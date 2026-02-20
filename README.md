@@ -14,3 +14,4 @@ For a more detailed description of the setup check here: [setting up the course 
 Presentations:
 
 [Lecture 1](https://hackmd.io/@RRclasses/BJ6G77A8be#/)
+[Lecture 2](https://hackmd.io/@RRclasses/ryCxmmRLbl)
