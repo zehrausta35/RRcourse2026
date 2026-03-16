@@ -1,0 +1,55 @@
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	git2_a.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+commit f0737fd1c5593ca5e0d4616ea92b4809f8a4053c
+Merge: bee7586 a9dcae5
+Author: Developer_1 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 23:10:06 2026 +0100
+
+    Resolved merge conflict in text3.txt
+
+commit a9dcae5e3cf5870bd168bed998c7924ad3cbb7e7
+Author: Developer_2 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 23:06:26 2026 +0100
+
+    Changes in text3.txt
+
+commit bee7586758daf4f163aa3a4914d0f0b4d7510ed7
+Merge: 7c211fa 866e60c
+Author: Developer_1 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 23:03:34 2026 +0100
+
+    Merge branch 'master' of E:/UWarsaw/Semester_IV/ReproducibleResearch/RR_git2/CentralRepo
+
+commit 7c211fa5df17601b1c4d6957187f45953bdf58c6
+Author: Developer_1 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 23:02:46 2026 +0100
+
+    Added text3
+
+commit 866e60c9df423c9ef9ff6c25c3af01ef118349ba
+Author: Developer_2 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 23:02:01 2026 +0100
+
+    Added readme.md and changed readme.txt
+
+commit 0964e3cb32193b6e2cbd694b7a554fa229aae7d0
+Author: Developer_1 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 22:57:36 2026 +0100
+
+    Added readme.txt
+
+commit 7dea4caf0780f70654874d41efc61648be243a42
+Author: Developer_1 <abdukholikt@yahoo.com>
+Date:   Mon Mar 16 22:55:48 2026 +0100
+
+    Added the file with code
+code.R
+readme.md
+readme.txt
+text3.txt
