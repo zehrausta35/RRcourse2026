@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-Value Explainer — Two Views</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
+    background: #e2e8f0; outline: none; margin-top: 6px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: #3b82f6; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #3b82f6; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+function normalPDF(x, mean, sd) {
+  const z = (x - mean) / sd;
+  return Math.exp(-0.5 * z * z) / (sd * Math.sqrt(2 * Math.PI));
+}
+
+function normalCDF(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  const t = 1.0 / (1.0 + p * Math.abs(x));
+  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x / 2);
+  return 0.5 * (1.0 + sign * y);
+}
+
+function CoefficientDistribution({ beta, se }) {
+  const width = 520, height = 250;
+  const pad = { top: 28, bottom: 45, left: 15, right: 15 };
+  const pw = width - pad.left - pad.right;
+  const ph = height - pad.top - pad.bottom;
+
+  const range = Math.max(Math.abs(beta) + 4 * se, 2.5);
+  const xMin = -range, xMax = range;
+  const toX = v => pad.left + ((v - xMin) / (xMax - xMin)) * pw;
+
+  const step = (xMax - xMin) / 200;
+
+  const nullPoints = [];
+  for (let i = xMin; i <= xMax; i += step) {
+    nullPoints.push({ x: i, y: normalPDF(i, 0, se) });
+  }
+
+  const betaPoints = [];
+  for (let i = xMin; i <= xMax; i += step) {
+    betaPoints.push({ x: i, y: normalPDF(i, beta, se) });
+  }
+
+  const yMaxVal = Math.max(
+    ...nullPoints.map(p => p.y),
+    ...betaPoints.map(p => p.y)
+  ) * 1.15;
+  const toY = v => pad.top + ph - (v / yMaxVal) * ph;
+
+  const makePath = (points) =>
+    points.map((p, i) => `${i === 0 ? "M" : "L"} ${toX(p.x).toFixed(1)} ${toY(p.y).toFixed(1)}`).join(" ");
+
+  const absBeta = Math.abs(beta);
+  const leftTail = nullPoints.filter(p => p.x <= -absBeta);
+  const rightTail = nullPoints.filter(p => p.x >= absBeta);
+
+  const makeFillPath = (points) => {
+    if (points.length < 2) return "";
+    const first = points[0], last = points[points.length - 1];
+    let d = points.map((p, i) =>
+      `${i === 0 ? "M" : "L"} ${toX(p.x).toFixed(1)} ${toY(p.y).toFixed(1)}`
+    ).join(" ");
+    d += ` L ${toX(last.x).toFixed(1)} ${toY(0).toFixed(1)}`;
+    d += ` L ${toX(first.x).toFixed(1)} ${toY(0).toFixed(1)} Z`;
+    return d;
+  };
+
+  const overlapPoints = [];
+  for (let i = xMin; i <= xMax; i += step) {
+    const ny = normalPDF(i, 0, se);
+    const by = normalPDF(i, beta, se);
+    overlapPoints.push({ x: i, y: Math.min(ny, by) });
+  }
+  const overlapFill = (() => {
+    const pts = overlapPoints.filter(p => p.y > 0.001);
+    if (pts.length < 2) return "";
+    const first = pts[0], last = pts[pts.length - 1];
+    let d = pts.map((p, i) =>
+      `${i === 0 ? "M" : "L"} ${toX(p.x).toFixed(1)} ${toY(p.y).toFixed(1)}`
+    ).join(" ");
+    d += ` L ${toX(last.x).toFixed(1)} ${toY(0).toFixed(1)}`;
+    d += ` L ${toX(first.x).toFixed(1)} ${toY(0).toFixed(1)} Z`;
+    return d;
+  })();
+
+  const tickStep = range > 4 ? 1 : range > 2 ? 0.5 : 0.2;
+  const ticks = [];
+  for (let v = Math.ceil(xMin / tickStep) * tickStep; v <= xMax; v += tickStep) {
+    ticks.push(Math.round(v * 100) / 100);
+  }
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ display: "block", width: "100%", maxWidth: 520, margin: "0 auto" }}>
+      <line x1={pad.left} y1={toY(0)} x2={width - pad.right} y2={toY(0)} stroke="#94a3b8" strokeWidth={1} />
+
+      {ticks.map(v => (
+        <g key={v}>
+          <line x1={toX(v)} y1={toY(0)} x2={toX(v)} y2={toY(0) + 5} stroke="#cbd5e1" />
+          <text x={toX(v)} y={toY(0) + 17} textAnchor="middle" fontSize={10} fill="#94a3b8">
+            {v.toFixed(Math.abs(v) < 1 && v !== 0 ? 1 : 0)}
+          </text>
+        </g>
+      ))}
+      <text x={width / 2} y={height - 3} textAnchor="middle" fontSize={11} fill="#64748b">
+        Coefficient value (β)
+      </text>
+
+      {overlapFill && <path d={overlapFill} fill="#a78bfa" opacity={0.18} />}
+
+      {absBeta > 0.01 && leftTail.length > 1 && <path d={makeFillPath(leftTail)} fill="#ef4444" opacity={0.3} />}
+      {absBeta > 0.01 && rightTail.length > 1 && <path d={makeFillPath(rightTail)} fill="#ef4444" opacity={0.3} />}
+
+      <path d={makePath(nullPoints)} fill="none" stroke="#94a3b8" strokeWidth={2.5} strokeDasharray="6,4" />
+      <path d={makePath(betaPoints)} fill="none" stroke="#3b82f6" strokeWidth={2.5} />
+
+      <line x1={toX(0)} y1={toY(0)} x2={toX(0)} y2={toY(normalPDF(0, 0, se))}
+        stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="3,3" />
+      <text x={toX(0)} y={pad.top - 10} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#64748b">
+        0 (H₀)
+      </text>
+
+      {absBeta > 0.01 && (
+        <>
+          <line x1={toX(beta)} y1={toY(0)} x2={toX(beta)} y2={toY(normalPDF(beta, beta, se))}
+            stroke="#3b82f6" strokeWidth={1.5} strokeDasharray="3,3" />
+          <text x={toX(beta)} y={pad.top - 10} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#3b82f6">
+            β = {beta.toFixed(2)}
+          </text>
+        </>
+      )}
+
+      {absBeta > 0.01 && (() => {
+        const bracketY = toY(normalPDF(beta + se, beta, se));
+        return (
+          <>
+            <line x1={toX(beta - se)} y1={bracketY} x2={toX(beta + se)} y2={bracketY}
+              stroke="#059669" strokeWidth={2} />
+            <line x1={toX(beta - se)} y1={bracketY - 4} x2={toX(beta - se)} y2={bracketY + 4}
+              stroke="#059669" strokeWidth={2} />
+            <line x1={toX(beta + se)} y1={bracketY - 4} x2={toX(beta + se)} y2={bracketY + 4}
+              stroke="#059669" strokeWidth={2} />
+            <text x={toX(beta)} y={bracketY + 15}
+              textAnchor="middle" fontSize={10} fontWeight="bold" fill="#059669">
+              ← SE = {se.toFixed(2)} →
+            </text>
+          </>
+        );
+      })()}
+
+      <line x1={width - 180} y1={pad.top} x2={width - 160} y2={pad.top}
+        stroke="#94a3b8" strokeWidth={2.5} strokeDasharray="6,4" />
+      <text x={width - 155} y={pad.top + 4} fontSize={10} fill="#64748b">Null (β = 0)</text>
+      <line x1={width - 180} y1={pad.top + 16} x2={width - 160} y2={pad.top + 16}
+        stroke="#3b82f6" strokeWidth={2.5} />
+      <text x={width - 155} y={pad.top + 20} fontSize={10} fill="#3b82f6">Your estimate</text>
+    </svg>
+  );
+}
+
+function TDistribution({ tValue }) {
+  const width = 520, height = 190;
+  const pad = { top: 20, bottom: 40, left: 15, right: 15 };
+  const pw = width - pad.left - pad.right;
+  const ph = height - pad.top - pad.bottom;
+  const xMin = -5, xMax = 5;
+  const toX = v => pad.left + ((v - xMin) / (xMax - xMin)) * pw;
+  const yMaxVal = normalPDF(0, 0, 1) * 1.1;
+  const toY = v => pad.top + ph - (v / yMaxVal) * ph;
+
+  const curvePoints = [];
+  for (let i = xMin; i <= xMax; i += 0.04) {
+    curvePoints.push({ x: i, y: normalPDF(i, 0, 1) });
+  }
+  const curvePath = curvePoints.map((p, i) =>
+    `${i === 0 ? "M" : "L"} ${toX(p.x).toFixed(1)} ${toY(p.y).toFixed(1)}`
+  ).join(" ");
+
+  const absTVal = Math.abs(tValue);
+  const clampedT = Math.min(absTVal, 4.8);
+  const leftTail = curvePoints.filter(p => p.x <= -clampedT);
+  const rightTail = curvePoints.filter(p => p.x >= clampedT);
+
+  const makeTailPath = (points) => {
+    if (points.length < 2) return "";
+    const first = points[0], last = points[points.length - 1];
+    let d = points.map((p, i) =>
+      `${i === 0 ? "M" : "L"} ${toX(p.x).toFixed(1)} ${toY(p.y).toFixed(1)}`
+    ).join(" ");
+    d += ` L ${toX(last.x).toFixed(1)} ${toY(0).toFixed(1)}`;
+    d += ` L ${toX(first.x).toFixed(1)} ${toY(0).toFixed(1)} Z`;
+    return d;
+  };
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{ display: "block", width: "100%", maxWidth: 520, margin: "0 auto" }}>
+      <line x1={pad.left} y1={toY(0)} x2={width - pad.right} y2={toY(0)} stroke="#94a3b8" strokeWidth={1} />
+      {[-4, -3, -2, -1, 0, 1, 2, 3, 4].map(v => (
+        <g key={v}>
+          <line x1={toX(v)} y1={toY(0)} x2={toX(v)} y2={toY(0) + 5} stroke="#cbd5e1" />
+          <text x={toX(v)} y={toY(0) + 17} textAnchor="middle" fontSize={10} fill="#94a3b8">{v}</text>
+        </g>
+      ))}
+      <text x={width / 2} y={height - 2} textAnchor="middle" fontSize={11} fill="#64748b">t-statistic (number of SEs from 0)</text>
+
+      {absTVal > 0.1 && leftTail.length > 1 && <path d={makeTailPath(leftTail)} fill="#ef4444" opacity={0.35} />}
+      {absTVal > 0.1 && rightTail.length > 1 && <path d={makeTailPath(rightTail)} fill="#ef4444" opacity={0.35} />}
+
+      <path d={curvePath} fill="none" stroke="#f97316" strokeWidth={2.5} />
+
+      {absTVal > 0.1 && (
+        <>
+          <line x1={toX(Math.min(Math.max(tValue, -4.8), 4.8))} y1={toY(0)}
+            x2={toX(Math.min(Math.max(tValue, -4.8), 4.8))} y2={toY(normalPDF(Math.min(absTVal, 4.8), 0, 1))}
+            stroke="#ef4444" strokeWidth={2} strokeDasharray="4,3" />
+          <text x={toX(Math.min(Math.max(tValue, -4.8), 4.8))}
+            y={toY(normalPDF(Math.min(absTVal, 4.8), 0, 1)) - 6}
+            textAnchor="middle" fontSize={11} fontWeight="bold" fill="#ef4444">
+            t = {tValue.toFixed(2)}
+          </text>
+        </>
+      )}
+    </svg>
+  );
+}
+
+function App() {
+  const [coefficient, setCoefficient] = useState(-0.42);
+  const [standardError, setStandardError] = useState(0.12);
+
+  const tValue = standardError !== 0 ? coefficient / standardError : 0;
+  const absTVal = Math.abs(tValue);
+  const pValue = 2 * (1 - normalCDF(absTVal));
+  const isSignificant = pValue < 0.05;
+
+  return (
+    <div style={{
+      maxWidth: 600, margin: "0 auto", fontFamily: "system-ui, -apple-system, sans-serif",
+      padding: 20, background: "#f8fafc", minHeight: "100vh"
+    }}>
+      <h2 style={{ textAlign: "center", color: "#1e293b", marginBottom: 2, fontSize: 22 }}>
+        P-Value: Two Ways to See It
+      </h2>
+      <p style={{ textAlign: "center", color: "#64748b", fontSize: 13, marginTop: 0, marginBottom: 16 }}>
+        The coefficient distribution (top) and the t-distribution (bottom) tell the same story
+      </p>
+
+      {/* CONTROLS */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 18, marginBottom: 14,
+        border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: "#3b82f6", textTransform: "uppercase",
+          letterSpacing: 1, marginBottom: 10
+        }}>Adjust your regression output</div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 14, color: "#334155", fontWeight: 600 }}>
+            Coefficient (β): <span style={{ color: "#3b82f6" }}>{coefficient.toFixed(2)}</span>
+          </label>
+          <input type="range" min={-2} max={2} step={0.01} value={coefficient}
+            onChange={e => setCoefficient(+e.target.value)}
+            style={{ width: "100%", marginTop: 4 }} />
+          <div style={{ fontSize: 12, color: "#94a3b8" }}>
+            Moves the blue curve left/right — further from 0 = stronger effect
+          </div>
+        </div>
+
+        <div>
+          <label style={{ fontSize: 14, color: "#334155", fontWeight: 600 }}>
+            Standard Error (SE): <span style={{ color: "#059669" }}>{standardError.toFixed(2)}</span>
+          </label>
+          <input type="range" min={0.05} max={1} step={0.01} value={standardError}
+            onChange={e => setStandardError(+e.target.value)}
+            style={{ width: "100%", marginTop: 4 }} />
+          <div style={{ fontSize: 12, color: "#94a3b8" }}>
+            Changes the width of BOTH curves — smaller SE = taller, narrower, more peaked
+          </div>
+        </div>
+      </div>
+
+      {/* VIEW 1 */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 16, marginBottom: 14,
+        border: "2px solid #3b82f6", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: "#3b82f6", textTransform: "uppercase",
+          letterSpacing: 1, marginBottom: 4
+        }}>View 1 — Sampling distribution of β</div>
+        <div style={{ fontSize: 12, color: "#64748b", marginBottom: 6 }}>
+          <strong style={{ color: "#94a3b8" }}>Dashed gray</strong> = what β looks like if H₀ is true (centered at 0, width = SE).
+          {" "}<strong style={{ color: "#3b82f6" }}>Solid blue</strong> = your estimate (centered at β, same width).
+          {" "}<strong style={{ color: "#ef4444" }}>Red area</strong> on the null = p-value.
+        </div>
+        <CoefficientDistribution beta={coefficient} se={standardError} />
+        <div style={{
+          marginTop: 8, padding: 10, background: "#eff6ff", borderRadius: 8,
+          fontSize: 12, color: "#334155", lineHeight: 1.6
+        }}>
+          <strong>Why SE controls the shape:</strong> SE is the standard deviation of β's sampling distribution.
+          Smaller SE → taller, narrower peak → less overlap between curves → easier to tell them apart → smaller p-value.
+        </div>
+      </div>
+
+      {/* ARROW */}
+      <div style={{ textAlign: "center", color: "#94a3b8", fontSize: 13, margin: "4px 0" }}>
+        ↓ divide everything by SE to standardize ↓
+      </div>
+
+      {/* VIEW 2 */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 16, marginBottom: 14,
+        border: "2px solid #f97316", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: "#f97316", textTransform: "uppercase",
+          letterSpacing: 1, marginBottom: 4
+        }}>View 2 — t-distribution (standardized)</div>
+        <div style={{ fontSize: 12, color: "#64748b", marginBottom: 6 }}>
+          Dividing β by SE collapses both curves into one standard scale:
+          <strong> how many SEs away from 0 are you?</strong>
+        </div>
+        <div style={{
+          textAlign: "center", fontSize: 17, padding: "4px 0", marginBottom: 4,
+          fontFamily: "Georgia, serif", color: "#1e293b"
+        }}>
+          t = β / SE = {coefficient.toFixed(2)} / {standardError.toFixed(2)} ={" "}
+          <strong style={{ color: "#ef4444", fontSize: 20 }}>{tValue.toFixed(2)}</strong>
+        </div>
+        <TDistribution tValue={tValue} />
+        <div style={{ fontSize: 12, color: "#64748b", textAlign: "center", marginTop: 4 }}>
+          The <span style={{ color: "#ef4444", fontWeight: 700 }}>red tail area</span> = same p-value as View 1
+        </div>
+      </div>
+
+      {/* RESULT */}
+      <div style={{
+        background: isSignificant ? "#ecfdf5" : "#fef2f2",
+        borderRadius: 12, padding: 16, marginBottom: 14,
+        border: `2px solid ${isSignificant ? "#10b981" : "#f87171"}`
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: isSignificant ? "#059669" : "#dc2626" }}>
+            p = {pValue < 0.0001 ? "< 0.0001" : pValue.toFixed(4)}
+          </div>
+          <div style={{ fontSize: 14, color: "#334155", marginTop: 4 }}>
+            {isSignificant
+              ? "✅ Significant — the curves barely overlap, 0 can't explain your β"
+              : "❌ Not significant — too much overlap, 0 is still plausible"
+            }
+          </div>
+          <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
+            {pValue < 0.01 ? "⭐⭐⭐ p < 0.01" :
+             pValue < 0.05 ? "⭐⭐ p < 0.05" :
+             pValue < 0.10 ? "⭐ p < 0.10 (weak)" :
+             "No stars"}
+          </div>
+        </div>
+      </div>
+
+      {/* THREE WAYS */}
+      <div style={{
+        background: "#faf5ff", borderRadius: 12, padding: 16, marginBottom: 14,
+        border: "1px solid #e9d5ff"
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase",
+          letterSpacing: 1, marginBottom: 8
+        }}>Three ways to make p-value smaller</div>
+        <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.8 }}>
+          <div style={{ marginBottom: 6 }}>
+            <strong>1. Larger |β|</strong> — the blue curve moves further from the gray curve → less overlap
+          </div>
+          <div style={{ marginBottom: 6 }}>
+            <strong>2. Smaller SE</strong> — both curves get taller and narrower → they separate even at the same distance
+          </div>
+          <div>
+            <strong>3. Both</strong> — big effect + high precision = very large t → tiny red area
+          </div>
+        </div>
+      </div>
+
+      {/* EXPERIMENTS */}
+      <div style={{
+        padding: 14, background: "#f1f5f9", borderRadius: 10,
+        fontSize: 13, color: "#475569", lineHeight: 1.7
+      }}>
+        <strong>Try these experiments:</strong><br />
+        → β = −0.42, SE = 0.12 → curves well separated → p ≈ 0.0005 ⭐⭐⭐<br />
+        → β = −0.42, SE = 0.40 → same β but wide curves overlap → p ≈ 0.29 ❌<br />
+        → β = −0.10, SE = 0.03 → tiny effect but razor-sharp curves → p ≈ 0.001 ⭐⭐⭐<br />
+        → β = −1.50, SE = 0.90 → big effect but very wide curves → p ≈ 0.10 ⭐
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>
