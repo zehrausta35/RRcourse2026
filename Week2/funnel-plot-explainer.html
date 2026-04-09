@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funnel Plot — How It Detects Publication Bias</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
+    background: #e2e8f0; outline: none; margin-top: 6px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: #3b82f6; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #3b82f6; cursor: pointer; border: 2px solid white;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo, useRef } = React;
+
+// Seeded random for reproducibility
+function mulberry32(a) {
+  return function() {
+    var t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
+// Box-Muller for normal random
+function normalRandom(rng) {
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function generateStudies(trueEffect, numStudies, biasLevel, seed) {
+  const rng = mulberry32(seed);
+  const allStudies = [];
+  
+  for (let i = 0; i < numStudies; i++) {
+    // Random sample size between 20 and 5000 (log-distributed, more small studies)
+    const logN = 3.0 + rng() * 5.5;
+    const n = Math.round(Math.exp(logN));
+    
+    // SE decreases with sample size
+    const se = 1.5 / Math.sqrt(n) + 0.02;
+    
+    // Observed effect = true effect + noise
+    const effect = trueEffect + normalRandom(rng) * se;
+    
+    // Precision = 1/SE
+    const precision = 1 / se;
+    
+    // Is it "significant"? (|effect/se| > 1.96)
+    const zStat = Math.abs(effect / se);
+    const isSignificant = zStat > 1.96;
+    
+    // Does the effect go in the "expected" direction?
+    const expectedDirection = (trueEffect < 0 && effect < 0) || (trueEffect >= 0 && effect >= 0);
+    
+    allStudies.push({
+      effect, se, precision, n, isSignificant, expectedDirection,
+      // Publication probability depends on bias level
+      // Large studies always published, small + insignificant studies filtered by bias
+      publishProb: isSignificant ? 1.0 :
+        precision > 8 ? 0.95 :  // large studies mostly published regardless
+        1.0 - biasLevel * 0.85  // small insignificant studies filtered
+    });
+  }
+  
+  return allStudies;
+}
+
+function FunnelPlotSVG({ studies, published, trueEffect, showFunnel }) {
+  const w = 540, h = 420;
+  const pad = { top: 30, bottom: 55, left: 60, right: 30 };
+  const pw = w - pad.left - pad.right;
+  const ph = h - pad.top - pad.bottom;
+
+  // Determine axis ranges from all studies (not just published)
+  const allEffects = studies.map(s => s.effect);
+  const allPrecisions = studies.map(s => s.precision);
+  
+  const effectMin = Math.min(-1.5, Math.min(...allEffects) - 0.1);
+  const effectMax = Math.max(1.5, Math.max(...allEffects) + 0.1);
+  const precMin = 0;
+  const precMax = Math.max(...allPrecisions) * 1.1;
+
+  const toX = v => pad.left + ((v - effectMin) / (effectMax - effectMin)) * pw;
+  const toY = v => pad.top + ph - ((v - precMin) / (precMax - precMin)) * ph;
+
+  // Funnel lines (95% CI around true effect)
+  const funnelTop = precMax;
+  const funnelSETop = 1 / funnelTop;
+  const funnelBottom = 0.5;
+  const funnelSEBottom = 1 / funnelBottom;
+  
+  // X ticks
+  const xTicks = [];
+  const xStep = (effectMax - effectMin) > 4 ? 1 : 0.5;
+  for (let v = Math.ceil(effectMin / xStep) * xStep; v <= effectMax; v += xStep) {
+    xTicks.push(Math.round(v * 10) / 10);
+  }
+
+  // Y ticks
+  const yTicks = [];
+  const yStep = precMax > 20 ? 5 : precMax > 10 ? 2 : 1;
+  for (let v = 0; v <= precMax; v += yStep) {
+    yTicks.push(v);
+  }
+
+  // Suppressed studies (in allStudies but not in published)
+  const publishedSet = new Set(published.map((_, i) => {
+    return studies.indexOf(published[i]);
+  }));
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} style={{ display: "block", width: "100%", maxWidth: 540, margin: "0 auto" }}>
+      {/* Background */}
+      <rect x={pad.left} y={pad.top} width={pw} height={ph} fill="white" />
+      
+      {/* Grid */}
+      {xTicks.map(v => (
+        <g key={`x${v}`}>
+          <line x1={toX(v)} y1={pad.top} x2={toX(v)} y2={toY(precMin)} stroke="#f1f5f9" />
+          <text x={toX(v)} y={toY(precMin) + 16} textAnchor="middle" fontSize={11} fill="#94a3b8">{v}</text>
+        </g>
+      ))}
+      {yTicks.map(v => (
+        <g key={`y${v}`}>
+          <line x1={pad.left} y1={toY(v)} x2={pad.left + pw} y2={toY(v)} stroke="#f1f5f9" />
+          <text x={pad.left - 8} y={toY(v) + 4} textAnchor="end" fontSize={11} fill="#94a3b8">{v}</text>
+        </g>
+      ))}
+      
+      {/* Axes */}
+      <line x1={pad.left} y1={toY(precMin)} x2={pad.left + pw} y2={toY(precMin)} stroke="#94a3b8" strokeWidth={1} />
+      <line x1={pad.left} y1={pad.top} x2={pad.left} y2={toY(precMin)} stroke="#94a3b8" strokeWidth={1} />
+      
+      {/* Axis labels */}
+      <text x={pad.left + pw / 2} y={h - 8} textAnchor="middle" fontSize={12} fill="#475569">
+        Effect Size (coefficient)
+      </text>
+      <text x={16} y={pad.top + ph / 2} textAnchor="middle" fontSize={12} fill="#475569"
+        transform={`rotate(-90, 16, ${pad.top + ph / 2})`}>
+        Precision (1/SE) — larger = bigger sample
+      </text>
+
+      {/* Funnel shape */}
+      {showFunnel && (
+        <>
+          {/* 95% CI funnel */}
+          <polygon
+            points={`
+              ${toX(trueEffect)},${toY(funnelTop)}
+              ${toX(trueEffect - 1.96 / funnelBottom)},${toY(funnelBottom)}
+              ${toX(trueEffect + 1.96 / funnelBottom)},${toY(funnelBottom)}
+            `}
+            fill="#e2e8f0" opacity={0.3}
+          />
+          <line x1={toX(trueEffect)} y1={toY(funnelTop)} x2={toX(trueEffect - 1.96 / funnelBottom)} y2={toY(funnelBottom)}
+            stroke="#94a3b8" strokeWidth={1} strokeDasharray="4,4" />
+          <line x1={toX(trueEffect)} y1={toY(funnelTop)} x2={toX(trueEffect + 1.96 / funnelBottom)} y2={toY(funnelBottom)}
+            stroke="#94a3b8" strokeWidth={1} strokeDasharray="4,4" />
+        </>
+      )}
+
+      {/* True effect line */}
+      <line x1={toX(trueEffect)} y1={pad.top} x2={toX(trueEffect)} y2={toY(precMin)}
+        stroke="#3b82f6" strokeWidth={1.5} strokeDasharray="6,4" />
+      <text x={toX(trueEffect)} y={pad.top - 8} textAnchor="middle" fontSize={10} fontWeight="bold" fill="#3b82f6">
+        True effect = {trueEffect.toFixed(2)}
+      </text>
+
+      {/* Zero line */}
+      {Math.abs(trueEffect) > 0.05 && (
+        <line x1={toX(0)} y1={pad.top} x2={toX(0)} y2={toY(precMin)}
+          stroke="#d1d5db" strokeWidth={1} strokeDasharray="2,4" />
+      )}
+
+      {/* Suppressed studies (shown as faded X marks) */}
+      {studies.map((s, i) => {
+        const isPub = published.includes(s);
+        if (isPub) return null;
+        const cx = toX(s.effect);
+        const cy = toY(s.precision);
+        if (cx < pad.left || cx > pad.left + pw || cy < pad.top || cy > pad.top + ph) return null;
+        return (
+          <g key={`sup${i}`} opacity={0.25}>
+            <line x1={cx-4} y1={cy-4} x2={cx+4} y2={cy+4} stroke="#94a3b8" strokeWidth={1.5} />
+            <line x1={cx+4} y1={cy-4} x2={cx-4} y2={cy+4} stroke="#94a3b8" strokeWidth={1.5} />
+          </g>
+        );
+      })}
+
+      {/* Published studies */}
+      {published.map((s, i) => {
+        const cx = toX(s.effect);
+        const cy = toY(s.precision);
+        if (cx < pad.left || cx > pad.left + pw || cy < pad.top || cy > pad.top + ph) return null;
+        return (
+          <circle key={`pub${i}`} cx={cx} cy={cy} r={4.5}
+            fill={s.isSignificant ? "#1e293b" : "#f97316"}
+            stroke="white" strokeWidth={1.5} />
+        );
+      })}
+
+      {/* Legend */}
+      <circle cx={pad.left + pw - 145} cy={pad.top + 12} r={4.5} fill="#1e293b" stroke="white" strokeWidth={1.5} />
+      <text x={pad.left + pw - 135} y={pad.top + 16} fontSize={10} fill="#475569">Significant (published)</text>
+      <circle cx={pad.left + pw - 145} cy={pad.top + 28} r={4.5} fill="#f97316" stroke="white" strokeWidth={1.5} />
+      <text x={pad.left + pw - 135} y={pad.top + 32} fontSize={10} fill="#475569">Not significant (published)</text>
+      <g opacity={0.5}>
+        <line x1={pad.left + pw - 149} y1={pad.top + 40} x2={pad.left + pw - 141} y2={pad.top + 48} stroke="#94a3b8" strokeWidth={1.5} />
+        <line x1={pad.left + pw - 141} y1={pad.top + 40} x2={pad.left + pw - 149} y2={pad.top + 48} stroke="#94a3b8" strokeWidth={1.5} />
+      </g>
+      <text x={pad.left + pw - 135} y={pad.top + 48} fontSize={10} fill="#94a3b8">Suppressed (in file drawer)</text>
+    </svg>
+  );
+}
+
+function App() {
+  const [biasLevel, setBiasLevel] = useState(0);
+  const [trueEffect, setTrueEffect] = useState(-0.3);
+  const [showFunnel, setShowFunnel] = useState(true);
+  const [showSuppressed, setShowSuppressed] = useState(true);
+  const numStudies = 120;
+  const seed = 42;
+
+  const allStudies = useMemo(
+    () => generateStudies(trueEffect, numStudies, biasLevel, seed),
+    [trueEffect, numStudies, biasLevel]
+  );
+
+  const published = useMemo(() => {
+    const rng = mulberry32(seed + 999);
+    return allStudies.filter(s => rng() < s.publishProb);
+  }, [allStudies]);
+
+  const suppCount = allStudies.length - published.length;
+  
+  // Asymmetry measure
+  const pubMeanEffect = published.reduce((s, p) => s + p.effect, 0) / published.length;
+  const asymmetry = Math.abs(pubMeanEffect - trueEffect);
+
+  return (
+    <div style={{
+      maxWidth: 600, margin: "0 auto", fontFamily: "system-ui, -apple-system, sans-serif",
+      padding: 20, background: "#f8fafc", minHeight: "100vh"
+    }}>
+      <h2 style={{ textAlign: "center", color: "#1e293b", marginBottom: 2, fontSize: 22 }}>
+        Funnel Plot — Detecting Publication Bias
+      </h2>
+      <p style={{ textAlign: "center", color: "#64748b", fontSize: 13, marginTop: 0, marginBottom: 16 }}>
+        See how bias distorts the funnel shape
+      </p>
+
+      {/* CONTROLS */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 18, marginBottom: 14,
+        border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+      }}>
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 14, color: "#334155", fontWeight: 600 }}>
+            Publication Bias: <span style={{ color: biasLevel > 0.5 ? "#ef4444" : biasLevel > 0 ? "#f97316" : "#059669" }}>
+              {biasLevel === 0 ? "None" : biasLevel < 0.4 ? "Low" : biasLevel < 0.7 ? "Moderate" : "Strong"}
+            </span>
+            <span style={{ color: "#94a3b8", fontWeight: 400, fontSize: 12 }}> ({(biasLevel * 100).toFixed(0)}%)</span>
+          </label>
+          <input type="range" min={0} max={1} step={0.01} value={biasLevel}
+            onChange={e => setBiasLevel(+e.target.value)} style={{ width: "100%" }} />
+          <div style={{ fontSize: 12, color: "#94a3b8" }}>
+            0% = all studies published → 100% = non-significant small studies almost never published
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ fontSize: 14, color: "#334155", fontWeight: 600 }}>
+            True Effect: <span style={{ color: "#3b82f6" }}>{trueEffect.toFixed(2)}</span>
+          </label>
+          <input type="range" min={-1} max={1} step={0.05} value={trueEffect}
+            onChange={e => setTrueEffect(+e.target.value)} style={{ width: "100%" }} />
+        </div>
+
+        <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
+          <label style={{ color: "#475569", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <input type="checkbox" checked={showFunnel} onChange={e => setShowFunnel(e.target.checked)} />
+            Show expected funnel
+          </label>
+          <label style={{ color: "#475569", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <input type="checkbox" checked={showSuppressed} onChange={e => setShowSuppressed(e.target.checked)} />
+            Show suppressed studies
+          </label>
+        </div>
+      </div>
+
+      {/* FUNNEL PLOT */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 12, marginBottom: 14,
+        border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+      }}>
+        <FunnelPlotSVG
+          studies={showSuppressed ? allStudies : published}
+          published={published}
+          trueEffect={trueEffect}
+          showFunnel={showFunnel}
+        />
+      </div>
+
+      {/* STATUS */}
+      <div style={{
+        background: biasLevel === 0 ? "#ecfdf5" : biasLevel < 0.4 ? "#fffbeb" : "#fef2f2",
+        borderRadius: 12, padding: 16, marginBottom: 14,
+        border: `2px solid ${biasLevel === 0 ? "#10b981" : biasLevel < 0.4 ? "#f59e0b" : "#ef4444"}`
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1 }}>Total studies</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#334155" }}>{allStudies.length}</div>
+          </div>
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1 }}>Published</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#059669" }}>{published.length}</div>
+          </div>
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1 }}>Suppressed</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#ef4444" }}>{suppCount}</div>
+          </div>
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1 }}>Funnel shape</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: biasLevel < 0.15 ? "#059669" : "#ef4444" }}>
+              {biasLevel < 0.15 ? "✅ Symmetric" : "⚠️ Asymmetric"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* EXPLANATION */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 16, marginBottom: 14,
+        border: "1px solid #e2e8f0"
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase",
+          letterSpacing: 1, marginBottom: 10
+        }}>How to read this plot</div>
+        <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.8 }}>
+          <div style={{ marginBottom: 8 }}>
+            <strong>Top of plot</strong> = large, precise studies (big samples). They cluster tightly around the true effect regardless of bias — journals publish them either way.
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <strong>Bottom of plot</strong> = small, imprecise studies (small samples). Without bias, they scatter symmetrically around the true effect. With bias, the non-significant ones disappear into the file drawer.
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <strong>The gap</strong> = the missing studies. Turn on "Show suppressed studies" and slide the bias up — you'll see the faded X marks that represent studies that were conducted but never published.
+          </div>
+          <div style={{
+            padding: 10, background: "#faf5ff", borderRadius: 8,
+            border: "1px solid #e9d5ff"
+          }}>
+            <strong style={{ color: "#7c3aed" }}>The key test:</strong> Is the bottom of the funnel symmetric?
+            If one side is emptier than the other, that's evidence of publication bias. The published literature is giving us a distorted picture of reality.
+          </div>
+        </div>
+      </div>
+
+      {/* EXPERIMENTS */}
+      <div style={{
+        padding: 14, background: "#f1f5f9", borderRadius: 10,
+        fontSize: 13, color: "#475569", lineHeight: 1.7
+      }}>
+        <strong>Try these experiments:</strong><br />
+        → Bias = 0%: symmetric funnel, all studies visible, healthy literature<br />
+        → Bias = 50%: bottom starts losing studies on one side<br />
+        → Bias = 100%: only significant small studies survive — the funnel looks like a triangle with a chunk bitten off<br />
+        → Toggle "Show suppressed" off: now you only see what a real meta-analyst sees — can you spot the bias?<br />
+        → Set true effect = 0: even with NO real effect, bias makes it look like there is one!
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>
