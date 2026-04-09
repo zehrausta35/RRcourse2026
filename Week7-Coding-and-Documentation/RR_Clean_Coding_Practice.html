@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reproducible Code — Common Mistakes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --bg:     #f8f6f2;
+  --bg2:    #f0ede7;
+  --ink:    #1c1917;
+  --ink2:   #57534e;
+  --ink3:   #a8a29e;
+  --border: #e2ddd8;
+  --red:    #c0392b;
+  --red-bg: #fdf2f0;
+  --red-br: #f0c4be;
+  --green:  #1a6b45;
+  --grn-bg: #f0faf5;
+  --grn-br: #b2ddc8;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 48px 28px 80px; }
+
+header { margin-bottom: 44px; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+h1 { font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+.sub { color: var(--ink2); font-size: 14px; }
+
+.principle { margin-bottom: 44px; }
+
+.p-title {
+  font-size: 13px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--ink2); margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.p-num { font-family: var(--mono); font-size: 11px; color: var(--ink3); }
+.p-desc { font-size: 14px; color: var(--ink2); margin-bottom: 14px; max-width: 640px; }
+
+/* layout: wrong always visible, correct hidden */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+@media(max-width: 620px){ .pair { grid-template-columns: 1fr; } }
+
+.panel { border-radius: 6px; overflow: hidden; }
+.panel.wrong { border: 1px solid var(--red-br); }
+.panel.right  { border: 1px solid var(--grn-br); }
+
+.plabel {
+  padding: 6px 12px; font-family: var(--mono); font-size: 10px;
+  font-weight: 500; letter-spacing: 0.08em;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.wrong .plabel { background: var(--red-bg); color: var(--red); border-bottom: 1px solid var(--red-br); }
+.right  .plabel { background: var(--grn-bg); color: var(--green); border-bottom: 1px solid var(--grn-br); }
+
+.plabel-left { display: flex; align-items: center; gap: 6px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.wrong .dot { background: var(--red); }
+.right  .dot { background: var(--green); }
+
+/* reveal button */
+.reveal-btn {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em;
+  padding: 3px 8px; border-radius: 3px; border: 1px solid var(--grn-br);
+  background: transparent; color: var(--green); cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.reveal-btn:hover { background: var(--grn-bg); }
+.reveal-btn.shown { background: var(--grn-bg); }
+
+.code-scroll { overflow-x: auto; }
+pre {
+  font-family: var(--mono); font-size: 12px;
+  line-height: 1.85; padding: 14px 16px; white-space: pre;
+}
+.wrong pre { background: var(--red-bg); color: #5c1a12; }
+.right  pre { background: var(--grn-bg); color: #0f3d27; }
+
+/* hidden state */
+.hidden-answer { position: relative; }
+.answer-mask {
+  position: absolute; inset: 0;
+  background: var(--grn-bg);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 0 0 6px 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.answer-mask span {
+  font-family: var(--mono); font-size: 11px; color: var(--green);
+  letter-spacing: 0.06em; user-select: none;
+}
+.answer-mask.gone { display: none; }
+
+.kw { color: #7c3aed; }
+.fn { color: #1d4ed8; }
+.st { color: #166534; }
+.cm { color: #9ca3af; font-style: italic; }
+.nu { color: #b45309; }
+.hi { font-weight: 600; }
+
+.note {
+  margin-top: 8px; font-size: 12.5px; color: var(--ink2);
+  padding-left: 10px; border-left: 2px solid var(--border); line-height: 1.6;
+}
+
+.tabs { display: flex; gap: 0; margin-bottom: 0; }
+.tab {
+  font-family: var(--mono); font-size: 11px; padding: 5px 12px;
+  border: 1px solid var(--border); background: var(--bg2); color: var(--ink3);
+  cursor: pointer; border-radius: 4px 4px 0 0; border-bottom: none;
+  margin-right: 3px; transition: all 0.12s;
+}
+.tab.active { background: var(--bg); color: var(--ink); }
+.lp { display: none; }
+.lp.active { display: block; }
+
+footer { color: var(--ink3); font-size: 12px; font-family: var(--mono); padding-top: 24px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Common Reproducibility Mistakes</h1>
+  <p class="sub">Session 6 — Coding &amp; Documentation &nbsp;·&nbsp; Wrong pattern on the left. Click <em>show answer</em> to reveal the correct version.</p>
+</header>
+
+
+<!-- helper macro: each principle uses tabs + a reveal-on-click right panel -->
+
+<!-- ── 1. Hard-coded paths ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">01</span> Hard-coded paths</div>
+  <p class="p-desc">Absolute paths are tied to one machine. They break for every other user immediately.</p>
+
+  <div class="tabs" id="t1">
+    <button class="tab active" onclick="sw('t1','p1','py',this)">Python</button>
+    <button class="tab" onclick="sw('t1','p1','r',this)">R</button>
+  </div>
+
+  <div id="p1-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre><span class="kw">import</span> os
+<span class="hi">os.chdir(<span class="st">"C:/Users/Anna/Project"</span>)</span>
+data = pd.read_csv(<span class="st">"data.csv"</span>)</pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a1py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="hi">HERE = Path(__file__).parent</span>
+data = pd.read_csv(HERE / <span class="st">"data.csv"</span>)</pre></div>
+          <div class="answer-mask" id="a1py" onclick="reveal('a1py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p1-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre><span class="hi">setwd(<span class="st">"C:/Users/Anna/Project"</span>)</span>
+data &lt;- read.csv(<span class="st">"data.csv"</span>)</pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a1r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="kw">library</span>(here)
+<span class="cm"># here() finds the project root automatically</span>
+data &lt;- read.csv(<span class="hi">here(<span class="st">"data.csv"</span>)</span>)</pre></div>
+          <div class="answer-mask" id="a1r" onclick="reveal('a1r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">The correct version runs on any machine because the path is relative to the script itself, not to a specific folder on a specific laptop.</p>
+</div>
+
+
+<!-- ── 2. Hard-coded values ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">02</span> Hard-coded values scattered through the code</div>
+  <p class="p-desc">When a value appears in multiple places, changing it means hunting through the whole file — and it's easy to miss one.</p>
+
+  <div class="tabs" id="t2">
+    <button class="tab active" onclick="sw('t2','p2','py',this)">Python</button>
+    <button class="tab" onclick="sw('t2','p2','r',this)">R</button>
+  </div>
+
+  <div id="p2-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre>df    = df[df[<span class="st">"year"</span>] == <span class="hi"><span class="nu">2019</span></span>]
+title = <span class="st">f"Wages in <span class="hi">2019</span>"</span>
+out   = <span class="st">"wages_<span class="hi">2019</span>.csv"</span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a2py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="hi">YEAR = <span class="nu">2019</span>  <span class="cm"># change here only</span></span>
+
+df    = df[df[<span class="st">"year"</span>] == YEAR]
+title = <span class="st">f"Wages in {YEAR}"</span>
+out   = <span class="st">f"wages_{YEAR}.csv"</span></pre></div>
+          <div class="answer-mask" id="a2py" onclick="reveal('a2py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p2-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre>df    &lt;- df[df$year == <span class="hi"><span class="nu">2019</span></span>, ]
+title &lt;- <span class="st">"Wages in <span class="hi">2019</span>"</span>
+out   &lt;- <span class="st">"wages_<span class="hi">2019</span>.csv"</span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a2r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="hi">YEAR &lt;- <span class="nu">2019</span>  <span class="cm"># change here only</span></span>
+
+df    &lt;- df[df$year == YEAR, ]
+title &lt;- paste(<span class="st">"Wages in"</span>, YEAR)
+out   &lt;- paste0(<span class="st">"wages_"</span>, YEAR, <span class="st">".csv"</span>)</pre></div>
+          <div class="answer-mask" id="a2r" onclick="reveal('a2r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Keep all configurable values at the top. The rest of the code should never contain a literal year, country name, or threshold — only the variable.</p>
+</div>
+
+
+<!-- ── 3. Copy-paste repetition ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">03</span> Copy-pasted blocks</div>
+  <p class="p-desc">Repeating the same logic for each country means any fix must be applied in every copy. One bug becomes many bugs.</p>
+
+  <div class="tabs" id="t3">
+    <button class="tab active" onclick="sw('t3','p3','py',this)">Python</button>
+    <button class="tab" onclick="sw('t3','p3','r',this)">R</button>
+  </div>
+
+  <div id="p3-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre><span class="hi">de = df[df[<span class="st">"country"</span>]==<span class="st">"Germany"</span>].copy()
+de[<span class="st">"growth"</span>] = de[<span class="st">"gdp"</span>].pct_change() * <span class="nu">100</span>
+
+pl = df[df[<span class="st">"country"</span>]==<span class="st">"Poland"</span>].copy()
+pl[<span class="st">"growth"</span>] = pl[<span class="st">"gdp"</span>].pct_change() * <span class="nu">100</span>
+
+fr = df[df[<span class="st">"country"</span>]==<span class="st">"France"</span>].copy()
+fr[<span class="st">"growth"</span>] = fr[<span class="st">"gdp"</span>].pct_change() * <span class="nu">100</span></span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a3py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre>COUNTRIES = [<span class="st">"Germany"</span>, <span class="st">"Poland"</span>, <span class="st">"France"</span>]
+
+<span class="hi">df = (df[df[<span class="st">"country"</span>].isin(COUNTRIES)]
+  .sort_values([<span class="st">"country"</span>, <span class="st">"year"</span>])
+  .assign(growth=<span class="kw">lambda</span> x:
+    x.groupby(<span class="st">"country"</span>)[<span class="st">"gdp"</span>]
+     .pct_change() * <span class="nu">100</span>)
+)</span></pre></div>
+          <div class="answer-mask" id="a3py" onclick="reveal('a3py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p3-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre><span class="hi">de &lt;- df[df$country == <span class="st">"Germany"</span>, ]
+de$growth &lt;- c(NA, diff(de$gdp)/head(de$gdp,-<span class="nu">1</span>)*<span class="nu">100</span>)
+
+pl &lt;- df[df$country == <span class="st">"Poland"</span>, ]
+pl$growth &lt;- c(NA, diff(pl$gdp)/head(pl$gdp,-<span class="nu">1</span>)*<span class="nu">100</span>)
+
+fr &lt;- df[df$country == <span class="st">"France"</span>, ]
+fr$growth &lt;- c(NA, diff(fr$gdp)/head(fr$gdp,-<span class="nu">1</span>)*<span class="nu">100</span>)</span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a3r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre>COUNTRIES &lt;- c(<span class="st">"Germany"</span>, <span class="st">"Poland"</span>, <span class="st">"France"</span>)
+
+<span class="hi">df &lt;- df |&gt;
+  group_by(country) |&gt;
+  arrange(year) |&gt;
+  mutate(growth = (gdp/lag(gdp) - <span class="nu">1</span>) * <span class="nu">100</span>) |&gt;
+  ungroup()</span></pre></div>
+          <div class="answer-mask" id="a3r" onclick="reveal('a3r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Adding a fourth country now costs one line in the configuration — not another copy-pasted block.</p>
+</div>
+
+
+<!-- ── 4. No functions ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">04</span> Repeating logic without functions</div>
+  <p class="p-desc">When the same calculation appears in multiple places, extract it into a function. One definition, tested once, used everywhere.</p>
+
+  <div class="tabs" id="t4">
+    <button class="tab active" onclick="sw('t4','p4','py',this)">Python</button>
+    <button class="tab" onclick="sw('t4','p4','r',this)">R</button>
+  </div>
+
+  <div id="p4-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG — same formula copied twice</span></div>
+        <div class="code-scroll"><pre><span class="hi">mu = np.average(df[<span class="st">"task"</span>], weights=df[<span class="st">"share_BE"</span>])
+sd = np.sqrt(np.average((df[<span class="st">"task"</span>]-mu)**<span class="nu">2</span>,
+             weights=df[<span class="st">"share_BE"</span>]))
+df[<span class="st">"std_BE"</span>] = (df[<span class="st">"task"</span>] - mu) / sd
+
+mu = np.average(df[<span class="st">"task"</span>], weights=df[<span class="st">"share_PL"</span>])
+sd = np.sqrt(np.average((df[<span class="st">"task"</span>]-mu)**<span class="nu">2</span>,
+             weights=df[<span class="st">"share_PL"</span>]))
+df[<span class="st">"std_PL"</span>] = (df[<span class="st">"task"</span>] - mu) / sd</span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a4py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="hi"><span class="kw">def</span> wtd_std(series, weights):
+    mu = np.average(series, weights=weights)
+    sd = np.sqrt(np.average(
+            (series-mu)**<span class="nu">2</span>, weights=weights))
+    <span class="kw">return</span> (series - mu) / sd</span>
+
+<span class="kw">for</span> country <span class="kw">in</span> COUNTRIES:
+    df[<span class="st">f"std_{country}"</span>] = wtd_std(
+        df[<span class="st">"task"</span>], df[<span class="st">f"share_{country}"</span>])</pre></div>
+          <div class="answer-mask" id="a4py" onclick="reveal('a4py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p4-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG — same formula copied twice</span></div>
+        <div class="code-scroll"><pre><span class="hi">mu &lt;- wtd.mean(df$task, df$share_BE)
+sd &lt;- sqrt(wtd.var(df$task, df$share_BE))
+df$std_BE &lt;- (df$task - mu) / sd
+
+mu &lt;- wtd.mean(df$task, df$share_PL)
+sd &lt;- sqrt(wtd.var(df$task, df$share_PL))
+df$std_PL &lt;- (df$task - mu) / sd</span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a4r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="hi">wtd_std &lt;- function(series, weights) {
+  mu &lt;- wtd.mean(series, weights)
+  sd &lt;- sqrt(wtd.var(series, weights))
+  (series - mu) / sd
+}</span>
+
+<span class="kw">for</span> (country <span class="kw">in</span> COUNTRIES) {
+  col &lt;- paste0(<span class="st">"std_"</span>, country)
+  df[[col]] &lt;- wtd_std(
+    df$task, df[[paste0(<span class="st">"share_"</span>, country)]])
+}</pre></div>
+          <div class="answer-mask" id="a4r" onclick="reveal('a4r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">If the formula needs to change, you change it in one place. With copy-paste, a change in one copy and not the others produces silently inconsistent results.</p>
+</div>
+
+
+<!-- ── 5. No output saving ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">05</span> Outputs not saved</div>
+  <p class="p-desc">A plot that only displays is not reproducible. When the session closes, it is gone.</p>
+
+  <div class="tabs" id="t5">
+    <button class="tab active" onclick="sw('t5','p5','py',this)">Python</button>
+    <button class="tab" onclick="sw('t5','p5','r',this)">R</button>
+  </div>
+
+  <div id="p5-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre>plt.plot(df[<span class="st">"year"</span>], df[<span class="st">"wage"</span>])
+plt.title(<span class="st">"Real wages"</span>)
+<span class="hi">plt.show()  <span class="cm"># disappears on close</span></span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a5py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre>plt.plot(df[<span class="st">"year"</span>], df[<span class="st">"wage"</span>])
+plt.title(<span class="st">"Real wages"</span>)
+<span class="hi">plt.savefig(HERE / <span class="st">"figures"</span> / <span class="st">"wages.pdf"</span>,
+            bbox_inches=<span class="st">"tight"</span>)
+plt.close()</span></pre></div>
+          <div class="answer-mask" id="a5py" onclick="reveal('a5py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p5-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG</span></div>
+        <div class="code-scroll"><pre>p &lt;- ggplot(df, aes(year, wage)) +
+  geom_line() + ggtitle(<span class="st">"Real wages"</span>)
+<span class="hi">print(p)  <span class="cm"># disappears on close</span></span></pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT</span>
+          <button class="reveal-btn" onclick="reveal('a5r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre>p &lt;- ggplot(df, aes(year, wage)) +
+  geom_line() + ggtitle(<span class="st">"Real wages"</span>)
+<span class="hi">ggsave(here(<span class="st">"figures"</span>, <span class="st">"wages.pdf"</span>),
+       p, width=8, height=4)</span></pre></div>
+          <div class="answer-mask" id="a5r" onclick="reveal('a5r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">The same applies to tables — always save to a path built from your project root, not a bare filename.</p>
+</div>
+
+
+<!-- ── 6. Useless comments ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">06</span> Comments that restate the code</div>
+  <p class="p-desc">A comment should explain <em>why</em>, not <em>what</em>. A reader can see what the code does — they cannot see the methodological reasoning behind it.</p>
+
+  <div class="tabs" id="t6">
+    <button class="tab active" onclick="sw('t6','p6','py',this)">Python</button>
+    <button class="tab" onclick="sw('t6','p6','r',this)">R</button>
+  </div>
+
+  <div id="p6-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG — restates the code</span></div>
+        <div class="code-scroll"><pre><span class="kw">def</span> wtd_std(series, weights):
+    <span class="hi"><span class="cm"># calculate weighted mean and standard deviation</span></span>
+    mu = np.average(series, weights=weights)
+    sd = np.sqrt(np.average(
+        (series - mu)**<span class="nu">2</span>, weights=weights))
+    <span class="kw">return</span> (series - mu) / sd</pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT — explains the why</span>
+          <button class="reveal-btn" onclick="reveal('a6py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="kw">def</span> wtd_std(series, weights):
+    <span class="hi"><span class="st">"""Weighted standardisation (Autor method).
+    Weights are employment shares so the mean
+    reflects workforce composition, not a simple
+    average across occupations.
+    """</span></span>
+    mu = np.average(series, weights=weights)
+    sd = np.sqrt(np.average(
+        (series - mu)**<span class="nu">2</span>, weights=weights))
+    <span class="kw">return</span> (series - mu) / sd</pre></div>
+          <div class="answer-mask" id="a6py" onclick="reveal('a6py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p6-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG — restates the code</span></div>
+        <div class="code-scroll"><pre>wtd_std &lt;- function(series, weights) {
+  <span class="hi"><span class="cm"># calculate weighted mean and standard deviation</span></span>
+  mu &lt;- wtd.mean(series, weights)
+  sd &lt;- sqrt(wtd.var(series, weights))
+  (series - mu) / sd
+}</pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT — explains the why</span>
+          <button class="reveal-btn" onclick="reveal('a6r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="hi"><span class="cm">#' Weighted standardisation (Autor method).</span>
+<span class="cm">#' Weights are employment shares so the mean</span>
+<span class="cm">#' reflects workforce composition, not a simple</span>
+<span class="cm">#' average across occupations.</span>
+<span class="cm">#' @param series  numeric — task scores</span>
+<span class="cm">#' @param weights numeric — employment shares</span></span>
+wtd_std &lt;- function(series, weights) {
+  mu &lt;- wtd.mean(series, weights)
+  sd &lt;- sqrt(wtd.var(series, weights))
+  (series - mu) / sd
+}</pre></div>
+          <div class="answer-mask" id="a6r" onclick="reveal('a6r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">"Calculate mean and standard deviation" tells a reader nothing new. "Weights are employment shares so the mean reflects workforce composition" is the kind of thing a future reader — including yourself in six months — actually needs.</p>
+</div>
+
+
+<!-- ── 7. Silent failures ── -->
+<div class="principle">
+  <div class="p-title"><span class="p-num">07</span> Silent failures</div>
+  <p class="p-desc">Code that produces a wrong result without any warning is harder to catch than code that crashes. Check your assumptions explicitly.</p>
+
+  <div class="tabs" id="t7">
+    <button class="tab active" onclick="sw('t7','p7','py',this)">Python</button>
+    <button class="tab" onclick="sw('t7','p7','r',this)">R</button>
+  </div>
+
+  <div id="p7-py" class="lp active">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG — wrong result, no warning</span></div>
+        <div class="code-scroll"><pre><span class="kw">def</span> gini(wages):
+    <span class="hi"><span class="cm"># silently wrong if wages has &lt; 10 rows</span>
+    <span class="cm"># or contains negative values</span></span>
+    wages = np.sort(wages)
+    n = len(wages); idx = np.arange(<span class="nu">1</span>, n+<span class="nu">1</span>)
+    <span class="kw">return</span> (<span class="nu">2</span>*(idx*wages).sum())/(n*wages.sum()) - (n+<span class="nu">1</span>)/n</pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT — fails loudly</span>
+          <button class="reveal-btn" onclick="reveal('a7py',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre><span class="kw">import</span> warnings
+
+<span class="kw">def</span> gini(wages):
+    <span class="hi"><span class="kw">if</span> len(wages) != <span class="nu">10</span>:
+        warnings.warn(
+            <span class="st">f"Expected 10 deciles, got {len(wages)}"</span>)
+        <span class="kw">return</span> None
+    <span class="kw">if not</span> (wages > <span class="nu">0</span>).all():
+        warnings.warn(<span class="st">"Non-positive wages — skipping"</span>)
+        <span class="kw">return</span> None</span>
+    wages = np.sort(wages)
+    n = len(wages); idx = np.arange(<span class="nu">1</span>, n+<span class="nu">1</span>)
+    <span class="kw">return</span> (<span class="nu">2</span>*(idx*wages).sum())/(n*wages.sum()) - (n+<span class="nu">1</span>)/n</pre></div>
+          <div class="answer-mask" id="a7py" onclick="reveal('a7py',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="p7-r" class="lp">
+    <div class="pair">
+      <div class="panel wrong">
+        <div class="plabel"><span class="plabel-left"><span class="dot"></span>WRONG — wrong result, no warning</span></div>
+        <div class="code-scroll"><pre>gini &lt;- function(wages) {
+  <span class="hi"><span class="cm"># silently wrong if wages has &lt; 10 rows</span>
+  <span class="cm"># or contains negative values</span></span>
+  wages &lt;- sort(wages)
+  n &lt;- length(wages); idx &lt;- seq_len(n)
+  (<span class="nu">2</span>*sum(idx*wages))/(n*sum(wages)) - (n+<span class="nu">1</span>)/n
+}</pre></div>
+      </div>
+      <div class="panel right">
+        <div class="plabel">
+          <span class="plabel-left"><span class="dot"></span>CORRECT — fails loudly</span>
+          <button class="reveal-btn" onclick="reveal('a7r',this)">show answer ▾</button>
+        </div>
+        <div class="hidden-answer">
+          <div class="code-scroll"><pre>gini &lt;- function(wages) {
+  <span class="hi"><span class="kw">if</span> (length(wages) != <span class="nu">10</span>) {
+    warning("Expected 10 deciles, got ",
+            length(wages))
+    return(NA_real_)
+  }
+  <span class="kw">if</span> (any(wages &lt;= <span class="nu">0</span>)) {
+    warning("Non-positive wages — skipping")
+    return(NA_real_)
+  }</span>
+  wages &lt;- sort(wages)
+  n &lt;- length(wages); idx &lt;- seq_len(n)
+  (<span class="nu">2</span>*sum(idx*wages))/(n*sum(wages)) - (n+<span class="nu">1</span>)/n
+}</pre></div>
+          <div class="answer-mask" id="a7r" onclick="reveal('a7r',null)"><span>click to show answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">A script that crashes with a clear message is easier to fix than one that silently produces a plausible-looking wrong number.</p>
+</div>
+
+<footer>Reproducible Research · Session 6 · University of Warsaw</footer>
+</div>
+
+<script>
+function sw(tabId, panePrefix, lang, btn) {
+  document.querySelectorAll('#'+tabId+' .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['py','r'].forEach(l => {
+    const p = document.getElementById(panePrefix+'-'+l);
+    if (p) p.classList.toggle('active', l===lang);
+  });
+}
+function reveal(maskId, btn) {
+  const mask = document.getElementById(maskId);
+  if (!mask) return;
+  mask.classList.add('gone');
+  if (btn) { btn.textContent = 'shown ✓'; btn.classList.add('shown'); btn.disabled = true; }
+}
+</script>
+</body>
+</html>

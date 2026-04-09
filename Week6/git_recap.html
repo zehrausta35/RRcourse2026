@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Recap — Before Branches</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1a1a;--ink2:#444;--ink3:#888;--paper:#faf8f4;--paper2:#f2ede4;
+  --paper3:#e8e0d3;--rule:#d0c8bc;--green:#1a6b3c;--red:#b91c1c;
+  --amber:#92400e;--blue:#1e40af;
+  --correct:#dcfce7;--correct-b:#166534;--wrong:#fee2e2;--wrong-b:#991b1b;
+  --reveal:#fffbeb;--reveal-b:#92400e;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{background:var(--paper);color:var(--ink);font-family:'Source Serif 4',Georgia,serif;line-height:1.7;}
+header{border-bottom:3px solid var(--ink);padding:24px 40px 20px;display:grid;grid-template-columns:1fr auto;align-items:end;gap:20px;}
+.masthead{font-family:'Playfair Display',Georgia,serif;font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1;}
+.masthead span{color:var(--green);}
+.header-meta{text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);line-height:1.8;}
+.header-rule{border:none;border-top:1px solid var(--ink);margin:6px 40px 0;}
+.progress-wrap{background:var(--paper2);border-bottom:1px solid var(--rule);padding:10px 40px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;}
+.progress-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);white-space:nowrap;}
+.progress-track{flex:1;height:6px;background:var(--paper3);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width .4s ease;width:0%;}
+.score-badge{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);white-space:nowrap;}
+.content{max-width:800px;margin:0 auto;padding:36px 40px 60px;}
+.section{margin-bottom:44px;border-top:2px solid var(--ink);padding-top:20px;}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;}
+.section-title{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;margin-bottom:6px;line-height:1.2;}
+.section-desc{font-size:14px;color:var(--ink2);margin-bottom:22px;font-style:italic;}
+.ex-card{background:white;border:1px solid var(--rule);border-radius:8px;padding:20px 22px;margin-bottom:14px;}
+.ex-q{font-size:14.5px;color:var(--ink);margin-bottom:14px;line-height:1.6;}
+.ex-q code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--paper2);padding:1px 6px;border-radius:3px;color:var(--green);}
+.terminal{background:#0f1117;color:#a8e6a3;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;padding:14px 18px;border-radius:6px;margin-bottom:14px;white-space:pre;overflow-x:auto;}
+.terminal .dim{color:#555770;}.terminal .yellow{color:#fbbf24;}.terminal .red{color:#f87171;}.terminal .blue{color:#7dd3fc;}
+.choices{display:flex;flex-direction:column;gap:8px;}
+.choice{display:flex;align-items:flex-start;gap:11px;padding:10px 14px;border:1px solid var(--rule);border-radius:6px;cursor:pointer;transition:all .12s;font-size:13.5px;background:var(--paper);user-select:none;}
+.choice:hover{border-color:var(--ink3);background:white;}
+.choice.selected{border-color:var(--ink);background:white;}
+.choice.correct{background:var(--correct);border-color:var(--correct-b);color:var(--correct-b);}
+.choice.wrong{background:var(--wrong);border-color:var(--wrong-b);color:var(--wrong-b);}
+.choice-key{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;width:20px;flex-shrink:0;margin-top:1px;color:var(--ink3);}
+.choice.selected .choice-key{color:var(--ink);}.choice.correct .choice-key{color:var(--correct-b);}.choice.wrong .choice-key{color:var(--wrong-b);}
+.choice code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;}
+.blank-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:13px;}
+.blank-static{color:var(--green);}
+.blank-input{border:none;border-bottom:2px solid var(--ink);background:transparent;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink);width:160px;padding:2px 4px;outline:none;transition:border-color .12s;}
+.blank-input:focus{border-color:var(--green);}
+.blank-input.correct{border-color:var(--correct-b);color:var(--correct-b);background:var(--correct);border-radius:3px 3px 0 0;}
+.blank-input.wrong{border-color:var(--wrong-b);color:var(--wrong-b);background:var(--wrong);border-radius:3px 3px 0 0;}
+.order-list{display:flex;flex-direction:column;gap:8px;}
+.order-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border:1px solid var(--rule);border-radius:6px;cursor:grab;user-select:none;font-family:'JetBrains Mono',monospace;font-size:12.5px;transition:all .12s;}
+.order-item:hover{border-color:var(--ink3);box-shadow:0 2px 6px rgba(0,0,0,.06);}
+.order-item.dragging{opacity:.4;cursor:grabbing;}
+.order-item.drag-over{border-color:var(--green);background:#f0fdf4;}
+.order-item.correct{border-color:var(--correct-b);background:var(--correct);color:var(--correct-b);}
+.order-item.wrong{border-color:var(--wrong-b);background:var(--wrong);color:var(--wrong-b);}
+.drag-handle{color:var(--ink3);font-size:14px;flex-shrink:0;}
+.order-num{width:22px;height:22px;border-radius:50%;background:var(--paper2);border:1px solid var(--rule);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--ink3);}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.match-col-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);padding-bottom:8px;border-bottom:1px solid var(--rule);margin-bottom:6px;}
+.match-item{padding:9px 12px;border:1px solid var(--rule);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;background:white;cursor:pointer;transition:all .12s;user-select:none;min-height:42px;display:flex;align-items:center;margin-bottom:7px;}
+.match-item:hover{border-color:var(--ink3);}
+.match-item.selected{border-color:var(--green);background:#f0fdf4;box-shadow:0 0 0 2px var(--green);}
+.match-item.matched{border-color:var(--correct-b);background:var(--correct);color:var(--correct-b);cursor:default;}
+.match-item.wrong-flash{border-color:var(--wrong-b);background:var(--wrong);}
+.match-desc{font-family:'Source Serif 4',Georgia,serif;font-size:12.5px;color:var(--ink2);}
+.scenario-box{background:#0f1117;color:#cdd9e5;border-radius:8px;padding:18px 20px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.8;}
+.scenario-box .prompt{color:#555770;}.scenario-box .cmd{color:#a8e6a3;}.scenario-box .hi{color:#fbbf24;}
+.check-btn{margin-top:14px;padding:9px 22px;background:var(--ink);color:white;border:none;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .12s;}
+.check-btn:hover{background:var(--green);}
+.check-btn:disabled{opacity:.35;cursor:default;background:var(--ink);}
+.feedback{margin-top:12px;padding:12px 16px;border-radius:6px;font-size:13.5px;line-height:1.6;display:none;}
+.feedback.show{display:block;}
+.feedback.correct{background:var(--correct);border-left:3px solid var(--correct-b);color:#14532d;}
+.feedback.wrong{background:var(--wrong);border-left:3px solid var(--wrong-b);color:#7f1d1d;}
+.feedback strong{font-weight:600;}
+.feedback code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:rgba(0,0,0,.08);padding:1px 5px;border-radius:3px;}
+.areas-diagram{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;margin-bottom:18px;align-items:center;}
+.area-box{background:white;border:1px solid var(--rule);border-radius:8px;padding:14px 12px;text-align:center;}
+.area-name{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.area-sub{font-size:11px;color:var(--ink3);font-style:italic;}
+.area-arrow{text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);padding:0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.arrow-cmd{color:var(--green);font-weight:700;font-size:11px;}
+.completion{display:none;text-align:center;padding:40px 20px;border:2px solid var(--green);border-radius:12px;background:white;margin-top:36px;}
+.completion.show{display:block;}
+.completion-icon{font-size:48px;margin-bottom:12px;}
+.completion-title{font-family:'Playfair Display',Georgia,serif;font-size:28px;font-weight:900;color:var(--green);margin-bottom:8px;}
+.completion-sub{font-size:15px;color:var(--ink2);margin-bottom:20px;}
+.final-score{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;color:var(--green);margin-bottom:6px;}
+.reset-btn{padding:10px 28px;background:var(--ink);color:white;border:none;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;margin-top:16px;}
+.reset-btn:hover{background:var(--green);}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="masthead">Git <span>Recap</span> Exercise</div>
+    <div style="font-size:13px;color:var(--ink2);margin-top:6px;font-style:italic">Warm-up before branching — make sure these feel automatic</div>
+  </div>
+  <div class="header-meta">Reproducible Research 2026<br>University of Warsaw<br>DS / QF · Session 5</div>
+</header>
+<hr class="header-rule">
+
+<div class="progress-wrap">
+  <div class="progress-label">progress</div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="score-badge" id="score-badge">0 / 0</div>
+</div>
+
+<div class="content">
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-num">// section 01</div>
+    <div class="section-title">The Three Areas</div>
+    <div class="section-desc">Git tracks your work across three distinct places. Understanding this is the foundation of everything else.</div>
+    <div class="areas-diagram">
+      <div class="area-box"><div class="area-name">Working Directory</div><div class="area-sub">files on disk</div></div>
+      <div class="area-arrow"><span class="arrow-cmd">git add →</span><span class="arrow-cmd">← git restore</span></div>
+      <div class="area-box"><div class="area-name">Staging Area</div><div class="area-sub">index / cache</div></div>
+      <div class="area-arrow"><span class="arrow-cmd">git commit →</span><span class="arrow-cmd">← git reset</span></div>
+      <div class="area-box"><div class="area-name">Repository</div><div class="area-sub">.git / history</div></div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">1. You have edited <code>analysis.R</code> but haven't run any Git commands yet. Where does the file currently exist?</div>
+      <div class="choices" data-q="1" data-answer="a">
+        <div class="choice" data-val="a"><span class="choice-key">A</span>Working directory only</div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span>Staging area only</div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span>The repository</div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span>All three areas simultaneously</div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'1')">Check answer</button>
+      <div class="feedback" id="fb-1">
+        <strong>✓ Correct.</strong> Editing a file only affects your working directory. Git doesn't know about the change until you explicitly stage it with <code>git add</code>.
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">2. You run <code>git add analysis.R</code>. What has happened?</div>
+      <div class="choices" data-q="2" data-answer="b">
+        <div class="choice" data-val="a"><span class="choice-key">A</span>The file is saved to the repository with a commit hash</div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span>A snapshot of the file is copied to the staging area</div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span>The file is uploaded to the remote repository</div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span>Git starts tracking changes to the file in real time</div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'2')">Check answer</button>
+      <div class="feedback" id="fb-2">
+        <strong>✓ Correct.</strong> <code>git add</code> takes a snapshot of the file at that moment and places it in the staging area. If you edit the file again afterwards, you need to run <code>git add</code> again to include the new changes.
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">3. Which command moves a snapshot from the staging area into the repository?</div>
+      <div class="choices" data-q="3" data-answer="c">
+        <div class="choice" data-val="a"><span class="choice-key">A</span><code>git push</code></div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span><code>git add</code></div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span><code>git commit</code></div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span><code>git save</code></div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'3')">Check answer</button>
+      <div class="feedback" id="fb-3">
+        <strong>✓ Correct.</strong> <code>git commit</code> takes everything in the staging area and permanently stores it as a new commit in the local repository. <code>git push</code> comes later — it sends commits to the remote.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-num">// section 02</div>
+    <div class="section-title">Reading git status</div>
+    <div class="section-desc">Being able to read status output quickly is one of the most important habits you can build.</div>
+
+    <div class="ex-card">
+      <div class="ex-q">4. What does this output tell you?</div>
+      <div class="terminal">On branch main
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
+
+<span class="yellow">Changes not staged for commit:</span>
+        <span class="red">modified:   report.Rmd</span></div>
+      <div class="choices" data-q="4" data-answer="d">
+        <div class="choice" data-val="a"><span class="choice-key">A</span>Everything is up to date — nothing to do</div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span><code>report.Rmd</code> has been staged and is ready to commit</div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span>There are 2 new commits on the remote that you need to pull</div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span>You have 2 unpushed local commits, and <code>report.Rmd</code> is modified but not staged</div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'4')">Check answer</button>
+      <div class="feedback" id="fb-4">
+        <strong>✓ Correct.</strong> "Ahead by 2 commits" means you have 2 local commits the remote doesn't have yet — run <code>git push</code>. The modified <code>report.Rmd</code> is separate: it's changed on disk but not staged yet.
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">5. You see this output. What is the state of <code>data.csv</code>?</div>
+      <div class="terminal">On branch main
+<span class="yellow">Changes to be committed:</span>
+        <span class="blue">new file:   data.csv</span>
+
+<span class="yellow">Changes not staged for commit:</span>
+        <span class="red">modified:   README.md</span></div>
+      <div class="choices" data-q="5" data-answer="b">
+        <div class="choice" data-val="a"><span class="choice-key">A</span>It is a new file that Git has not seen before — untracked</div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span>It is staged and will be included in the next commit</div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span>It has been committed to the repository</div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span>It is modified but not staged</div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'5')">Check answer</button>
+      <div class="feedback" id="fb-5">
+        <strong>✓ Correct.</strong> "Changes to be committed" means the file is in the staging area — it will be part of the next <code>git commit</code>. Note <code>README.md</code> is in a different state: modified on disk but not yet staged.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-num">// section 03</div>
+    <div class="section-title">Fill in the Command</div>
+    <div class="section-desc">Type the missing part. Exact spelling matters — this is how you'd type it in the terminal.</div>
+
+    <div class="ex-card">
+      <div class="ex-q">6. You want to see the commit history in compact one-line format. Complete the command:</div>
+      <div class="blank-wrap">
+        <span class="blank-static">git log</span>
+        <input class="blank-input" id="blank-6" placeholder="flag here" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="check-btn" onclick="checkBlank('6',['--oneline'])">Check answer</button>
+      <div class="feedback" id="fb-6"></div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">7. You want to stage all modified tracked files and commit in one step. Complete the command:</div>
+      <div class="blank-wrap">
+        <span class="blank-static">git commit</span>
+        <input class="blank-input" id="blank-7" placeholder="flags" autocomplete="off" spellcheck="false" style="width:100px">
+        <span class="blank-static">"Fix typo in README"</span>
+      </div>
+      <button class="check-btn" onclick="checkBlank('7',['-am','-ma'])">Check answer</button>
+      <div class="feedback" id="fb-7"></div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">8. You want to download the latest changes from the remote and merge them into your current branch. Type the command:</div>
+      <div class="blank-wrap">
+        <input class="blank-input" id="blank-8" placeholder="full command" autocomplete="off" spellcheck="false" style="width:200px">
+        <span class="blank-static">origin main</span>
+      </div>
+      <button class="check-btn" onclick="checkBlank('8',['git pull'])">Check answer</button>
+      <div class="feedback" id="fb-8"></div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">9. You want to download remote changes WITHOUT merging them into your branch yet. Type the command:</div>
+      <div class="blank-wrap">
+        <input class="blank-input" id="blank-9" placeholder="full command" autocomplete="off" spellcheck="false" style="width:200px">
+        <span class="blank-static">origin</span>
+      </div>
+      <button class="check-btn" onclick="checkBlank('9',['git fetch'])">Check answer</button>
+      <div class="feedback" id="fb-9"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-num">// section 04</div>
+    <div class="section-title">Put the Steps in Order</div>
+    <div class="section-desc">Drag and drop the steps into the correct sequence for a standard commit-and-push workflow.</div>
+
+    <div class="ex-card">
+      <div class="ex-q">10. Arrange these steps in the correct order for getting your work into the remote repository:</div>
+      <div class="order-list" id="order-10">
+        <div class="order-item" draggable="true" data-val="4"><span class="drag-handle">⠿</span><div class="order-num">?</div><code>git push origin main</code></div>
+        <div class="order-item" draggable="true" data-val="2"><span class="drag-handle">⠿</span><div class="order-num">?</div><code>git add analysis.R</code></div>
+        <div class="order-item" draggable="true" data-val="1"><span class="drag-handle">⠿</span><div class="order-num">?</div>Edit <code>analysis.R</code> in your editor</div>
+        <div class="order-item" draggable="true" data-val="3"><span class="drag-handle">⠿</span><div class="order-num">?</div><code>git commit -m "Add analysis results"</code></div>
+      </div>
+      <button class="check-btn" onclick="checkOrder('10',[1,2,3,4])">Check order</button>
+      <div class="feedback" id="fb-10"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-num">// section 05</div>
+    <div class="section-title">Match Command to Effect</div>
+    <div class="section-desc">Click a command on the left, then click its matching description on the right.</div>
+    <div class="ex-card">
+      <div class="ex-q">11. Match each command to what it does:</div>
+      <div class="match-grid">
+        <div><div class="match-col-title">command</div><div id="match-cmds"></div></div>
+        <div><div class="match-col-title">effect</div><div id="match-descs"></div></div>
+      </div>
+      <div class="feedback" id="fb-11"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-num">// section 06</div>
+    <div class="section-title">Scenario Questions</div>
+    <div class="section-desc">Read the terminal output and answer the question about what to do next.</div>
+
+    <div class="ex-card">
+      <div class="ex-q">12. Your colleague pushed new commits. You run git status. What should you do to get their changes?</div>
+      <div class="scenario-box"><span class="prompt">$ </span><span class="cmd">git status</span>
+On branch main
+<span class="hi">Your branch is behind 'origin/main' by 3 commits</span>, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+
+nothing to commit, working tree clean</div>
+      <div class="choices" data-q="12" data-answer="b">
+        <div class="choice" data-val="a"><span class="choice-key">A</span><code>git push origin main</code> — push your branch to sync it</div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span><code>git pull origin main</code> — fetch and merge the remote commits</div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span><code>git fetch origin</code> — this will also update your local branch</div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span>Nothing — "nothing to commit" means everything is fine</div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'12')">Check answer</button>
+      <div class="feedback" id="fb-12">
+        <strong>✓ Correct.</strong> "Behind by 3 commits" means the remote has commits you don't have locally. <code>git pull</code> fetches and merges them. Option C (<code>git fetch</code>) would only download — it would not update your local branch.
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">13. You staged a file by mistake. Which command removes it from the staging area without deleting it from disk?</div>
+      <div class="scenario-box"><span class="prompt">$ </span><span class="cmd">git status</span>
+<span class="hi">Changes to be committed:</span>
+        new file:   secret_passwords.txt   <span class="hi">&lt;-- you don't want this committed</span></div>
+      <div class="choices" data-q="13" data-answer="c">
+        <div class="choice" data-val="a"><span class="choice-key">A</span><code>git reset --hard HEAD</code></div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span><code>git checkout -- secret_passwords.txt</code></div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span><code>git restore --staged secret_passwords.txt</code></div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span><code>git rm secret_passwords.txt</code></div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'13')">Check answer</button>
+      <div class="feedback" id="fb-13">
+        <strong>✓ Correct.</strong> <code>git restore --staged</code> removes the file from the staging area while leaving it untouched on disk. Option A discards all uncommitted changes. Option D deletes the file entirely. Option B discards working directory changes.
+      </div>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-q">14. What does the <code>(HEAD -> main, origin/main)</code> annotation tell you about this commit?</div>
+      <div class="scenario-box"><span class="prompt">$ </span><span class="cmd">git log --oneline</span>
+<span class="hi">a3f92cd</span> (HEAD -> main, origin/main) Add data cleaning script
+7b1e034 Initial commit</div>
+      <div class="choices" data-q="14" data-answer="a">
+        <div class="choice" data-val="a"><span class="choice-key">A</span>Your local <code>main</code> and <code>origin/main</code> both point to the same commit — you are in sync</div>
+        <div class="choice" data-val="b"><span class="choice-key">B</span>There is a conflict between your local branch and the remote</div>
+        <div class="choice" data-val="c"><span class="choice-key">C</span>HEAD is detached and pointing directly to a commit</div>
+        <div class="choice" data-val="d"><span class="choice-key">D</span>The commit exists on the remote but not locally yet</div>
+      </div>
+      <button class="check-btn" onclick="checkMC(this,'14')">Check answer</button>
+      <div class="feedback" id="fb-14">
+        <strong>✓ Correct.</strong> When both <code>HEAD -> main</code> and <code>origin/main</code> point to the same commit, your local branch and the remote are in sync. If you make a new commit, only <code>main</code> will advance and <code>origin/main</code> will fall behind — until you push.
+      </div>
+    </div>
+  </div>
+
+  <div class="completion" id="completion">
+    <div class="completion-icon">🎓</div>
+    <div class="completion-title">Recap complete</div>
+    <div class="completion-sub">You are ready to move on to branches.</div>
+    <div class="final-score" id="final-score"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink3);margin-top:6px" id="final-msg"></div>
+    <button class="reset-btn" onclick="location.reload()">Start over</button>
+  </div>
+
+</div>
+
+<script>
+const TOTAL_Q=14;
+let answered=new Set(),correct=new Set();
+
+function updateProgress(){
+  document.getElementById('progress-fill').style.width=(answered.size/TOTAL_Q*100)+'%';
+  document.getElementById('score-badge').textContent=correct.size+' / '+answered.size;
+  if(answered.size===TOTAL_Q) showCompletion();
+}
+function markAnswered(qid,ok){ answered.add(qid); if(ok) correct.add(qid); updateProgress(); }
+
+// MC
+function checkMC(btn,qid){
+  const group=document.querySelector(`.choices[data-q="${qid}"]`);
+  const sel=group.querySelector('.choice.selected');
+  if(!sel) return;
+  const ok=sel.dataset.val===group.dataset.answer;
+  group.querySelectorAll('.choice').forEach(c=>{
+    c.style.pointerEvents='none';
+    if(c.dataset.val===group.dataset.answer) c.classList.add('correct');
+    else if(c.classList.contains('selected')) c.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb-'+qid);
+  if(!ok){
+    const ct=group.querySelector(`[data-val="${group.dataset.answer}"]`).textContent.trim();
+    fb.className='feedback wrong show';
+    fb.innerHTML=`<strong>✗ Not quite.</strong> The correct answer is: <strong>${ct}</strong><br><br>`+fb.innerHTML;
+  } else { fb.className='feedback correct show'; }
+  btn.disabled=true;
+  markAnswered(qid,ok);
+}
+document.querySelectorAll('.choices').forEach(g=>{
+  g.querySelectorAll('.choice').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(c.classList.contains('correct')||c.classList.contains('wrong')) return;
+      g.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+    });
+  });
+});
+
+// Blank
+function checkBlank(qid,accepted){
+  const inp=document.getElementById('blank-'+qid);
+  const ok=accepted.map(a=>a.toLowerCase()).includes(inp.value.trim().toLowerCase());
+  inp.classList.add(ok?'correct':'wrong'); inp.disabled=true;
+  inp.closest('.ex-card').querySelector('.check-btn').disabled=true;
+  const fb=document.getElementById('fb-'+qid);
+  fb.className='feedback '+(ok?'correct':'wrong')+' show';
+  fb.innerHTML=ok?`<strong>✓ Correct.</strong> <code>${inp.value.trim()}</code> is right.`:`<strong>✗ Not quite.</strong> The answer is <code>${accepted[0]}</code>.`;
+  if(!ok) inp.value=accepted[0];
+  markAnswered(qid,ok);
+}
+document.querySelectorAll('.blank-input').forEach(inp=>{
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const b=inp.closest('.ex-card').querySelector('.check-btn'); if(!b.disabled) b.click(); } });
+});
+
+// Drag order
+let dragSrc=null;
+function initDrag(id){
+  const list=document.getElementById(id);
+  list.querySelectorAll('.order-item').forEach(item=>{
+    item.addEventListener('dragstart',e=>{ dragSrc=item; item.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+    item.addEventListener('dragend',()=>{ dragSrc=null; item.classList.remove('dragging'); list.querySelectorAll('.order-item').forEach(i=>i.classList.remove('drag-over')); });
+    item.addEventListener('dragover',e=>{ e.preventDefault(); if(item!==dragSrc) item.classList.add('drag-over'); });
+    item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));
+    item.addEventListener('drop',e=>{ e.preventDefault(); item.classList.remove('drag-over'); if(dragSrc&&dragSrc!==item){ const items=[...list.querySelectorAll('.order-item')]; const si=items.indexOf(dragSrc),ti=items.indexOf(item); if(si<ti) list.insertBefore(dragSrc,item.nextSibling); else list.insertBefore(dragSrc,item); } });
+  });
+}
+initDrag('order-10');
+
+function checkOrder(qid,correct_order){
+  const list=document.getElementById('order-'+qid);
+  const items=[...list.querySelectorAll('.order-item')];
+  const vals=items.map(i=>parseInt(i.dataset.val));
+  const ok=JSON.stringify(vals)===JSON.stringify(correct_order);
+  items.forEach((item,i)=>{ item.draggable=false; item.querySelector('.order-num').textContent=i+1; item.classList.add(vals[i]===correct_order[i]?'correct':'wrong'); });
+  const fb=document.getElementById('fb-'+qid);
+  fb.className='feedback '+(ok?'correct':'wrong')+' show';
+  fb.innerHTML=ok?'<strong>✓ Correct order.</strong> Edit → stage → commit → push. This is the fundamental Git loop.':'<strong>✗ Not quite.</strong> Correct order: <strong>1.</strong> Edit the file → <strong>2.</strong> <code>git add</code> → <strong>3.</strong> <code>git commit</code> → <strong>4.</strong> <code>git push</code>. Green items were in the right position.';
+  list.closest('.ex-card').querySelector('.check-btn').disabled=true;
+  markAnswered(qid,ok);
+}
+
+// Match
+const matchData=[
+  {cmd:'git init',      desc:'Create a new empty repository in the current folder'},
+  {cmd:'git clone',     desc:'Download a remote repository to your local machine'},
+  {cmd:'git status',    desc:'Show what has changed since the last commit'},
+  {cmd:'git log',       desc:'Show the commit history of the current branch'},
+  {cmd:'git diff',      desc:'Show exact line-by-line changes not yet staged'},
+  {cmd:'git remote -v', desc:'List the remote repositories linked to this repo'},
+];
+let matchSel=null,matchPairs={};
+function buildMatch(){
+  const ce=document.getElementById('match-cmds'),de=document.getElementById('match-descs');
+  const shuffled=[...matchData].sort(()=>Math.random()-.5);
+  matchData.forEach((m,i)=>{
+    const c=document.createElement('div'); c.className='match-item'; c.dataset.side='cmd'; c.dataset.id=i;
+    c.textContent=m.cmd; c.style.fontWeight='600';
+    c.addEventListener('click',()=>handleMatch('cmd',i,c)); ce.appendChild(c);
+  });
+  shuffled.forEach(m=>{
+    const ri=matchData.indexOf(m);
+    const d=document.createElement('div'); d.className='match-item match-desc'; d.dataset.side='desc'; d.dataset.id=ri;
+    d.textContent=m.desc;
+    d.addEventListener('click',()=>handleMatch('desc',ri,d)); de.appendChild(d);
+  });
+}
+function handleMatch(side,id,el){
+  if(el.classList.contains('matched')) return;
+  if(!matchSel){ document.querySelectorAll('.match-item.selected').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); matchSel={side,id,el}; }
+  else{
+    if(matchSel.side===side){ matchSel.el.classList.remove('selected'); el.classList.add('selected'); matchSel={side,id,el}; return; }
+    const cmdId=side==='cmd'?id:matchSel.id, descId=side==='desc'?id:matchSel.id;
+    const ce2=side==='cmd'?el:matchSel.el, de2=side==='desc'?el:matchSel.el;
+    if(cmdId===descId){
+      ce2.classList.remove('selected'); ce2.classList.add('matched');
+      de2.classList.remove('selected'); de2.classList.add('matched');
+      matchPairs[cmdId]=descId;
+      if(Object.keys(matchPairs).length===matchData.length){
+        const fb=document.getElementById('fb-11');
+        fb.className='feedback correct show';
+        fb.innerHTML='<strong>✓ All matched correctly.</strong> These six commands cover the core of everyday Git usage.';
+        markAnswered('11',true);
+      }
+    } else {
+      ce2.classList.remove('selected'); ce2.classList.add('wrong-flash');
+      de2.classList.remove('selected'); de2.classList.add('wrong-flash');
+      setTimeout(()=>{ ce2.classList.remove('wrong-flash'); de2.classList.remove('wrong-flash'); },600);
+    }
+    matchSel=null;
+  }
+}
+buildMatch();
+
+function showCompletion(){
+  const pct=Math.round(correct.size/TOTAL_Q*100);
+  document.getElementById('final-score').textContent=correct.size+' / '+TOTAL_Q+' correct';
+  document.getElementById('final-msg').textContent=pct===100?'Perfect score — on to branches!':pct>=70?'Good foundation. Review any wrong answers before we start.':'Worth revisiting the weak spots before moving on.';
+  document.getElementById('completion').classList.add('show');
+}
+</script>
+</body>
+</html>
