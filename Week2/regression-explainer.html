@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Are β and SE Calculated? — Step by Step</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+  table { border-collapse: collapse; width: 100%; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+const INITIAL_DATA = [
+  { x: 0, y: 5 }, { x: 1, y: 4 }, { x: 2, y: 5 }, { x: 3, y: 3 }, { x: 5, y: 2 },
+  { x: 4, y: 3 }, { x: 6, y: 1 }, { x: 2, y: 4 }, { x: 7, y: 1 }, { x: 0, y: 6 },
+];
+
+function normalCDF(x) {
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  const t = 1/(1+p*Math.abs(x));
+  const y = 1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x/2);
+  return 0.5*(1+sign*y);
+}
+
+function computeAll(data) {
+  const n = data.length;
+  const xBar = data.reduce((s, d) => s + d.x, 0) / n;
+  const yBar = data.reduce((s, d) => s + d.y, 0) / n;
+
+  const withDevs = data.map(d => {
+    const dx = d.x - xBar;
+    const dy = d.y - yBar;
+    return { ...d, dx, dy, dxdy: dx * dy, dx2: dx * dx };
+  });
+
+  const sumDxDy = withDevs.reduce((s, d) => s + d.dxdy, 0);
+  const sumDx2 = withDevs.reduce((s, d) => s + d.dx2, 0);
+
+  const beta = sumDx2 !== 0 ? sumDxDy / sumDx2 : 0;
+  const alpha = yBar - beta * xBar;
+
+  const withResiduals = withDevs.map(d => {
+    const yHat = alpha + beta * d.x;
+    const residual = d.y - yHat;
+    return { ...d, yHat, residual, res2: residual * residual };
+  });
+
+  const ssr = withResiduals.reduce((s, d) => s + d.res2, 0);
+  const s2 = ssr / (n - 2);
+  const se = Math.sqrt(s2 / sumDx2);
+  const tStat = se !== 0 ? beta / se : 0;
+  const pValue = 2 * (1 - normalCDF(Math.abs(tStat)));
+
+  return { n, xBar, yBar, withResiduals, sumDxDy, sumDx2, beta, alpha, ssr, s2, se, tStat, pValue };
+}
+
+function ScatterPlot({ data, alpha, beta }) {
+  const w = 440, h = 300;
+  const pad = { top: 20, right: 25, bottom: 50, left: 50 };
+  const pw = w - pad.left - pad.right;
+  const ph = h - pad.top - pad.bottom;
+
+  const xMax = 8, yMax = 7;
+  const toX = v => pad.left + (v / xMax) * pw;
+  const toY = v => pad.top + ph - (v / yMax) * ph;
+
+  const lineX0 = 0, lineX1 = xMax;
+  const lineY0 = alpha + beta * lineX0;
+  const lineY1 = alpha + beta * lineX1;
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} style={{ display: "block", width: "100%", maxWidth: 440, margin: "0 auto" }}>
+      {/* Grid */}
+      {[0,1,2,3,4,5,6,7].map(v => (
+        <g key={`gx${v}`}>
+          <line x1={toX(v)} y1={toY(0)} x2={toX(v)} y2={toY(yMax)} stroke="#f1f5f9" />
+          <text x={toX(v)} y={toY(0)+16} textAnchor="middle" fontSize={11} fill="#94a3b8">{v}</text>
+        </g>
+      ))}
+      {[0,1,2,3,4,5,6,7].map(v => (
+        <g key={`gy${v}`}>
+          <line x1={toX(0)} y1={toY(v)} x2={toX(xMax)} y2={toY(v)} stroke="#f1f5f9" />
+          <text x={toX(0)-8} y={toY(v)+4} textAnchor="end" fontSize={11} fill="#94a3b8">{v}</text>
+        </g>
+      ))}
+      {/* Axes */}
+      <line x1={toX(0)} y1={toY(0)} x2={toX(xMax)} y2={toY(0)} stroke="#cbd5e1" />
+      <line x1={toX(0)} y1={toY(0)} x2={toX(0)} y2={toY(yMax)} stroke="#cbd5e1" />
+      <text x={w/2} y={h-6} textAnchor="middle" fontSize={12} fill="#64748b">Pirated movies (X)</text>
+      <text x={16} y={h/2} textAnchor="middle" fontSize={12} fill="#64748b"
+        transform={`rotate(-90, 16, ${h/2})`}>Bought (Y)</text>
+
+      {/* Residual lines */}
+      {data.map((d, i) => {
+        const yHat = alpha + beta * d.x;
+        return <line key={`r${i}`} x1={toX(d.x)} y1={toY(d.y)} x2={toX(d.x)} y2={toY(yHat)}
+          stroke="#f87171" strokeWidth={1.5} strokeDasharray="3,3" opacity={0.6} />;
+      })}
+
+      {/* Regression line */}
+      <line x1={toX(lineX0)} y1={toY(Math.max(0, lineY0))}
+        x2={toX(lineX1)} y2={toY(Math.max(0, lineY1))}
+        stroke="#3b82f6" strokeWidth={2.5} />
+
+      {/* Points */}
+      {data.map((d, i) => (
+        <circle key={i} cx={toX(d.x)} cy={toY(d.y)} r={6}
+          fill="#1e293b" stroke="white" strokeWidth={2} />
+      ))}
+
+      {/* Legend */}
+      <line x1={w-140} y1={pad.top+6} x2={w-120} y2={pad.top+6} stroke="#3b82f6" strokeWidth={2.5}/>
+      <text x={w-115} y={pad.top+10} fontSize={10} fill="#3b82f6">Best fit line</text>
+      <line x1={w-140} y1={pad.top+22} x2={w-120} y2={pad.top+22} stroke="#f87171" strokeWidth={1.5} strokeDasharray="3,3"/>
+      <text x={w-115} y={pad.top+26} fontSize={10} fill="#f87171">Residuals</text>
+    </svg>
+  );
+}
+
+function StepCard({ step, title, children, color }) {
+  const c = color || "#3b82f6";
+  return (
+    <div style={{
+      background: "white", borderRadius: 12, padding: 18, marginBottom: 14,
+      border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+    }}>
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: c, textTransform: "uppercase",
+        letterSpacing: 1, marginBottom: 8
+      }}>Step {step} — {title}</div>
+      {children}
+    </div>
+  );
+}
+
+function Formula({ children }) {
+  return (
+    <div style={{
+      textAlign: "center", fontSize: 17, padding: "10px 0",
+      fontFamily: "Georgia, serif", color: "#1e293b"
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function Note({ children }) {
+  return <div style={{ fontSize: 13, color: "#64748b", marginTop: 6 }}>{children}</div>;
+}
+
+function DataTable({ rows, xBar, yBar }) {
+  const hStyle = {
+    padding: "6px 6px", fontSize: 11, fontWeight: 700, color: "#475569",
+    borderBottom: "2px solid #e2e8f0", textAlign: "center"
+  };
+  const cStyle = {
+    padding: "5px 6px", fontSize: 12, textAlign: "center", color: "#334155",
+    borderBottom: "1px solid #f1f5f9"
+  };
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ marginTop: 8 }}>
+        <thead>
+          <tr>
+            <th style={hStyle}>#</th>
+            <th style={hStyle}>X</th>
+            <th style={hStyle}>Y</th>
+            <th style={{ ...hStyle, color: "#7c3aed" }}>X−X̄</th>
+            <th style={{ ...hStyle, color: "#7c3aed" }}>Y−Ȳ</th>
+            <th style={{ ...hStyle, color: "#059669" }}>(X−X̄)(Y−Ȳ)</th>
+            <th style={{ ...hStyle, color: "#d97706" }}>(X−X̄)²</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} style={{ background: i % 2 === 0 ? "#fafafa" : "white" }}>
+              <td style={cStyle}>{i + 1}</td>
+              <td style={cStyle}>{r.x}</td>
+              <td style={cStyle}>{r.y}</td>
+              <td style={{ ...cStyle, color: "#7c3aed" }}>{r.dx.toFixed(1)}</td>
+              <td style={{ ...cStyle, color: "#7c3aed" }}>{r.dy.toFixed(1)}</td>
+              <td style={{ ...cStyle, color: "#059669", fontWeight: 600 }}>{r.dxdy.toFixed(2)}</td>
+              <td style={{ ...cStyle, color: "#d97706", fontWeight: 600 }}>{r.dx2.toFixed(2)}</td>
+            </tr>
+          ))}
+          <tr style={{ background: "#f0fdf4" }}>
+            <td style={{ ...cStyle, fontWeight: 700 }}>Sum</td>
+            <td style={{ ...cStyle, fontWeight: 700 }}>Avg: {xBar.toFixed(1)}</td>
+            <td style={{ ...cStyle, fontWeight: 700 }}>Avg: {yBar.toFixed(1)}</td>
+            <td style={cStyle}>—</td>
+            <td style={cStyle}>—</td>
+            <td style={{ ...cStyle, color: "#059669", fontWeight: 700 }}>
+              {rows.reduce((s, r) => s + r.dxdy, 0).toFixed(2)}
+            </td>
+            <td style={{ ...cStyle, color: "#d97706", fontWeight: 700 }}>
+              {rows.reduce((s, r) => s + r.dx2, 0).toFixed(2)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ResidualTable({ rows }) {
+  const hStyle = {
+    padding: "6px 6px", fontSize: 11, fontWeight: 700, color: "#475569",
+    borderBottom: "2px solid #e2e8f0", textAlign: "center"
+  };
+  const cStyle = {
+    padding: "5px 6px", fontSize: 12, textAlign: "center", color: "#334155",
+    borderBottom: "1px solid #f1f5f9"
+  };
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ marginTop: 8 }}>
+        <thead>
+          <tr>
+            <th style={hStyle}>#</th>
+            <th style={hStyle}>X</th>
+            <th style={hStyle}>Y</th>
+            <th style={{ ...hStyle, color: "#3b82f6" }}>Ŷ = a + βX</th>
+            <th style={{ ...hStyle, color: "#ef4444" }}>Residual</th>
+            <th style={{ ...hStyle, color: "#ef4444" }}>Residual²</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} style={{ background: i % 2 === 0 ? "#fafafa" : "white" }}>
+              <td style={cStyle}>{i + 1}</td>
+              <td style={cStyle}>{r.x}</td>
+              <td style={cStyle}>{r.y}</td>
+              <td style={{ ...cStyle, color: "#3b82f6" }}>{r.yHat.toFixed(2)}</td>
+              <td style={{ ...cStyle, color: "#ef4444" }}>{r.residual.toFixed(2)}</td>
+              <td style={{ ...cStyle, color: "#ef4444", fontWeight: 600 }}>{r.res2.toFixed(2)}</td>
+            </tr>
+          ))}
+          <tr style={{ background: "#fef2f2" }}>
+            <td colSpan={5} style={{ ...cStyle, fontWeight: 700, textAlign: "right", paddingRight: 12 }}>
+              Sum of Squared Residuals (SSR) =
+            </td>
+            <td style={{ ...cStyle, color: "#ef4444", fontWeight: 700 }}>
+              {rows.reduce((s, r) => s + r.res2, 0).toFixed(2)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function App() {
+  const r = useMemo(() => computeAll(INITIAL_DATA), []);
+  const stars = r.pValue < 0.01 ? "***" : r.pValue < 0.05 ? "**" : r.pValue < 0.10 ? "*" : "";
+
+  return (
+    <div style={{
+      maxWidth: 620, margin: "0 auto", fontFamily: "system-ui, -apple-system, sans-serif",
+      padding: 20, background: "#f8fafc", minHeight: "100vh"
+    }}>
+      <h2 style={{ textAlign: "center", color: "#1e293b", marginBottom: 4, fontSize: 22 }}>
+        How Are β and SE Calculated?
+      </h2>
+      <p style={{ textAlign: "center", color: "#64748b", fontSize: 13, marginTop: 0, marginBottom: 16 }}>
+        Step-by-step with real numbers — piracy vs. movie purchases
+      </p>
+
+      {/* SCATTER */}
+      <div style={{
+        background: "white", borderRadius: 12, padding: 16, marginBottom: 14,
+        border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+      }}>
+        <div style={{ fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 4 }}>
+          10 people surveyed: pirated movies (X) vs. legally bought movies (Y)
+        </div>
+        <ScatterPlot data={INITIAL_DATA} alpha={r.alpha} beta={r.beta} />
+        <Note>
+          The <span style={{ color: "#3b82f6", fontWeight: 600 }}>blue line</span> is the best fit.
+          The <span style={{ color: "#f87171", fontWeight: 600 }}>red dashes</span> are residuals — the line minimizes the total squared red dashes (OLS).
+        </Note>
+      </div>
+
+      {/* STEP 1 */}
+      <StepCard step={1} title="Calculate the averages">
+        <Formula>
+          X̄ = (0 + 1 + 2 + 3 + 5 + 4 + 6 + 2 + 7 + 0) / 10 = <strong>{r.xBar.toFixed(1)}</strong>
+        </Formula>
+        <Formula>
+          Ȳ = (5 + 4 + 5 + 3 + 2 + 3 + 1 + 4 + 1 + 6) / 10 = <strong>{r.yBar.toFixed(1)}</strong>
+        </Formula>
+        <Note>On average, people pirated {r.xBar.toFixed(1)} and bought {r.yBar.toFixed(1)} movies.</Note>
+      </StepCard>
+
+      {/* STEP 2 */}
+      <StepCard step={2} title="Calculate deviations from the mean" color="#7c3aed">
+        <Note style={{ marginBottom: 8 }}>For each person: how far are they from the average? Then multiply and square the X deviation.</Note>
+        <DataTable rows={r.withResiduals} xBar={r.xBar} yBar={r.yBar} />
+        <div style={{
+          marginTop: 10, padding: 10, background: "#faf5ff", borderRadius: 8,
+          fontSize: 12, color: "#475569", lineHeight: 1.6
+        }}>
+          Notice: when someone pirates <em>more</em> than average (X−X̄ positive) they tend to buy <em>less</em> than average (Y−Ȳ negative).
+          So the products <span style={{ color: "#059669", fontWeight: 700 }}>(X−X̄)(Y−Ȳ)</span> are mostly negative → the sum is negative → β will be negative.
+        </div>
+      </StepCard>
+
+      {/* STEP 3 */}
+      <StepCard step={3} title="Calculate the coefficient (β)" color="#059669">
+        <Formula>
+          β = <span style={{ color: "#059669" }}>Σ(X−X̄)(Y−Ȳ)</span> / <span style={{ color: "#d97706" }}>Σ(X−X̄)²</span> = <span style={{ color: "#059669" }}>{r.sumDxDy.toFixed(2)}</span> / <span style={{ color: "#d97706" }}>{r.sumDx2.toFixed(2)}</span> = <strong style={{ fontSize: 22 }}>{r.beta.toFixed(4)}</strong>
+        </Formula>
+        <Note>
+          <strong>Meaning:</strong> Each additional pirated movie is associated with buying {Math.abs(r.beta).toFixed(2)} fewer legal movies.
+        </Note>
+      </StepCard>
+
+      {/* STEP 3b */}
+      <StepCard step="3b" title="Get the intercept (a)">
+        <Formula>
+          a = Ȳ − β × X̄ = {r.yBar.toFixed(1)} − ({r.beta.toFixed(4)}) × {r.xBar.toFixed(1)} = <strong>{r.alpha.toFixed(4)}</strong>
+        </Formula>
+        <div style={{
+          marginTop: 6, padding: 10, background: "#eff6ff", borderRadius: 8,
+          fontSize: 14, color: "#1e293b", textAlign: "center", fontFamily: "Georgia, serif"
+        }}>
+          The line: <strong>Y = {r.alpha.toFixed(2)} + ({r.beta.toFixed(2)}) × X</strong>
+        </div>
+        <Note>Someone who pirates 0 movies is predicted to buy {r.alpha.toFixed(1)} movies.</Note>
+      </StepCard>
+
+      {/* STEP 4 */}
+      <StepCard step={4} title="Calculate the residuals (prediction errors)" color="#ef4444">
+        <Note>For each person, how far is the actual Y from the predicted Ŷ? These are the red dashes in the scatter plot.</Note>
+        <ResidualTable rows={r.withResiduals} />
+      </StepCard>
+
+      {/* STEP 5 */}
+      <StepCard step={5} title="Calculate the Standard Error of β" color="#059669">
+        <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.8 }}>
+          <div style={{ marginBottom: 6 }}>First, estimate the variance of the errors:</div>
+          <Formula>
+            s² = SSR / (n − 2) = {r.ssr.toFixed(2)} / {r.n - 2} = <strong>{r.s2.toFixed(4)}</strong>
+          </Formula>
+          <div style={{ marginBottom: 6 }}>Then divide by the variation in X and take the square root:</div>
+          <Formula>
+            SE(β) = √( s² / Σ(X−X̄)² ) = √( {r.s2.toFixed(4)} / {r.sumDx2.toFixed(2)} ) = <strong style={{ fontSize: 22, color: "#059669" }}>{r.se.toFixed(4)}</strong>
+          </Formula>
+        </div>
+        <div style={{
+          marginTop: 8, padding: 10, background: "#ecfdf5", borderRadius: 8,
+          fontSize: 12, color: "#334155", lineHeight: 1.6
+        }}>
+          <strong>SE gets smaller when:</strong><br/>
+          • Residuals are small (data hugs the line tightly → s² is small)<br/>
+          • X has lots of variation (Σ(X−X̄)² is big → dividing by a bigger number)<br/>
+          • More data points (n is bigger → more evidence → more confidence)
+        </div>
+      </StepCard>
+
+      {/* STEP 6 */}
+      <StepCard step={6} title="Calculate t-statistic and p-value" color="#ef4444">
+        <Formula>
+          t = β / SE = {r.beta.toFixed(4)} / {r.se.toFixed(4)} = <strong style={{ color: "#ef4444", fontSize: 22 }}>{r.tStat.toFixed(2)}</strong>
+        </Formula>
+        <Note style={{ textAlign: "center", marginBottom: 8 }}>
+          The coefficient is <strong>{Math.abs(r.tStat).toFixed(1)} standard errors</strong> away from zero
+        </Note>
+        <Formula>
+          p-value = <strong style={{ color: "#ef4444", fontSize: 22 }}>{r.pValue.toFixed(4)}</strong>
+        </Formula>
+        <div style={{
+          marginTop: 12, padding: 14, borderRadius: 10, textAlign: "center",
+          background: r.pValue < 0.05 ? "#ecfdf5" : "#fef2f2",
+          border: `2px solid ${r.pValue < 0.05 ? "#10b981" : "#f87171"}`
+        }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: r.pValue < 0.05 ? "#059669" : "#dc2626" }}>
+            β = {r.beta.toFixed(2)}{stars}
+          </div>
+          <div style={{ fontSize: 14, color: "#475569", marginTop: 4 }}>
+            {r.pValue < 0.05
+              ? "Statistically significant — unlikely to be just noise"
+              : "Not statistically significant"}
+          </div>
+        </div>
+      </StepCard>
+
+      {/* CHAIN SUMMARY */}
+      <div style={{
+        padding: 18, background: "#eef2ff", borderRadius: 12,
+        border: "1px solid #c7d2fe", fontSize: 14, color: "#334155", lineHeight: 1.7
+      }}>
+        <strong>The whole chain:</strong><br />
+        <div style={{
+          display: "flex", flexWrap: "wrap", gap: "4px 2px", alignItems: "center",
+          marginTop: 8, fontSize: 13
+        }}>
+          <span style={{ background: "#e2e8f0", padding: "3px 8px", borderRadius: 6 }}>Raw data</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#e2e8f0", padding: "3px 8px", borderRadius: 6 }}>Averages</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#ede9fe", padding: "3px 8px", borderRadius: 6 }}>Deviations</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#d1fae5", padding: "3px 8px", borderRadius: 6, fontWeight: 700 }}>β</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#fee2e2", padding: "3px 8px", borderRadius: 6 }}>Residuals</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#d1fae5", padding: "3px 8px", borderRadius: 6, fontWeight: 700 }}>SE</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#fee2e2", padding: "3px 8px", borderRadius: 6, fontWeight: 700 }}>t = β/SE</span>
+          <span style={{ color: "#94a3b8" }}>→</span>
+          <span style={{ background: "#fef3c7", padding: "3px 8px", borderRadius: 6, fontWeight: 700 }}>p-value</span>
+        </div>
+      </div>
+
+      <div style={{
+        marginTop: 14, padding: 14, background: "#f1f5f9", borderRadius: 10,
+        fontSize: 13, color: "#64748b", lineHeight: 1.6, textAlign: "center"
+      }}>
+        Open the <strong>p-value-explainer.html</strong> file next to see how β and SE feed into the interactive distributions!
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>
