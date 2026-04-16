@@ -46,3 +46,25 @@ suits_data <- suits_data |>
 #| label: stats-table
 kable(suits_data, col.names = c("Season", "Viewership (Millions)", "Change"), caption = "Suits Viewership by Season")
 ```
+
+# Visualizations
+
+```{r}
+#| label: fig-viewership
+#| fig-cap: "Viewership over time"
+ggplot(suits_data, aes(x = Season, y = Viewers)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_point(color = "white", size = 2) +
+  theme_minimal() +
+  labs(y = "Viewers (Millions)") +
+  scale_x_continuous(breaks = 1:9)
+```
+
+```{r}
+#| label: fig-changes
+#| fig-cap: "Season-to-season changes in viewership"
+ggplot(suits_data[-1, ], aes(x = factor(Season), y = Change)) +
+  geom_col(fill = "indianred") +
+  theme_minimal() +
+  labs(x = "Season", y = "Change in Viewers (Millions)")
+```
