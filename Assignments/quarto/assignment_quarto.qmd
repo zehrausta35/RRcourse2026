@@ -1,5 +1,5 @@
 ---
-title: "Assignment_Quarto"
+title: "Assignment Quarto"
 format: html
 editor: visual
 execute:
@@ -10,7 +10,7 @@ execute:
 
 # Description
 
-The series follows the Dutton family, owners of the largest cattle ranch in Montana, the Yellowstone Dutton Ranch (located in *Darby*), commonly called *the Yellowstone*. The plot revolves around family drama at the ranch and the bordering *Broken Rock Indian Reservation*, *Yellowstone National Park*, and land developers.
+The series follows the Dutton family, owners of the largest cattle ranch in Montana, *the Yellowstone Dutton Ranch* (located in *Darby*), commonly called *the Yellowstone*. The plot revolves around family drama at the ranch and the bordering *Broken Rock Indian Reservation*, *Yellowstone National Park*, and land developers.
 
 ## Episodes summary
 
@@ -22,6 +22,7 @@ release_date <- c('20.06.2018', '19.06.2019', '21.06.2020', '07.11.2021', '07.13
 no_viewers <- c(5500000, 6500000, 7600000, 12700000, 12100000)
 df <- data.frame(seasons, episodes, release_date, no_viewers)
 knitr::kable(df, "html", caption = "Yellowstone - episodes")
+getwd()
 ```
 
 ## Season-to-season viewership
@@ -34,11 +35,14 @@ ggplot(df, aes(x = seasons, y = no_viewers)) +
   geom_col(fill = 'lightpink') + 
   labs(title = "Number of viewers per season",
        x = "Season",
-       y = "Number of viewers")
+       y = "Number of viewers") +
+   theme(
+    plot.title = element_text(hjust = 0.5)
+  )
 ```
 
-### The vievership was increasing with every season up to season 3 by approximately 1 million of viewers. 
+#### The vievership was increasing with every season up to season 3 by approximately 1 million of viewers.
 
-### In season 4 there was a maximum rising noticed, by 5 milions compared to seasons 3. 
+#### In season 4 there was a maximum rising noticed, by 5 milions compared to seasons 3.
 
-### In season 5 the viewership decreased by 600 thousands of viewers compared to season 4.
+#### In season 5 the viewership decreased by 600 thousands of viewers compared to season 4.
