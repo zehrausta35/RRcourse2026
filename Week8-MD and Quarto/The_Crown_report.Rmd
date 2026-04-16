@@ -1,5 +1,5 @@
 ---
-title: "The_Crown_report"
+title: "The Crown report"
 author: "Yuliya Martyniuk"
 date: "2026-04-16"
 output: html_document
@@ -11,7 +11,7 @@ library(ggplot2)
 library(knitr)
 ```
 
-# The Crown
+# The Crown ( TV series) 
 
 ## Description
 
@@ -21,45 +21,47 @@ library(knitr)
 knitr::include_graphics("crown_photo.jpg")
 ```
 
-## Some statistics 
+## Rating statistics
 
-```{r, echo=FALSE}
-#  IMDb ratings as the 'Ratings' metric
+```{r, echo=FALSE, warning=FALSE}
+# Rating data setup 
 crown_stats <- data.frame(
   Season = rep(1:6, each = 10),
   Episode = 1:60,
   Rating = c(
-    # Season 1
     8.2, 8.9, 8.1, 8.6, 8.5, 8.0, 8.7, 8.3, 9.0, 8.5,
-    # Season 2
     8.1, 8.1, 8.3, 8.5, 8.9, 9.1, 8.1, 9.1, 8.7, 8.3,
-    # Season 3
     7.9, 8.4, 9.3, 8.6, 8.0, 8.9, 8.6, 8.2, 8.4, 8.8,
-    # Season 4 
     8.1, 8.6, 8.9, 8.3, 8.5, 8.7, 8.2, 8.8, 9.1, 8.5,
-    # Season 5 
     7.5, 7.8, 8.0, 7.3, 7.6, 7.9, 7.2, 7.7, 7.4, 7.5,
-    # Season 6
     7.4, 7.6, 8.1, 8.5, 7.2, 7.5, 7.8, 8.3, 7.9, 8.4
   )
 )
 
-# Summary statistics
+# Calculate Summary statistics
 summary_stats <- data.frame(
-  Mean_Rating = mean(crown_stats$Rating),
-  Median_Rating = median(crown_stats$Rating),
-  Highest_Rating = max(crown_stats$Rating),
-  Lowest_Rating = min(crown_stats$Rating)
+  Metric = c("Mean Rating", "Median Rating", "Highest Rating", "Lowest Rating"),
+  Value = c(
+    mean(crown_stats$Rating),
+    median(crown_stats$Rating),
+    max(crown_stats$Rating),
+    min(crown_stats$Rating)
+  )
 )
 
-print(summary_stats)
+# Render as a structured table
+knitr::kable(summary_stats, 
+             digits = 2, 
+             caption = "Summary Statistics for The Crown Episode Ratings",
+             col.names = c("Statistic", "Score"))
 ```
 
-```{r, echo=FALSE}
+
+```{r, echo=FALSE, fig.align='center',warning=FALSE}
 library(ggplot2)
 
 ggplot(crown_stats, aes(x = Episode, y = Rating)) +
-  geom_line(color = "#B1954C", size = 1) + # Royal Gold color
+  geom_line(color = "#B1954C", size = 1) + 
   geom_point(aes(color = factor(Season))) +
   theme_minimal() +
   labs(title = "The Crown: Episode Ratings Over Time (Seasons 1-6)",
@@ -70,7 +72,12 @@ ggplot(crown_stats, aes(x = Episode, y = Rating)) +
   scale_x_continuous(breaks = seq(0, 60, by = 10))
 ```
 
-```{r, echo=FALSE}
+
+The first graph illustrates the viewer ratings for all **60 episodes** of The Crown. The series shows a strong and relatively stable performance across the first four seasons, with ratings frequently reaching or exceeding 9.0. The series reached its critical peak in Season 3, Episode 3 ("Aberfan") with a rating of 9.3.
+
+A noticeable shift occurs at Episode 41 (the start of Season 5), where the ratings enter a "lower tier" than previous years. Specifically, the average rating decreased by 0.92 points between Season 3 (avg 8.51) and Season 5 (avg 7.59). While Season 6 shows some recovery toward the series finale, the ratings remain lower than the early "Golden Era" of the show.
+
+```{r, echo=FALSE, fig.align='center', warning=FALSE}
 crown_stats$Change <- c(0, diff(crown_stats$Rating))
 
 ggplot(crown_stats, aes(x = Episode, y = Change, fill = Change > 0)) +
@@ -83,3 +90,11 @@ ggplot(crown_stats, aes(x = Episode, y = Change, fill = Change > 0)) +
        x = "Episode Number",
        y = "Change in Rating Points")
 ```
+
+
+The fluctuation bar chart tracks the "momentum" of the show by measuring the change in rating from one episode to the next. The graph reveals that The Crown is a highly volatile show, often following a "dip and recovery" pattern.
+
+- **Largest Increase**: The most significant positive jump occurred in Season 2, where the rating increased by 1.0 point between Episode 17 and Episode 18 ("Dear Mrs. Kennedy").
+
+- **Largest Decrease**: The sharpest decline in momentum happened in Season 6, where the rating decreased by 1.3 points between Episode 54 and Episode 55, marking the transition between the two volumes of the final season.
+
