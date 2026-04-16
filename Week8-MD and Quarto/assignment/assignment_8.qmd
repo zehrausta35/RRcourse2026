@@ -70,11 +70,27 @@ kable(summary_tbl, caption = "Basic information about Game of Thrones")
 # Season-Level Viewership Data
 
 ```{r}
-kable(
-  got,
-  digits = 2,
-  caption = "Average U.S. viewership by season (in millions)"
-)
+display_tbl <- got %>%
+  mutate(
+    `Season` = season,
+    `Episodes` = episodes,
+    `Average viewers (millions)` = round(avg_viewers_m, 2),
+    `Change from previous season` = ifelse(
+      is.na(change_m), "-", round(change_m, 2)
+    ),
+    `Percentage change` = ifelse(
+      is.na(pct_change), "-", paste0(round(pct_change, 2), "%")
+    )
+  ) %>%
+  select(
+    `Season`,
+    `Episodes`,
+    `Average viewers (millions)`,
+    `Change from previous season`,
+    `Percentage change`
+  )
+
+kable(display_tbl, caption = "Season-level viewership statistics")
 ```
 
 # Viewership Over Time
@@ -118,4 +134,4 @@ These patterns suggest that the series became increasingly popular over time, es
 
 # Conclusion
 
-This report analyzed the season-level viewership of *Game of Thrones*. Based on the available data, the show experienced substantial audience growth across its eight seasons. Both the line chart and the season-to-season change chart show that the series attracted a much larger average audience in the final seasons than at the beginning.
+This report analyzed the season-level viewership of *Game of Thrones*. Based on the available data, the show experienced substantial audience growth across its eight seasons. Average U.S. viewership increased from 2.52 million in season 1 to 11.99 million in season 8. Overall, the results suggest that the series attracted a much larger audience in its later seasons than at the beginning.
