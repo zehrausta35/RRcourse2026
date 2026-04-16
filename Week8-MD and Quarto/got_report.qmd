@@ -1,0 +1,109 @@
+---
+title: "Game of Thrones — Season 1 Viewership Report"
+format:
+  html:
+    toc: true
+    theme: cosmo
+    self-contained: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+df = pd.read_csv("../Data/season_1.csv", index_col=0)
+df["viewers"] = pd.to_numeric(df["viewers"])
+df["episode_label"] = df["no_season"].astype(str) + ". " + df["title"].str.strip('"')
+df["change"] = df["viewers"].diff()
+```
+
+## About the Show
+
+*Game of Thrones* is an American fantasy drama television series created by David Benioff and D. B. Weiss for HBO. Based on George R. R. Martin's *A Song of Ice and Fire* novels, the show premiered on **April 17, 2011** and ran for eight seasons, concluding on May 19, 2019 with 73 episodes total.
+
+Set across the fictional continents of Westeros and Essos, the series follows political power struggles over the Iron Throne, the exiled Targaryen heir plotting her return, and the Night's Watch defending against supernatural threats from the North. Critics praised its acting, complex characters, and production values. It received **59 Primetime Emmy Awards** — the most ever for a drama series.
+
+![](https://upload.wikimedia.org/wikipedia/en/d/d8/Game_of_Thrones_Season_1.jpg){width=320px fig-align="center"}
+
+---
+
+## Season 1 Statistics
+
+```{python}
+summary = df["viewers"].agg(["min", "max", "mean", "median"]).rename({
+    "min": "Minimum (M)",
+    "max": "Maximum (M)",
+    "mean": "Average (M)",
+    "median": "Median (M)"
+})
+
+summary_df = summary.reset_index()
+summary_df.columns = ["Metric", "Viewers (millions)"]
+summary_df["Viewers (millions)"] = summary_df["Viewers (millions)"].round(2)
+summary_df.style.hide(axis="index").set_table_styles([
+    {"selector": "th", "props": [("text-align", "left")]},
+    {"selector": "td", "props": [("text-align", "left")]}
+])
+```
+
+Season 1 aired **`{python} len(df)`** episodes between April and June 2011. Viewership ranged from a low of **`{python} df['viewers'].min()` million** (*`{python} df.loc[df['viewers'].idxmin(), 'title'].strip('"')`*) to a high of **`{python} df['viewers'].max()` million** (*`{python} df.loc[df['viewers'].idxmax(), 'title'].strip('"')`*).
+
+---
+
+## Viewership Over Time
+
+```{python}
+fig, ax = plt.subplots(figsize=(10, 4.5))
+
+ax.plot(df["no_season"], df["viewers"], marker="o", color="#c0392b", linewidth=2, markersize=7)
+ax.fill_between(df["no_season"], df["viewers"], alpha=0.08, color="#c0392b")
+
+ax.set_xticks(df["no_season"])
+ax.set_xticklabels([f"Ep {n}" for n in df["no_season"]], rotation=45, ha="right", fontsize=9)
+ax.set_ylabel("Viewers (millions)", fontsize=10)
+ax.set_title("Season 1 — Episode Viewership", fontsize=13, fontweight="bold", pad=12)
+ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.2f M"))
+ax.grid(axis="y", linestyle="--", alpha=0.4)
+ax.spines[["top", "right"]].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## Episode-to-Episode Change in Viewership
+
+```{python}
+fig, ax = plt.subplots(figsize=(10, 4))
+
+colors = ["#27ae60" if v >= 0 else "#e74c3c" for v in df["change"].fillna(0)]
+ax.bar(df["no_season"], df["change"].fillna(0), color=colors, edgecolor="white", linewidth=0.5)
+ax.axhline(0, color="black", linewidth=0.8)
+
+ax.set_xticks(df["no_season"])
+ax.set_xticklabels([f"Ep {n}" for n in df["no_season"]], rotation=45, ha="right", fontsize=9)
+ax.set_ylabel("Change in viewers (M)", fontsize=10)
+ax.set_title("Season 1 — Episode-to-Episode Change", fontsize=13, fontweight="bold", pad=12)
+ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.2f M"))
+ax.grid(axis="y", linestyle="--", alpha=0.4)
+ax.spines[["top", "right"]].set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## Observations
+
+Season 1 opened to **2.22 million viewers** and showed modest fluctuation through the middle episodes. Viewership dipped slightly to a season low of **2.20 M** in Episode 2 (*The Kingsroad*), then held relatively steady in the 2.40–2.58 M range through Episodes 3–7.
+
+A notable jump came with Episode 8 (*The Pointy End*), which rose by **`{python} round(df.loc[df['no_season']==8, 'change'].values[0], 2)` M** relative to the prior episode. The season finale, *Fire and Blood* (Episode 10), delivered the highest viewership of the season at **3.04 million** — an increase of **`{python} round(df.loc[df['no_season']==10, 'change'].values[0], 2)` M** over Episode 9 — suggesting strong audience retention and word-of-mouth growth as the show's dramatic first season concluded.
+
+Overall, Season 1 demonstrated steady audience growth from premiere to finale, laying the foundation for *Game of Thrones* to become one of HBO's most-watched series.

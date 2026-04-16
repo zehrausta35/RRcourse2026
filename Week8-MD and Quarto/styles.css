@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --gold: #d4af7a;
+  --dark-gold: #a08050;
+  --deep: #1a1209;
+  --panel: #22180a;
+  --red: #8b1a1a;
+  --cream: #f0e6c8;
+  --border: #3d2f1a;
+  --text: #c9b896;
+}
+
+/* ---- Base ---- */
+body {
+  background-color: var(--deep) !important;
+  color: var(--text) !important;
+  font-family: 'EB Garamond', Georgia, serif !important;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Cinzel', serif !important;
+  color: var(--gold) !important;
+  letter-spacing: 0.04em;
+}
+
+h2 {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+  margin-top: 2.5rem;
+}
+
+a { color: var(--gold); }
+a:hover { color: var(--cream); }
+
+strong { color: var(--cream); }
+em { color: var(--dark-gold); }
+
+hr {
+  border-color: var(--border) !important;
+  margin: 2rem 0;
+}
+
+/* ---- TOC ---- */
+#TOC {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 4px;
+  padding: 1rem 1.2rem !important;
+  font-family: 'Cinzel', serif;
+  font-size: 0.82rem;
+}
+
+#TOC a {
+  color: var(--dark-gold) !important;
+}
+
+#TOC a:hover {
+  color: var(--cream) !important;
+}
+
+/* ---- Hero Banner ---- */
+.hero-banner {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  background:
+    linear-gradient(to bottom, rgba(26,18,9,0.3) 0%, rgba(26,18,9,0.85) 80%, rgba(26,18,9,1) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(212,175,122,0.03) 40px,
+      rgba(212,175,122,0.03) 80px
+    ),
+    radial-gradient(ellipse at 50% 0%, #4a2a0a 0%, #1a1209 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border);
+  overflow: hidden;
+}
+
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(212,175,122,0.015) 2px,
+    rgba(212,175,122,0.015) 4px
+  );
+  pointer-events: none;
+}
+
+.hero-content {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  z-index: 1;
+}
+
+.sigil {
+  font-size: 2.5rem;
+  color: var(--gold);
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.hero-title {
+  font-family: 'Cinzel', serif !important;
+  font-weight: 900 !important;
+  font-size: clamp(2rem, 5vw, 3.5rem) !important;
+  color: var(--gold) !important;
+  letter-spacing: 0.18em !important;
+  text-shadow: 0 0 40px rgba(212,175,122,0.4), 0 2px 8px rgba(0,0,0,0.8);
+  margin: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.hero-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: var(--dark-gold);
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  margin: 0.4rem 0 1rem;
+}
+
+.hero-rule {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  margin: 0 auto;
+}
+
+/* ---- Intro section ---- */
+.section-intro {
+  background: var(--panel);
+  border-left: 3px solid var(--gold);
+  padding: 1.2rem 1.6rem;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+}
+
+/* ---- Stats Grid ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.2rem 1rem;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.stat-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.stat-card--highlight {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #2a1c0d, var(--panel));
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.stat-value {
+  font-family: 'Cinzel', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--dark-gold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+.stat-note {
+  font-size: 0.72rem;
+  color: #7a6040;
+  margin-top: 0.2rem;
+  font-style: italic;
+}
+
+/* ---- Episode Table ---- */
+.ep-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  margin: 1rem 0 !important;
+}
+
+.ep-table thead tr {
+  background: var(--border) !important;
+}
+
+.ep-table thead th {
+  color: var(--gold) !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 0.7rem 0.8rem !important;
+  text-align: left !important;
+  border-bottom: 2px solid var(--gold) !important;
+}
+
+.ep-table tbody tr {
+  border-bottom: 1px solid var(--border) !important;
+  transition: background 0.15s;
+}
+
+.ep-table tbody tr:hover {
+  background: var(--panel) !important;
+}
+
+.ep-table tbody td {
+  padding: 0.55rem 0.8rem !important;
+  color: var(--text) !important;
+}
+
+/* ---- Quarto table fallback ---- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'EB Garamond', serif;
+}
+
+thead th {
+  color: var(--gold) !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid var(--gold);
+  padding: 0.5rem 0.7rem;
+}
+
+tbody td {
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tbody tr:hover td {
+  background: var(--panel);
+}
+
+/* ---- Code blocks ---- */
+pre, code {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--gold) !important;
+  border-radius: 4px;
+}
+
+/* ---- Footer ---- */
+.footer-sigil {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: #5a4530;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+.footer-sigil span {
+  display: block;
+  font-size: 1.6rem;
+  margin-bottom: 0.4rem;
+  opacity: 0.4;
+}
+
+/* ---- Plots ---- */
+img {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: block;
+  margin: 0 auto;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dark-gold); }

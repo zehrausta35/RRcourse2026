@@ -1,0 +1,312 @@
+---
+title: "Game of Thrones — Season 1 Viewership Report"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    theme: cosmo
+    self-contained: true
+    css: styles.css
+    include-in-header:
+      text: |
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.ticker as ticker
+import matplotlib.patheffects as pe
+import numpy as np
+
+plt.rcParams.update({
+    "font.family": "serif",
+    "axes.facecolor": "#1a1209",
+    "figure.facecolor": "#1a1209",
+    "text.color": "#d4af7a",
+    "axes.labelcolor": "#d4af7a",
+    "xtick.color": "#a08050",
+    "ytick.color": "#a08050",
+    "axes.edgecolor": "#3d2f1a",
+    "grid.color": "#3d2f1a",
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.titlecolor": "#d4af7a",
+})
+
+df = pd.read_csv("../Data/season_1.csv", index_col=0)
+df["viewers"] = pd.to_numeric(df["viewers"])
+df["title_clean"] = df["title"].str.strip('"')
+df["short_title"] = df["title_clean"].apply(lambda x: x if len(x) <= 18 else x[:16] + "…")
+df["change"] = df["viewers"].diff()
+df["pct_change"] = df["viewers"].pct_change() * 100
+
+GOLD = "#d4af7a"
+DARK_GOLD = "#a08050"
+RED = "#8b1a1a"
+CREAM = "#f0e6c8"
+BG = "#1a1209"
+PANEL = "#22180a"
+```
+
+<div class="hero-banner">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="sigil">⚔</div>
+    <h1 class="hero-title">GAME OF THRONES</h1>
+    <p class="hero-sub">Season I · Viewership Analysis · 2011</p>
+    <div class="hero-rule"></div>
+  </div>
+</div>
+
+<div class="section-intro">
+*Game of Thrones* — created by David Benioff and D. B. Weiss for HBO — debuted on **April 17, 2011**, adapting George R. R. Martin's *A Song of Ice and Fire* novel series. The show would go on to become one of the most-watched series in HBO history, ultimately airing for **8 seasons** and **73 episodes**, collecting **59 Primetime Emmy Awards** along the way.
+
+This report examines the viewership trajectory of **Season 1** across its 10 episodes, tracing how audiences discovered and embraced the series from its premiere to its explosive finale.
+</div>
+
+---
+
+## Season at a Glance
+
+```{python}
+total = df["viewers"].sum()
+avg = df["viewers"].mean()
+peak = df["viewers"].max()
+peak_ep = df.loc[df["viewers"].idxmax(), "title_clean"]
+low = df["viewers"].min()
+low_ep = df.loc[df["viewers"].idxmin(), "title_clean"]
+growth = ((df["viewers"].iloc[-1] - df["viewers"].iloc[0]) / df["viewers"].iloc[0]) * 100
+```
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">👁</div>
+    <div class="stat-value">`{python} f"{avg:.2f}M"`</div>
+    <div class="stat-label">Average Viewers</div>
+  </div>
+  <div class="stat-card stat-card--highlight">
+    <div class="stat-icon">🔥</div>
+    <div class="stat-value">`{python} f"{peak:.2f}M"`</div>
+    <div class="stat-label">Season Peak</div>
+    <div class="stat-note">`{python} peak_ep`</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📈</div>
+    <div class="stat-value">`{python} f"+{growth:.1f}%"`</div>
+    <div class="stat-label">Premiere → Finale Growth</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📺</div>
+    <div class="stat-value">`{python} f"{total:.2f}M"`</div>
+    <div class="stat-label">Total Cumulative Viewers</div>
+  </div>
+</div>
+
+---
+
+## Viewership by Episode
+
+```{python}
+fig, ax = plt.subplots(figsize=(12, 5.5))
+
+x = df["no_season"].values
+y = df["viewers"].values
+
+# Area fill with gradient effect via multiple alphas
+for i in range(len(x) - 1):
+    ax.fill_between([x[i], x[i+1]], [y[i], y[i+1]], alpha=0.18, color=GOLD)
+
+ax.fill_between(x, y, alpha=0.06, color=GOLD)
+
+# Shadow line
+ax.plot(x, y, color="#5a3a1a", linewidth=5, zorder=2)
+
+# Main line
+ax.plot(x, y, color=GOLD, linewidth=2.5, zorder=3)
+
+# Highlight peak
+peak_idx = df["viewers"].idxmax()
+peak_x = df.loc[peak_idx, "no_season"]
+peak_y = df.loc[peak_idx, "viewers"]
+ax.scatter([peak_x], [peak_y], color="#c0392b", s=120, zorder=5, edgecolors=CREAM, linewidth=1.5)
+ax.annotate(f"PEAK\n{peak_y:.2f}M", xy=(peak_x, peak_y),
+            xytext=(peak_x - 1.1, peak_y + 0.04),
+            color=CREAM, fontsize=8.5, fontweight="bold",
+            arrowprops=dict(arrowstyle="->", color=GOLD, lw=1.2))
+
+# Regular dots
+non_peak = df[df["no_season"] != peak_x]
+ax.scatter(non_peak["no_season"], non_peak["viewers"], color=GOLD, s=60, zorder=4, edgecolors=BG, linewidth=1)
+
+# Episode labels
+for _, row in df.iterrows():
+    ax.text(row["no_season"], row["viewers"] - 0.055, row["short_title"],
+            ha="center", va="top", fontsize=7, color=DARK_GOLD, rotation=40)
+
+ax.set_xticks(x)
+ax.set_xticklabels([f"Ep {n}" for n in x], fontsize=9)
+ax.set_ylabel("Viewers (millions)", fontsize=10)
+ax.set_title("Episode Viewership — Season 1", fontsize=14, fontweight="bold", pad=16)
+ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.2f M"))
+ax.set_ylim(1.9, peak_y + 0.25)
+ax.grid(axis="y", linestyle=":", alpha=0.5)
+
+ax.spines["bottom"].set_color("#3d2f1a")
+ax.spines["left"].set_color("#3d2f1a")
+
+fig.patch.set_alpha(1)
+plt.tight_layout(pad=1.5)
+plt.savefig("viewership.png", dpi=150, bbox_inches="tight", facecolor=BG)
+plt.show()
+```
+
+The season opened with **`{python} f"{df['viewers'].iloc[0]:.2f}M"` million viewers** for the premiere *Winter Is Coming*, a strong debut for a new fantasy franchise. Viewership remained remarkably stable through Episodes 2–7, rarely deviating far from the 2.40–2.58M band — a sign of a loyal early audience forming around the show. The two-part surge in Episodes 8 and 10 marks the point at which *Game of Thrones* clearly crossed into broader cultural conversation.
+
+---
+
+## Episode-to-Episode Changes
+
+```{python}
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+
+# --- LEFT: Bar chart of absolute change ---
+ax = axes[0]
+changes = df["change"].fillna(0).values
+ep_nums = df["no_season"].values
+colors_bar = [GOLD if v >= 0 else RED for v in changes]
+
+bars = ax.bar(ep_nums, changes, color=colors_bar, width=0.65,
+              edgecolor=BG, linewidth=0.8, zorder=3)
+
+for bar, val in zip(bars, changes):
+    if val == 0:
+        continue
+    ypos = val + 0.005 if val >= 0 else val - 0.005
+    va = "bottom" if val >= 0 else "top"
+    ax.text(bar.get_x() + bar.get_width()/2, ypos,
+            f"{val:+.2f}", ha="center", va=va, fontsize=8, color=CREAM, fontweight="bold")
+
+ax.axhline(0, color=DARK_GOLD, linewidth=0.9, linestyle="--", alpha=0.7)
+ax.set_xticks(ep_nums)
+ax.set_xticklabels([f"Ep {n}" for n in ep_nums], fontsize=9)
+ax.set_ylabel("Change in viewers (M)", fontsize=10)
+ax.set_title("Absolute Change (M)", fontsize=12, fontweight="bold", pad=12)
+ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%+.2f M"))
+ax.grid(axis="y", linestyle=":", alpha=0.4)
+ax.spines["bottom"].set_color("#3d2f1a")
+ax.spines["left"].set_color("#3d2f1a")
+
+gain_patch = mpatches.Patch(color=GOLD, label="Gain")
+loss_patch = mpatches.Patch(color=RED, label="Drop")
+ax.legend(handles=[gain_patch, loss_patch], fontsize=8, facecolor=PANEL,
+          edgecolor=DARK_GOLD, labelcolor=CREAM, loc="upper left")
+
+# --- RIGHT: % change ---
+ax2 = axes[1]
+pct = df["pct_change"].fillna(0).values
+colors_pct = [GOLD if v >= 0 else RED for v in pct]
+
+bars2 = ax2.bar(ep_nums, pct, color=colors_pct, width=0.65,
+                edgecolor=BG, linewidth=0.8, zorder=3)
+
+for bar, val in zip(bars2, pct):
+    if val == 0:
+        continue
+    ypos = val + 0.3 if val >= 0 else val - 0.3
+    va = "bottom" if val >= 0 else "top"
+    ax2.text(bar.get_x() + bar.get_width()/2, ypos,
+             f"{val:+.1f}%", ha="center", va=va, fontsize=8, color=CREAM, fontweight="bold")
+
+ax2.axhline(0, color=DARK_GOLD, linewidth=0.9, linestyle="--", alpha=0.7)
+ax2.set_xticks(ep_nums)
+ax2.set_xticklabels([f"Ep {n}" for n in ep_nums], fontsize=9)
+ax2.set_ylabel("% Change", fontsize=10)
+ax2.set_title("Percentage Change (%)", fontsize=12, fontweight="bold", pad=12)
+ax2.yaxis.set_major_formatter(ticker.FormatStrFormatter("%+.1f%%"))
+ax2.grid(axis="y", linestyle=":", alpha=0.4)
+ax2.spines["bottom"].set_color("#3d2f1a")
+ax2.spines["left"].set_color("#3d2f1a")
+ax2.legend(handles=[gain_patch, loss_patch], fontsize=8, facecolor=PANEL,
+           edgecolor=DARK_GOLD, labelcolor=CREAM, loc="upper left")
+
+fig.suptitle("Episode-to-Episode Viewership Changes — Season 1",
+             fontsize=14, fontweight="bold", color=GOLD, y=1.01)
+fig.patch.set_alpha(1)
+plt.tight_layout(pad=2)
+plt.savefig("changes.png", dpi=150, bbox_inches="tight", facecolor=BG)
+plt.show()
+```
+
+---
+
+## Episode Breakdown Table
+
+```{python}
+from IPython.display import HTML
+
+table_df = df[["no_season", "title_clean", "premiere_date", "viewers", "change", "pct_change"]].copy()
+table_df.columns = ["Ep", "Title", "Premiere Date", "Viewers (M)", "Change (M)", "Change (%)"]
+table_df["Premiere Date"] = pd.to_datetime(table_df["Premiere Date"].str.extract(r'(\d{4}-\d{2}-\d{2})')[0]).dt.strftime("%b %d, %Y")
+table_df["Viewers (M)"] = table_df["Viewers (M)"].map("{:.2f}".format)
+
+def fmt_change(val):
+    if pd.isna(val):
+        return "—"
+    color = "#8bc34a" if val >= 0 else "#e57373"
+    sign = "+" if val >= 0 else ""
+    return f'<span style="color:{color};font-weight:bold">{sign}{val:.2f}</span>'
+
+def fmt_pct(val):
+    if pd.isna(val):
+        return "—"
+    color = "#8bc34a" if val >= 0 else "#e57373"
+    sign = "+" if val >= 0 else ""
+    return f'<span style="color:{color};font-weight:bold">{sign}{val:.1f}%</span>'
+
+table_df["Change (M)"] = table_df["Change (M)"].apply(fmt_change)
+table_df["Change (%)"] = table_df["Change (%)"].apply(fmt_pct)
+
+html = table_df.to_html(index=False, escape=False, classes="ep-table", border=0)
+HTML(html)
+```
+
+---
+
+## Narrative Analysis
+
+### The Slow Burn That Paid Off
+
+Season 1 of *Game of Thrones* followed a pattern typical of prestige drama: a strong but not explosive premiere, a stable middle run, and a finale that outperformed expectations.
+
+- **Episodes 1–2** (*Winter Is Coming*, *The Kingsroad*) — The premiere drew **2.22M** viewers, dipping slightly to **2.20M** in Episode 2 — a negligible early shake-out. These two episodes established the world without the benefit of existing fandom.
+
+- **Episodes 3–7** — Viewership stabilised in the **2.40–2.58M** range. This corridor represents HBO's loyal subscriber base locking in. The show demonstrated almost no attrition across five consecutive weeks — a strong signal of audience commitment.
+
+- **Episodes 8–9** — *The Pointy End* (Ep 8) jumped to **2.72M** (+**`{python} round(df.loc[df['no_season']==8, 'change'].values[0], 2)`M**, +`{python} round(df.loc[df['no_season']==8, 'pct_change'].values[0], 1)`%), driven by escalating plot stakes. *Baelor* (Ep 9) dipped slightly to 2.66M — notable given the episode's dramatic events.
+
+- **Episode 10 — *Fire and Blood*** — The season finale reached a peak of **3.04M** viewers, a `{python} round(df.loc[df['no_season']==10, 'pct_change'].values[0], 1)`% jump over Episode 9 and a **`{python} round(growth, 1)`% increase** over the premiere. This trajectory set the stage for the explosive growth that would define Seasons 2–4.
+
+### By the Numbers
+
+| Metric | Value |
+|---|---|
+| Premiere viewers | `{python} f"{df['viewers'].iloc[0]:.2f}M"` |
+| Finale viewers | `{python} f"{df['viewers'].iloc[-1]:.2f}M"` |
+| Season growth | `{python} f"+{growth:.1f}%"` |
+| Largest single-episode gain | `{python} f"+{df['change'].max():.2f}M"` (Ep `{python} int(df.loc[df['change'].idxmax(), 'no_season'])`) |
+| Largest single-episode drop | `{python} f"{df['change'].min():.2f}M"` (Ep `{python} int(df.loc[df['change'].idxmin(), 'no_season'])`) |
+| Episodes above average | `{python} int((df['viewers'] > df['viewers'].mean()).sum())` of 10 |
+
+---
+
+<div class="footer-sigil">
+  <span>⚔</span>
+  <p>Data sourced from Wikipedia · Report generated with Quarto & Python</p>
+</div>
