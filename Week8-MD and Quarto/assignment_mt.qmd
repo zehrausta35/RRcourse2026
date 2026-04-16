@@ -1,0 +1,22 @@
+---
+title: "Series_Assignment"
+author: "Marta Traczyk"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    number-sections: false
+    theme: darkly
+execute:
+  echo: false
+---
+
+# Game of Thrones  
+
+**Game of Thrones** is an American fantasy drama television series created by *David Benioff* and *D. B. Weiss* for **HBO**. It is the first adaptation of the *A Song of Ice and Fire* franchise, a series of high fantasy novels by *George R. R. Martin*, the first of which is *A Game of Thrones*. The show premiered on **HBO** in the United States on April 17, 2011, and concluded on May 19, 2019, with 73 episodes broadcast over eight seasons.
+
+```{r}
+knitr::include_graphics("Game_of_Thrones_title_card.jpg")
+```
+
