@@ -90,8 +90,7 @@ season_avgs %>%
     change = ifelse(is.na(change), "—", paste0(ifelse(change >= 0, "+", ""), change))
   ) %>%
   kable(
-    col.names = c("Season", "Episodes", "Avg. Viewers",
-                  "Peak", "Lowest", "Change vs. Prev."),
+    col.names = c("Season", "Episodes", "Avg. Viewers", "Peak", "Lowest", "Change vs. Prev."),
     align = "cccccc",
     caption = "US viewership by season (in millions of viewers)"
   )
@@ -191,7 +190,6 @@ season_avgs %>%
 # Pull specific numbers for inline use
 avg_s1    <- season_avgs$avg_viewers[1]
 avg_s8    <- season_avgs$avg_viewers[8]
-peak_s8   <- season_avgs$max_viewers[8]
 peak_ep   <- episodes %>% slice_max(viewers, n = 1)
 total_growth <- round(avg_s8 - avg_s1, 2)
 
