@@ -1,0 +1,27 @@
+---
+title: "Viewership Report: M jak miłość"
+author: "Cezary Kuźmowicz" 
+format: 
+  html:
+    theme: flatly
+    toc: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+```
+
+## 1. Show Description
+
+*M jak miłość* (L for Love) is a legendary Polish soap opera that premiered in November 2000 on TVP2. It follows the multi-generational Mostowiak family and their friends, dealing with love, tragedies, and everyday life in Poland. At its peak, it was an absolute television phenomenon, breaking viewership records and cementing itself as the most-watched TV show in Polish history.
+
+![*M jak miłość* Logo](m_jak_milosc.jpg)
