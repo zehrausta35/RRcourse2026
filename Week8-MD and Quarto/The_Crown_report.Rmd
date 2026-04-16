@@ -21,5 +21,65 @@ library(knitr)
 knitr::include_graphics("crown_photo.jpg")
 ```
 
+## Some statistics 
 
+```{r, echo=FALSE}
+#  IMDb ratings as the 'Ratings' metric
+crown_stats <- data.frame(
+  Season = rep(1:6, each = 10),
+  Episode = 1:60,
+  Rating = c(
+    # Season 1
+    8.2, 8.9, 8.1, 8.6, 8.5, 8.0, 8.7, 8.3, 9.0, 8.5,
+    # Season 2
+    8.1, 8.1, 8.3, 8.5, 8.9, 9.1, 8.1, 9.1, 8.7, 8.3,
+    # Season 3
+    7.9, 8.4, 9.3, 8.6, 8.0, 8.9, 8.6, 8.2, 8.4, 8.8,
+    # Season 4 
+    8.1, 8.6, 8.9, 8.3, 8.5, 8.7, 8.2, 8.8, 9.1, 8.5,
+    # Season 5 
+    7.5, 7.8, 8.0, 7.3, 7.6, 7.9, 7.2, 7.7, 7.4, 7.5,
+    # Season 6
+    7.4, 7.6, 8.1, 8.5, 7.2, 7.5, 7.8, 8.3, 7.9, 8.4
+  )
+)
 
+# Summary statistics
+summary_stats <- data.frame(
+  Mean_Rating = mean(crown_stats$Rating),
+  Median_Rating = median(crown_stats$Rating),
+  Highest_Rating = max(crown_stats$Rating),
+  Lowest_Rating = min(crown_stats$Rating)
+)
+
+print(summary_stats)
+```
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+ggplot(crown_stats, aes(x = Episode, y = Rating)) +
+  geom_line(color = "#B1954C", size = 1) + # Royal Gold color
+  geom_point(aes(color = factor(Season))) +
+  theme_minimal() +
+  labs(title = "The Crown: Episode Ratings Over Time (Seasons 1-6)",
+       subtitle = "Data source: IMDb / Wikipedia",
+       x = "Episode Number (Overall)",
+       y = "Viewer Rating",
+       color = "Season") +
+  scale_x_continuous(breaks = seq(0, 60, by = 10))
+```
+
+```{r, echo=FALSE}
+crown_stats$Change <- c(0, diff(crown_stats$Rating))
+
+ggplot(crown_stats, aes(x = Episode, y = Change, fill = Change > 0)) +
+  geom_col() +
+  scale_fill_manual(values = c("firebrick", "forestgreen"), 
+                    labels = c("Decrease", "Increase"),
+                    name = "Rating Change") +
+  theme_minimal() +
+  labs(title = "Episode-to-Episode Rating Fluctuation",
+       x = "Episode Number",
+       y = "Change in Rating Points")
+```
