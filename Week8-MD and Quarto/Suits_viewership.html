@@ -8,7 +8,7 @@
 
 <meta name="author" content="Mirzakalonboy Khamidov">
 
-<title>Suits – Viewership Report</title>
+<title>Game of thrones – Viewership Report</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -46,7 +80,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Suits – Viewership Report</h1>
+<h1 class="title">Game of thrones – Viewership Report</h1>
 </div>
 
 
@@ -69,24 +103,248 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="suits-tv-series-overview" class="level1">
-<h1><em>Suits</em> – TV Series Overview</h1>
-<p><em>Suits</em> is an American legal drama television series that follows a talented college dropout who begins working at a prestigious New York law firm. The show focuses on high‑stakes corporate cases, complex relationships inside the firm, and the tension created by the main character hiding the fact that he never attended law school.</p>
-<section id="suits-logo" class="level2">
-<h2 class="anchored" data-anchor-id="suits-logo">Suits Logo</h2>
-<p><img src="images/MV5BN2EwMGExNDgtNTA5Yi00OGRjLWJlYzEtZmI3MDg0NzQxNTIwXkEyXkFqcGdeQXNhcmFocmVi._V1_.jpg" class="img-fluid" width="300"></p>
+<section id="game-of-thrones-tv-series-overview" class="level1">
+<h1><em>Game of Thrones</em> – TV Series Overview</h1>
+<p><em>Game of Thrones</em> is a landmark HBO fantasy drama series based on George R. R. Martin’s epic novel saga <em>A Song of Ice and Fire</em>. Set across the continents of Westeros and Essos, the show follows brutal political conflicts, shifting alliances, and the struggle for dominance over the Iron Throne.</p>
+<p>The narrative centers on three major, interwoven story arcs:</p>
+<ul>
+<li><strong>The War for the Iron Throne</strong> — A complex web of political intrigue as the Great Houses (Stark, Lannister, Baratheon, Targaryen, and others) battle for control of the Seven Kingdoms.</li>
+<li><strong>The Rise of Daenerys Targaryen</strong> — Her journey from exile to becoming a powerful contender for the throne, supported by dragons and loyal followers.</li>
+<li><strong>The Threat Beyond the Wall</strong> — The Night King and the White Walkers pose an existential danger to all of humanity, forcing old enemies to unite.</li>
+</ul>
+<p>The series is known for its morally ambiguous characters, unexpected plot twists, and cinematic world‑building.</p>
+<section id="game-of-thrones-logo" class="level2">
+<h2 class="anchored" data-anchor-id="game-of-thrones-logo">Game of Thrones Logo</h2>
+<p><img src="images/F3WBE3KWFVCZTIMDR3CI2DAGXM.avif" class="img-fluid" width="300"></p>
 <hr>
 </section>
 <section id="viewership-data" class="level2">
 <h2 class="anchored" data-anchor-id="viewership-data">Viewership Data</h2>
-<p>library(readxl) library(dplyr) library(ggplot2)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>season1 <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/Users/khami/Desktop/University of Warsaw/4 semester/Reproducible research/RRcourse2026/Week8-MD and Quarto/Data/season_1.csv"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(season1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   X no_overall no_season                                   title
+1  1          1         1                      "Winter Is Coming"
+2  3          2         2                         "The Kingsroad"
+3  5          3         3                             "Lord Snow"
+4  7          4         4 "Cripples, Bastards, and Broken Things"
+5  9          5         5                 "The Wolf and the Lion"
+6 11          6         6                        "A Golden Crown"
+     directed_by
+1 Tim Van Patten
+2 Tim Van Patten
+3     Brian Kirk
+4     Brian Kirk
+5     Brian Kirk
+6 Daniel Minahan
+                                                                                         written_by
+1                                                                       David Benioff &amp; D. B. Weiss
+2                                                                       David Benioff &amp; D. B. Weiss
+3                                                                       David Benioff &amp; D. B. Weiss
+4                                                                                      Bryan Cogman
+5                                                                       David Benioff &amp; D. B. Weiss
+6 Story by : David Benioff &amp; D. B. WeissTeleplay by : Jane Espenson and David Benioff &amp; D. B. Weiss
+                premiere_date viewers
+1 April&nbsp;17,&nbsp;2011&nbsp;(2011-04-17)    2.22
+2 April&nbsp;24,&nbsp;2011&nbsp;(2011-04-24)    2.20
+3    May&nbsp;1,&nbsp;2011&nbsp;(2011-05-01)    2.44
+4    May&nbsp;8,&nbsp;2011&nbsp;(2011-05-08)    2.45
+5   May&nbsp;15,&nbsp;2011&nbsp;(2011-05-15)    2.58
+6   May&nbsp;22,&nbsp;2011&nbsp;(2011-05-22)    2.44
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description
+1 North of the Seven Kingdoms of Westeros, Night's Watch soldiers are attacked by supernatural White Walkers. One soldier escapes but is captured at Castle Winterfell. Eddard "Ned" Stark, Warden of the North, executes him for desertion. Later, six orphaned dire wolf pups are found and one given to each Stark sibling, including Ned's bastard son, Jon Snow. In King's Landing, the Seven Kingdoms capital, Jon Arryn, the Hand of the King, dies suddenly. King Robert Baratheon, Ned's old friend, travels to Winterfell to recruit Ned and propose a marriage between his heir Joffrey and Ned's daughter, Sansa. Lysa Arryn, Jon's widow, sends her sister (Ned's wife), Catelyn, a letter claiming the Lannisters, Queen Cersei's family, murdered Arryn. Catelyn believes the Lannisters are now plotting against King Robert. Ned's young son, Brandon, climbs a tall tower and witnesses Cersei and her twin brother, Jaime Lannister, inside having sex. To hide their incest, Jaime pushes Bran from the high window. Across the Narrow Sea in Essos, exiled Prince Viserys Targaryen forces his sister, Daenerys, to marry the Dothraki warlord, Drogo, in exchange for an army to conquer Westeros and reclaim the Iron Throne. Robert Baratheon became king after Jaime Lannister killed "Mad" King Aerys Targaryen, earning Jaime the nickname, "The King Slayer". The ancient Targaryens once commanded dragons, and Daenerys is given three fossilized dragon eggs as a wedding gift.
+2                                                                                                                                                                                 Ned, the new Hand of the King, travels to King's Landing accompanied by his daughters, Sansa and Arya. Catelyn remains at Winterfell to care for the still unconscious Bran. An assassin attacks Bran, but Catelyn fends him off and Bran's direwolf, Summer, kills him. Catelyn suspects the Lannisters were behind the attack. Ned's illegitimate son, Jon, heads north with his uncle, Benjen Stark, to join the Night's Watch, the protectors of the Wall, a massive ice structure that keeps the Wildling tribes and the mythical White Walkers from civilized Westeros. Before departing, Jon gave tomboy Arya a thin sword she names, "Needle". Queen Cersei's younger brother, Tyrion Lannister, a dwarf also known as "The Imp," accompanies Jon to the Wall. In King's Landing, Prince Joffrey threatens Arya's young commoner friend, later having him killed. Nymeria, Arya's direwolf, defends her, biting Joffrey. Cersei demands that Robert have the wolf killed, but Arya releases Nymeria to the wild. Sansa's direwolf, Lady, is killed instead. In Winterfell, Brandon awakens, remembering nothing about his fall. He will live, but his legs are permanently paralyzed. Meanwhile, Daenerys is befriended by Ser Jorah Mormont, a disgraced knight, while she focuses on learning how to please Drogo.
+3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       Ned attends the King's Small Council and learns Westeros has been poorly managed and deeply in debt. Catelyn travels to King's Landing to covertly warn her husband about the assassination attempt, but she is intercepted by her childhood friend, Councillor Petyr "Littlefinger" Baelish. Bran learns he will never walk again and remains unable to remember the events leading to his fall. Jon struggles to adapt to life on the Wall. The once elite Night's Watch now recruits many low-born and/or convicted criminals who are unimpressed by Jon's bloodline. Lord Commander Mormont asks Tyrion to plead with the King to send more recruits to the Night's Watch. Daenerys, now pregnant, stands up to her brother, Viserys, threatening him if he ever abuses her again.
+4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            While returning to King's Landing, Tyrion stops at Winterfell where he presents the Starks a saddle design that will allow the paraplegic Bran to ride a horse. Ned secretly investigates Jon Arryn's death. In the process, he discovers one of King Robert's illegitimate children, Gendry, an armorer. Robert and his guests attend a tournament honoring Ned, which Ned considers an extravagance. Jon takes measures to protect Samwell Tarly, an awkward and friendless Night's Watch recruit from the other Watchmen's abuse. A frustrated Viserys clashes with his newly-empowered sister. Sansa dreams of one day becoming queen, while Arya envisions a far different future. At a roadside tavern, Catelyn, who is Lord Hoster Tully's daughter, unexpectedly encounters Tyrion Lannister. She rallies her father's Riverrun allies to arrest Tyrion for conspiring to murder her son.
+5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  King Robert's eunuch spy, Varys, has uncovered that Daenerys Targaryen is pregnant. Ned rejects Robert's plan to assassinate her, considering Daenerys a non-threat. He resigns in protest as Robert's Hand, angering the king. Catelyn and her prisoner, Tyrion, arrive at her sister Lysa Arryn's fortress home in the Eyrie. News of Tyrion's capture reaches King's Landing where Jaime Lannister, the Queen's twin brother, demands answers from Ned. A vengeful Jaime orders Ned's men killed and fights Ned until Jaime's man stabs Ned in the leg from behind, leaving him wounded.
+6                                                                                                                                                                                                                                                                                                                       King Robert reappoints Ned as Hand and tasks him with running affairs until Robert returns from hunting. Villagers from Riverrun arrive with news of atrocities committed by raiders, who Ned deduces were led by Ser Gregor Clegane, a Lannister retainer. Ned sentences Ser Gregor to death and summons Tywin Lannister to a trial. Ned decides to send Sansa (now reconciled with Joffrey) and Arya back to Winterfell. Ned has discovered that Joffrey and his two siblings are not Robert's biological children, and were fathered by Jaime Lannister. Bran, while testing his new saddle, is attacked by rogue Wildings. Robb, Ned's oldest son, and Theon, Ned's captive ward, whose father, King Balon, was a fallen rebel, rescue him, and the woman Wilding, Osha, is enslaved. In the Vale, Tyrion demands a trial by combat. Lysa chooses Ser Vardis as her champion. The sellsword Bronn volunteers as Tyrion's champion. He defeats Vardis and obtains Tyrion's release. Meanwhile, Viserys grows impatient and angry waiting for Drogo to fulfill his promise, and he threatens to kill Daenerys' unborn child. Drogo kills Viserys by pouring molten gold on his head.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(season1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       X          no_overall      no_season        title          
+ Min.   : 1.0   Min.   : 1.00   Min.   : 1.00   Length:10         
+ 1st Qu.: 5.5   1st Qu.: 3.25   1st Qu.: 3.25   Class :character  
+ Median :10.0   Median : 5.50   Median : 5.50   Mode  :character  
+ Mean   :10.0   Mean   : 5.50   Mean   : 5.50                     
+ 3rd Qu.:14.5   3rd Qu.: 7.75   3rd Qu.: 7.75                     
+ Max.   :19.0   Max.   :10.00   Max.   :10.00                     
+ directed_by         written_by        premiere_date         viewers     
+ Length:10          Length:10          Length:10          Min.   :2.200  
+ Class :character   Class :character   Class :character   1st Qu.:2.410  
+ Mode  :character   Mode  :character   Mode  :character   Median :2.445  
+                                                          Mean   :2.515  
+                                                          3rd Qu.:2.640  
+                                                          Max.   :3.040  
+ description       
+ Length:10         
+ Class :character  
+ Mode  :character  
+                   
+                   
+                   </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(season1, <span class="fu">aes</span>(<span class="at">x =</span> no_season, <span class="at">y =</span> viewers)) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">linewidth =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Season 1 Viewership Over Episodes"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Episode Number"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Viewers (millions)"</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Suits_viewership_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>season1_change <span class="ot">&lt;-</span> season1 <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(no_season) <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">change =</span> viewers <span class="sc">-</span> <span class="fu">lag</span>(viewers))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>season1_change</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    X no_overall no_season                                   title
+1   1          1         1                      "Winter Is Coming"
+2   3          2         2                         "The Kingsroad"
+3   5          3         3                             "Lord Snow"
+4   7          4         4 "Cripples, Bastards, and Broken Things"
+5   9          5         5                 "The Wolf and the Lion"
+6  11          6         6                        "A Golden Crown"
+7  13          7         7                    "You Win or You Die"
+8  15          8         8                        "The Pointy End"
+9  17          9         9                                "Baelor"
+10 19         10        10                        "Fire and Blood"
+      directed_by
+1  Tim Van Patten
+2  Tim Van Patten
+3      Brian Kirk
+4      Brian Kirk
+5      Brian Kirk
+6  Daniel Minahan
+7  Daniel Minahan
+8  Daniel Minahan
+9     Alan Taylor
+10    Alan Taylor
+                                                                                          written_by
+1                                                                        David Benioff &amp; D. B. Weiss
+2                                                                        David Benioff &amp; D. B. Weiss
+3                                                                        David Benioff &amp; D. B. Weiss
+4                                                                                       Bryan Cogman
+5                                                                        David Benioff &amp; D. B. Weiss
+6  Story by : David Benioff &amp; D. B. WeissTeleplay by : Jane Espenson and David Benioff &amp; D. B. Weiss
+7                                                                        David Benioff &amp; D. B. Weiss
+8                                                                                George R. R. Martin
+9                                                                        David Benioff &amp; D. B. Weiss
+10                                                                       David Benioff &amp; D. B. Weiss
+                 premiere_date viewers
+1  April&nbsp;17,&nbsp;2011&nbsp;(2011-04-17)    2.22
+2  April&nbsp;24,&nbsp;2011&nbsp;(2011-04-24)    2.20
+3     May&nbsp;1,&nbsp;2011&nbsp;(2011-05-01)    2.44
+4     May&nbsp;8,&nbsp;2011&nbsp;(2011-05-08)    2.45
+5    May&nbsp;15,&nbsp;2011&nbsp;(2011-05-15)    2.58
+6    May&nbsp;22,&nbsp;2011&nbsp;(2011-05-22)    2.44
+7    May&nbsp;29,&nbsp;2011&nbsp;(2011-05-29)    2.40
+8    June&nbsp;5,&nbsp;2011&nbsp;(2011-06-05)    2.72
+9   June&nbsp;12,&nbsp;2011&nbsp;(2011-06-12)    2.66
+10  June&nbsp;19,&nbsp;2011&nbsp;(2011-06-19)    3.04
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    description
+1  North of the Seven Kingdoms of Westeros, Night's Watch soldiers are attacked by supernatural White Walkers. One soldier escapes but is captured at Castle Winterfell. Eddard "Ned" Stark, Warden of the North, executes him for desertion. Later, six orphaned dire wolf pups are found and one given to each Stark sibling, including Ned's bastard son, Jon Snow. In King's Landing, the Seven Kingdoms capital, Jon Arryn, the Hand of the King, dies suddenly. King Robert Baratheon, Ned's old friend, travels to Winterfell to recruit Ned and propose a marriage between his heir Joffrey and Ned's daughter, Sansa. Lysa Arryn, Jon's widow, sends her sister (Ned's wife), Catelyn, a letter claiming the Lannisters, Queen Cersei's family, murdered Arryn. Catelyn believes the Lannisters are now plotting against King Robert. Ned's young son, Brandon, climbs a tall tower and witnesses Cersei and her twin brother, Jaime Lannister, inside having sex. To hide their incest, Jaime pushes Bran from the high window. Across the Narrow Sea in Essos, exiled Prince Viserys Targaryen forces his sister, Daenerys, to marry the Dothraki warlord, Drogo, in exchange for an army to conquer Westeros and reclaim the Iron Throne. Robert Baratheon became king after Jaime Lannister killed "Mad" King Aerys Targaryen, earning Jaime the nickname, "The King Slayer". The ancient Targaryens once commanded dragons, and Daenerys is given three fossilized dragon eggs as a wedding gift.
+2                                                                                                                                                                                  Ned, the new Hand of the King, travels to King's Landing accompanied by his daughters, Sansa and Arya. Catelyn remains at Winterfell to care for the still unconscious Bran. An assassin attacks Bran, but Catelyn fends him off and Bran's direwolf, Summer, kills him. Catelyn suspects the Lannisters were behind the attack. Ned's illegitimate son, Jon, heads north with his uncle, Benjen Stark, to join the Night's Watch, the protectors of the Wall, a massive ice structure that keeps the Wildling tribes and the mythical White Walkers from civilized Westeros. Before departing, Jon gave tomboy Arya a thin sword she names, "Needle". Queen Cersei's younger brother, Tyrion Lannister, a dwarf also known as "The Imp," accompanies Jon to the Wall. In King's Landing, Prince Joffrey threatens Arya's young commoner friend, later having him killed. Nymeria, Arya's direwolf, defends her, biting Joffrey. Cersei demands that Robert have the wolf killed, but Arya releases Nymeria to the wild. Sansa's direwolf, Lady, is killed instead. In Winterfell, Brandon awakens, remembering nothing about his fall. He will live, but his legs are permanently paralyzed. Meanwhile, Daenerys is befriended by Ser Jorah Mormont, a disgraced knight, while she focuses on learning how to please Drogo.
+3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Ned attends the King's Small Council and learns Westeros has been poorly managed and deeply in debt. Catelyn travels to King's Landing to covertly warn her husband about the assassination attempt, but she is intercepted by her childhood friend, Councillor Petyr "Littlefinger" Baelish. Bran learns he will never walk again and remains unable to remember the events leading to his fall. Jon struggles to adapt to life on the Wall. The once elite Night's Watch now recruits many low-born and/or convicted criminals who are unimpressed by Jon's bloodline. Lord Commander Mormont asks Tyrion to plead with the King to send more recruits to the Night's Watch. Daenerys, now pregnant, stands up to her brother, Viserys, threatening him if he ever abuses her again.
+4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             While returning to King's Landing, Tyrion stops at Winterfell where he presents the Starks a saddle design that will allow the paraplegic Bran to ride a horse. Ned secretly investigates Jon Arryn's death. In the process, he discovers one of King Robert's illegitimate children, Gendry, an armorer. Robert and his guests attend a tournament honoring Ned, which Ned considers an extravagance. Jon takes measures to protect Samwell Tarly, an awkward and friendless Night's Watch recruit from the other Watchmen's abuse. A frustrated Viserys clashes with his newly-empowered sister. Sansa dreams of one day becoming queen, while Arya envisions a far different future. At a roadside tavern, Catelyn, who is Lord Hoster Tully's daughter, unexpectedly encounters Tyrion Lannister. She rallies her father's Riverrun allies to arrest Tyrion for conspiring to murder her son.
+5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   King Robert's eunuch spy, Varys, has uncovered that Daenerys Targaryen is pregnant. Ned rejects Robert's plan to assassinate her, considering Daenerys a non-threat. He resigns in protest as Robert's Hand, angering the king. Catelyn and her prisoner, Tyrion, arrive at her sister Lysa Arryn's fortress home in the Eyrie. News of Tyrion's capture reaches King's Landing where Jaime Lannister, the Queen's twin brother, demands answers from Ned. A vengeful Jaime orders Ned's men killed and fights Ned until Jaime's man stabs Ned in the leg from behind, leaving him wounded.
+6                                                                                                                                                                                                                                                                                                                        King Robert reappoints Ned as Hand and tasks him with running affairs until Robert returns from hunting. Villagers from Riverrun arrive with news of atrocities committed by raiders, who Ned deduces were led by Ser Gregor Clegane, a Lannister retainer. Ned sentences Ser Gregor to death and summons Tywin Lannister to a trial. Ned decides to send Sansa (now reconciled with Joffrey) and Arya back to Winterfell. Ned has discovered that Joffrey and his two siblings are not Robert's biological children, and were fathered by Jaime Lannister. Bran, while testing his new saddle, is attacked by rogue Wildings. Robb, Ned's oldest son, and Theon, Ned's captive ward, whose father, King Balon, was a fallen rebel, rescue him, and the woman Wilding, Osha, is enslaved. In the Vale, Tyrion demands a trial by combat. Lysa chooses Ser Vardis as her champion. The sellsword Bronn volunteers as Tyrion's champion. He defeats Vardis and obtains Tyrion's release. Meanwhile, Viserys grows impatient and angry waiting for Drogo to fulfill his promise, and he threatens to kill Daenerys' unborn child. Drogo kills Viserys by pouring molten gold on his head.
+7                                                                                                                                                                                                                                                                               In King's Landing, Ned confronts Cersei, saying he knows Jaime fathered her children and will inform King Robert. Before he can, Robert is critically wounded while hunting boar. As Robert lies dying, he signs a proclamation naming Ned "Protector of the Realm," until Robert's heir can assume the throne. Ned amends the wording to say the king's rightful heir. Ned sends word to Stannis, Robert's brother, the legal heir to the throne. Ned asks Petyr Baelish to secure the City Watch's loyalty. After Robert's death, Ned confronts Cersei and Joffrey in the throne room, where Baelish and the City Watch betray Ned and attack his men. At the Wall, Benjen Stark disappears during a foray north of the Wall. Jon and Sam are assigned as stewards, with Jon as Lord Commander Jeor Mormont personal servant. Jon is disappointed he was not chosen as a ranger until Sam points out that Commander Mormont likely intends to groom him for command. The stewards swear their loyalties to the Night's Watch. In Essos, King Robert's hired assassin is exposed by Ser Jorah before he can poison Daenerys. Drogo vows to conquer the Seven Kingdoms for his unborn son and starts marching towards Westeros.
+8                                                                                                                                                                                                                                                                                                                                            Arya escapes the Red Keep after Syrio Forel, her Braavosian sword master, fends off guards sent to arrest her, while Sansa is captured. Robb hears the news and prepares the Northern armies to fight the Lannisters, leaving Bran behind to rule Winterfell. Lysa refuses to fight the Lannisters, and Catelyn leaves to join Robb's camp. Tyrion and Bronn are surrounded by Shagga, leader of the Stone Crows tribe. Tyrion convinces them to escort him to his father Tywin Lannister, who will pay them. At the camp, Tywin asks Shagga to help them confront the Starks in exchange for even greater payment. At the Wall, some bodies affected by the White Walkers are found. One awakens as a wight and attack Commander Mormont, but Jon kills it. In Essos, Drogo's soldiers begin attacking nearby settlements, enslaving locals in order to sell them to raise money to buy ships to cross the Narrow Sea. Drogo is wounded in a fight. Joffrey appoints his grandfather, Tywin, as Hand of the King. Sansa begs Joffrey to show Ned mercy. Joffrey agrees if Ned publicly recognizes Joffrey's claim to the throne and admits to committing treason.
+9                                                                                                                                                                                                                                                                                                                                          The Stark army arrives at the Twins castle; Catelyn persuades Lord Walder Frey to allow them to pass through his land and assist them in exchange for Robb and Arya marrying two of Frey's many unattractive offspring in the future. At the Wall, Jeor Mormont gives his family Valyrian steel sword to Jon in gratitude; Maester Aemon reveals to Jon that Aemon is a Targaryen. In Essos, Drogo's wound becomes septic and his death imminent. Daenerys asks a mystic slave woman to use blood magic to save him. The woman tells everyone to remain outside the tent until after the spell is cast. Daenerys goes into labor, and Jorah brings her into the tent seeking aid. Robb sacrifices 2,000 soldiers to fight the Lannister army as a diversion so he can move his army and capture Jaime. In a public hearing, Ned confesses to treason and publicly affirms Joffrey is the rightful heir. However, rather than sparing his life as negotiated, the vengeful and increasingly insane Joffrey has him decapitated, while Sansa, Cersei, and other counselors object futilely. Sansa is forced to watch her father die while Arya is nearby in the crowd.
+10                                                                                                                                                                                                                                                                                                               The North secedes from the Seven Kingdoms and proclaims Robb as king. With Jaime as the Starks' prisoner and Robert's two brothers, Stannis and Renly, each challenging Joffrey's claim to the throne, Tywin appoints Tyrion as acting King's Hand, while Tywin fights to defend Joffrey's reign. Jon attempts to desert the Night's Watch to avenge Ned and join Robb, but his Night's Watch brothers convince him to honor his oath. Jon joins an expedition to search for Benjen Stark beyond the Wall. Yoren, a Night's Watch recruiter, smuggles Arya out of King's Landing disguised as a boy, while Joffrey intends to crown Sansa his queen, despite executing her father. Daenerys's baby is born deformed and dead, and Drogo is left in a vegetative state by the witch's treacherous magic. Daenerys compassionately ends Drogo's life. She places the three dragon eggs on Drogo's funeral pyre and sets it afire, also burning the witch alive. Ignoring Jorah's pleas, she walks into the flames. When the embers die the following morning, Daenerys is found in the ashes, unharmed, flanked by three newly-hatched baby dragons. Jorah and other witnesses kneel before her.
+   change
+1      NA
+2   -0.02
+3    0.24
+4    0.01
+5    0.13
+6   -0.14
+7   -0.04
+8    0.32
+9   -0.06
+10   0.38</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(season1_change, <span class="fu">aes</span>(<span class="at">x =</span> no_season, <span class="at">y =</span> change)) <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"darkred"</span>) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Episode-to-Episode Change in Viewership"</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Episode Number"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Change (millions)"</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row containing missing values or values outside the scale range
+(`geom_col()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Suits_viewership_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>avg_viewers <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(season1<span class="sc">$</span>viewers), <span class="dv">2</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>max_increase <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">max</span>(season1_change<span class="sc">$</span>change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>max_drop <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">min</span>(season1_change<span class="sc">$</span>change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>overall_trend <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(season1_change<span class="sc">$</span>change, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">&lt;</span> <span class="dv">0</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"a slight decline"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"a slight increase"</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
+<section id="interpretation-of-viewership-changes" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation-of-viewership-changes">Interpretation of Viewership Changes</h2>
+<p>Across Season 1 of <em>Game of Thrones</em>, viewership varied noticeably from episode to episode.<br>
+The season opened with <strong>2.22 million</strong> viewers and ended with<br>
+<strong>3.04 million</strong>,<br>
+representing <strong>0.82 million</strong> overall change.</p>
+<p>The largest single‑episode increase was <strong>0.38 million</strong>,<br>
+and the largest drop was <strong>-0.14 million</strong>.</p>
+<p>On average, episodes attracted <strong>2.52 million</strong> viewers,<br>
+and the season shows <strong>a slight increase</strong> in audience engagement.</p>
+<p>These trends are clearly reflected in the episode‑to‑episode bar chart above.</p>
 </section>
-<section id="load-season-1-data-using-your-absolute-path" class="level1">
-<h1>Load Season 1 data using your absolute path</h1>
-<p>season1 &lt;- read_excel(“C:/Users/khami/Desktop/University of Warsaw/4 semester/Reproducible research/RRcourse2026/Data/season_1.xlsx”)</p>
-<p>head(season1)</p>
-<p>…</p>
 </section>
 
 </main>

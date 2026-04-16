@@ -1,16 +1,25 @@
 ---
-title: "Suits – Viewership Report"
+title: "Game of thrones – Viewership Report"
 author: "Mirzakalonboy Khamidov"
 format: html
 ---
 
-# *Suits* – TV Series Overview
+# *Game of Thrones* – TV Series Overview
 
-*Suits* is an American legal drama television series that follows a talented college dropout who begins working at a prestigious New York law firm. The show focuses on high‑stakes corporate cases, complex relationships inside the firm, and the tension created by the main character hiding the fact that he never attended law school.
+*Game of Thrones* is a landmark HBO fantasy drama series based on George R. R. Martin’s epic novel saga *A Song of Ice and Fire*. Set across the continents of Westeros and Essos, the show follows brutal political conflicts, shifting alliances, and the struggle for dominance over the Iron Throne.
 
-## Suits Logo
+The narrative centers on three major, interwoven story arcs:
 
-![](images/MV5BN2EwMGExNDgtNTA5Yi00OGRjLWJlYzEtZmI3MDg0NzQxNTIwXkEyXkFqcGdeQXNhcmFocmVi._V1_.jpg){width="300px"}
+- **The War for the Iron Throne** — A complex web of political intrigue as the Great Houses (Stark, Lannister, Baratheon, Targaryen, and others) battle for control of the Seven Kingdoms.
+- **The Rise of Daenerys Targaryen** — Her journey from exile to becoming a powerful contender for the throne, supported by dragons and loyal followers.
+- **The Threat Beyond the Wall** — The Night King and the White Walkers pose an existential danger to all of humanity, forcing old enemies to unite.
+
+The series is known for its morally ambiguous characters, unexpected plot twists, and cinematic world‑building.
+
+## Game of Thrones Logo
+
+![](images/F3WBE3KWFVCZTIMDR3CI2DAGXM.avif){width="300px"}
+
 
 ------------------------------------------------------------------------
 
@@ -20,14 +29,14 @@ format: html
 library(readxl)
 library(dplyr)
 library(ggplot2)
+
 ```
 
 ```{r}
-season1 \<- read_excel("C:/Users/khami/Desktop/University of Warsaw/4 semester/Reproducible research/RRcourse2026/Data/season_1.xlsx")
+season1 <- read.csv("C:/Users/khami/Desktop/University of Warsaw/4 semester/Reproducible research/RRcourse2026/Week8-MD and Quarto/Data/season_1.csv")
 
 head(season1)
 ```
-
 
 ```{r}
 summary(season1)
@@ -35,12 +44,12 @@ summary(season1)
 ```
 
 ```{r}
-ggplot(season1, aes(x = episode, y = viewers)) +
+ggplot(season1, aes(x = no_season, y = viewers)) +
   geom_line(color = "steelblue", linewidth = 1.2) +
   geom_point(size = 2) +
   labs(
-    title = "Suits Season 1 Viewership Over Episodes",
-    x = "Episode",
+    title = "Season 1 Viewership Over Episodes",
+    x = "Episode Number",
     y = "Viewers (millions)"
   ) +
   theme_minimal()
@@ -49,7 +58,7 @@ ggplot(season1, aes(x = episode, y = viewers)) +
 
 ```{r}
 season1_change <- season1 %>%
-  arrange(episode) %>%
+  arrange(no_season) %>%
   mutate(change = viewers - lag(viewers))
 
 season1_change
@@ -57,14 +66,47 @@ season1_change
 ```
 
 ```{r}
-ggplot(season1_change, aes(x = episode, y = change)) +
+ggplot(season1_change, aes(x = no_season, y = change)) +
   geom_col(fill = "darkred") +
   labs(
     title = "Episode-to-Episode Change in Viewership",
-    x = "Episode",
+    x = "Episode Number",
     y = "Change (millions)"
   ) +
   theme_minimal()
 
+
+
 ```
+
+
+```{r}
+avg_viewers <- round(mean(season1$viewers), 2)
+max_increase <- round(max(season1_change$change, na.rm = TRUE), 2)
+max_drop <- round(min(season1_change$change, na.rm = TRUE), 2)
+
+overall_trend <- ifelse(
+  mean(season1_change$change, na.rm = TRUE) < 0,
+  "a slight decline",
+  "a slight increase"
+)
+
+
+```
+
+## Interpretation of Viewership Changes
+
+Across Season 1 of *Game of Thrones*, viewership varied noticeably from episode to episode.  
+The season opened with **`r season1$viewers[1]` million** viewers and ended with  
+**`r season1$viewers[nrow(season1)]` million**,  
+representing **`r round(season1$viewers[nrow(season1)] - season1$viewers[1], 2)` million** overall change.
+
+The largest single‑episode increase was **`r max_increase` million**,  
+and the largest drop was **`r max_drop` million**.
+
+On average, episodes attracted **`r avg_viewers` million** viewers,  
+and the season shows **`r overall_trend`** in audience engagement.
+
+These trends are clearly reflected in the episode‑to‑episode bar chart above.
+
 
