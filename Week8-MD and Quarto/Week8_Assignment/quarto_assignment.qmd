@@ -1,0 +1,97 @@
+---
+title: "Assignment"
+author: "Weronika Mądro"
+format: html
+editor: visual
+---
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+# Pretty Little Liars
+
+*Pretty Little Liars* is an American teen drama mystery thriller television series created by I. Marlene King, which aired on Freeform from June 8, 2010, to June 27, 2017, based on the novel series of the same name written by Sara Shepard, lasting 160 episodes over seven seasons. Set in the fictional Rosewood, Pennsylvania, the plot follows five best friends whose secrets are consistently threatened by the anonymous "A", who begins harassing them after the disappearance of their clique leader.
+
+![From left to right, Troian Bellisario, Ashley Benson, Lucy Hale, Shay Mitchell, and Sasha Pieterse,the protagonists of *Pretty Little Liars.*](images/clipboard-940661517.png)
+
+### Broadcast
+
+```{r}
+#| echo: false
+# install.packages("gt")
+# install.packages("tibble")
+
+library(gt)
+library(tibble)
+
+dvd_tbl <- tibble(
+  Season = c("1", "2", "3", "4", "5", "6", "7", "All seasons"),
+  `Region 1` = c(
+    "June 7, 2011",
+    "June 5, 2012",
+    "June 4, 2013",
+    "June 3, 2014",
+    "June 2, 2015",
+    "April 19, 2016",
+    "July 25, 2017",
+    "July 25, 2017"
+  ),
+  `Region 2` = c(
+    "September 24, 2012",
+    "November 11, 2013",
+    "April 21, 2014",
+    "September 29, 2014",
+    "July 15, 2015",
+    "April 18, 2016",
+    "TBA",
+    "July 24, 2017"
+  ),
+  `Region 4` = c(
+    "November 2, 2011",
+    "October 3, 2012",
+    "June 19, 2013",
+    "July 9, 2014",
+    "July 8, 2015",
+    "April 20, 2016",
+    "July 26, 2017",
+    "July 26, 2017"
+  )
+)
+
+dvd_tbl |>
+  gt(rowname_col = "Season") |>
+  tab_header(
+    title = "DVD and Blu-ray release dates"
+  ) |>
+  cols_label(
+    `Region 1` = "Region 1",
+    `Region 2` = "Region 2",
+    `Region 4` = "Region 4"
+  ) |>
+  opt_row_striping() |>
+  tab_options(
+    table.width = pct(70),
+    heading.align = "center",
+    column_labels.font.weight = "bold",
+    table.border.top.color = "white",
+    table.border.bottom.color = "#d0d7de",
+    heading.border.bottom.color = "#444444",
+    row.striping.background_color = "#f2f2f2",
+    stub.font.weight = "normal",
+    table.font.size = px(18)
+  )
+```
