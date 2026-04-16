@@ -1,0 +1,118 @@
+---
+title: "Viewership Analysis of Game of Thrones"
+author: "Kuo Zhang"
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+file_paths <- list.files(
+  "data",
+  pattern = "^season_[0-9]+\\.csv$",
+  full.names = TRUE
+)
+
+stopifnot(length(file_paths) == 8)
+
+got_all <- lapply(file_paths, function(path) {
+  season_num <- as.integer(sub("season_([0-9]+)\\.csv", "\\1", basename(path)))
+  df <- read.csv(path, stringsAsFactors = FALSE)
+  df$season <- season_num
+  df
+}) |>
+  bind_rows() |>
+  mutate(
+    viewers = as.numeric(viewers),
+    no_season = as.integer(no_season)
+  ) |>
+  arrange(season, no_season)
+
+season_summary <- got_all |>
+  group_by(season) |>
+  summarise(
+    episodes = n(),
+    avg_viewers = round(mean(viewers, na.rm = TRUE), 2),
+    max_viewers = round(max(viewers, na.rm = TRUE), 2),
+    min_viewers = round(min(viewers, na.rm = TRUE), 2),
+    .groups = "drop"
+  ) |>
+  mutate(
+    change_avg_viewers = round(avg_viewers - lag(avg_viewers), 2)
+  )
+```
+
+# Introduction
+
+*Game of Thrones* is an American fantasy drama television series created by David Benioff and D. B. Weiss for HBO. It is based on *A Song of Ice and Fire* by George R. R. Martin. This report presents a simple analysis of the viewership of the show across eight seasons.
+
+# Show Image
+
+![Game of Thrones logo](images/got_logo.jpg){fig-align="center" width="60%"}
+
+# Basic Statistics
+
+```{r}
+knitr::kable(
+  season_summary,
+  caption = "Summary statistics by season."
+)
+```
+
+# Viewership Over Time
+
+```{r}
+ggplot(season_summary, aes(x = season, y = avg_viewers)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    title = "Average Viewership Across Seasons",
+    x = "Season",
+    y = "Average viewers (millions)"
+  ) +
+  theme_minimal()
+```
+
+# Season-to-Season Change in Viewership
+
+```{r}
+ggplot(season_summary[-1, ], aes(x = season, y = change_avg_viewers)) +
+  geom_col() +
+  geom_text(aes(label = change_avg_viewers), vjust = -0.3, size = 3) +
+  scale_x_continuous(breaks = 2:8) +
+  labs(
+    title = "Change in Average Viewership from Previous Season",
+    x = "Season",
+    y = "Change in average viewers (millions)"
+  ) +
+  theme_minimal()
+```
+
+# Short Interpretation
+
+Average viewership increased from Season 1 (`r season_summary$avg_viewers[season_summary$season == 1]` million) 
+to Season 8 (`r season_summary$avg_viewers[season_summary$season == 8]` million).  
+
+The highest average viewership was observed in Season 
+`r season_summary$season[which.max(season_summary$avg_viewers)]`, 
+with `r max(season_summary$avg_viewers)` million viewers.  
+
+The lowest average viewership was observed in Season 
+`r season_summary$season[which.min(season_summary$avg_viewers)]`, 
+with `r min(season_summary$avg_viewers)` million viewers.  
+
+The largest increase from the previous season occurred in Season 
+`r season_summary$season[which.max(season_summary$change_avg_viewers)]`, 
+when average viewership rose by 
+`r max(season_summary$change_avg_viewers, na.rm = TRUE)` million viewers.  
+
+Overall, the show became more popular over time, although growth between Season 4 and Season 5 was almost flat.
