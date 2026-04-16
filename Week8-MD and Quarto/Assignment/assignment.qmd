@@ -10,6 +10,7 @@ format:
     number-sections: false
     theme: flatly
 execute:
+  echo: false
   warning: false
   message: false
 ---
