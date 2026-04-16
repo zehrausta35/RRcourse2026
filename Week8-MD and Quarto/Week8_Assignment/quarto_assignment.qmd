@@ -1,13 +1,14 @@
 ---
 title: "Assignment"
 author: "Weronika Mądro 473193"
+date: "16/04/2026"
 format: html
 editor: visual
 ---
 
 # Pretty Little Liars
 
-*Pretty Little Liars* is an American teen drama mystery thriller television series created by I. Marlene King, which aired on Freeform from June 8, 2010, to June 27, 2017, based on the novel series of the same name written by Sara Shepard, lasting 160 episodes over seven seasons. Set in the fictional Rosewood, Pennsylvania, the plot follows five best friends whose secrets are consistently threatened by the anonymous "A", who begins harassing them after the disappearance of their clique leader.
+*Pretty Little Liars* is an American teen drama mystery thriller television series created by I. **Marlene King**, which aired on Freeform from June 8, 2010, to June 27, 2017, based on the novel series of the same name written by Sara Shepard, lasting 160 episodes over seven seasons. Set in the fictional Rosewood, Pennsylvania, the plot follows five best friends whose secrets are consistently threatened by the anonymous "A", who begins harassing them after the disappearance of their clique leader.
 
 ![From left to right, Troian Bellisario, Ashley Benson, Lucy Hale, Shay Mitchell, and Sasha Pieterse,the protagonists of *Pretty Little Liars.*](images/clipboard-940661517.png)
 
@@ -81,7 +82,7 @@ dvd_tbl |>
 
 *Pretty Little Liars* premiered on June 8, 2010, in the United States, becoming ABC Family's highest-rated series debut on record across the network's target demographics. It ranked number one in key 12–34 demos and teens, becoming the number-one scripted show in Women 18–34, and Women 18–49. The premiere was number two in the hour for total viewers, which generated 2.47 million unique viewers, and was ABC Family's best delivery in the time slot since the premiere of *The Secret Life of the American Teenager*.
 
-he second episode retained 100% of its premiere audience with 2.48 million viewers, despite the usual downward trend following a premiere of a show, and built on its premiere audience. It was the dominant number one of its time slot in Adults 18–49, and the number one show in female teens. Subsequent episodes fluctuated between 2.09 and 2.74 million viewers.The August 10, 2010, "Summer Finale" episode drew an impressive 3.07 million viewers.
+The second episode retained 100% of its premiere audience with 2.48 million viewers, despite the usual downward trend following a premiere of a show, and built on its premiere audience. It was the dominant number one of its time slot in Adults 18–49, and the number one show in female teens. Subsequent episodes fluctuated between 2.09 and 2.74 million viewers.The August 10, 2010, "Summer Finale" episode drew an impressive 3.07 million viewers.
 
 On June 28, 2010, ABC Family ordered 12 more episodes of the show, bringing its total first-season order to 22.\[97\] On January 10, 2011, ABC Family picked the show up for a second season that premiered on June 14, 2011. During the summer of 2011, *Pretty Little Liars* was basic cable's top scripted series in women aged 18–34 and viewers 12–34.The second half of season 2 aired on Mondays at 8/7c, beginning on January 2, 2012.
 
@@ -171,3 +172,5 @@ ggplot(viewership_change, aes(x = season, y = change)) +
   ) +
   theme_minimal(base_size = 14)
 ```
+
+The viewership shows a clear downward trend over time, with only minor fluctuations in the earlier seasons. After a small drop of about 0.19 million from season 1 to 2, the decline continues more gradually through seasons 3 and 4 (around 0.09 and 0.06 million, respectively). A more pronounced decrease occurs between seasons 4 and 5, where viewership drops by approximately 0.52 million, marking the largest single-season decline up to that point. The downward trend continues with a further decrease of about 0.29 million from season 5 to 6. The most significant drop happens between seasons 6 and 7, where viewership falls by roughly 0.61 million. Overall, the data indicates a steady loss of audience over time, with sharper declines in the later seasons compared to the relatively stable early period.
