@@ -1,0 +1,198 @@
+---
+title: 'Viewership Report: Suits'
+author: "Elvis Udabor"
+date: "2026-04-16"
+format:
+  html:
+    toc: true
+    theme: flatly
+execute:
+  echo: false
+---
+
+```{r}
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(purrr)
+library(lubridate)
+library(knitr)
+
+url <- "https://en.wikipedia.org/wiki/List_of_Suits_episodes"
+page <- read_html(url)
+
+tables <- page |>
+  html_elements("table.wikiepisodetable") |>
+  html_table()
+
+# build one combined episode dataset from all episode tables
+episodes <- map_dfr(seq_along(tables), function(i) {
+  tab <- tables[[i]] |>
+    clean_names()
+  
+  # keep only tables that contain a viewers column
+  if (!any(str_detect(names(tab), "viewers"))) {
+    return(NULL)
+  }
+  
+  tab$season <- i
+  tab
+})
+```
+
+
+
+## About the show
+
+Suits is an American television drama series created by Aaron Korsh. It premiered on USA Network in 2011 and follows Mike Ross, who begins working as a law associate for Harvey Specter despite never attending law school. The series ran for nine seasons and 134 episodes.
+
+## Data
+
+```{r}
+episodes_clean <- episodes |>
+  clean_names()
+
+# identify likely columns
+viewer_col <- names(episodes_clean)[str_detect(names(episodes_clean), "viewers")][1]
+date_col   <- names(episodes_clean)[str_detect(names(episodes_clean), "original_air_date|original_release_date")][1]
+season_ep_col <- names(episodes_clean)[str_detect(names(episodes_clean), "^no_in_season$|season_no|episode_no")][1]
+overall_ep_col <- names(episodes_clean)[str_detect(names(episodes_clean), "^no_overall$|overall")][1]
+
+# rename only the columns that actually exist
+if (!is.na(viewer_col)) {
+  episodes_clean <- episodes_clean |> rename(viewers_millions = all_of(viewer_col))
+}
+
+if (!is.na(date_col)) {
+  episodes_clean <- episodes_clean |> rename(release_date = all_of(date_col))
+}
+
+if (!is.na(season_ep_col)) {
+  episodes_clean <- episodes_clean |> rename(episode_in_season = all_of(season_ep_col))
+}
+
+if (!is.na(overall_ep_col)) {
+  episodes_clean <- episodes_clean |> rename(episode_overall = all_of(overall_ep_col))
+}
+
+# clean required columns
+episodes_clean <- episodes_clean |>
+  mutate(
+    viewers_millions = str_extract(as.character(viewers_millions), "\\d+\\.?\\d*") |> as.numeric(),
+    release_date_raw = str_remove_all(as.character(release_date), "\\[.*?\\]") |> str_squish(),
+    release_date = case_when(
+      str_detect(release_date_raw, "\\d{4}-\\d{2}-\\d{2}") ~
+        str_extract(release_date_raw, "\\d{4}-\\d{2}-\\d{2}") |> ymd(),
+      TRUE ~ parse_date_time(release_date_raw, orders = c("mdy", "dmy"))
+    )
+  )
+
+# clean optional episode-number columns only if present
+if ("episode_in_season" %in% names(episodes_clean)) {
+  episodes_clean <- episodes_clean |>
+    mutate(
+      episode_in_season = str_extract(as.character(episode_in_season), "\\d+") |> as.integer()
+    )
+}
+
+if ("episode_overall" %in% names(episodes_clean)) {
+  episodes_clean <- episodes_clean |>
+    mutate(
+      episode_overall = str_extract(as.character(episode_overall), "\\d+") |> as.integer()
+    )
+}
+
+episodes_clean <- episodes_clean |>
+  filter(!is.na(viewers_millions), !is.na(release_date)) |>
+  arrange(release_date)
+```
+
+## Summary statistics
+
+```{r}
+summary_stats <- episodes_clean |>
+  summarise(
+    episodes = n(),
+    first_episode_viewers = first(viewers_millions),
+    last_episode_viewers = last(viewers_millions),
+    average_viewers = mean(viewers_millions),
+    median_viewers = median(viewers_millions),
+    max_viewers = max(viewers_millions),
+    min_viewers = min(viewers_millions)
+  )
+
+kable(round(summary_stats, 2), caption = "Basic viewership summary for *Suits*")
+```
+
+```{r}
+season_stats <- episodes_clean |>
+  group_by(season) |>
+  summarise(
+    avg_viewers = mean(viewers_millions),
+    start_viewers = first(viewers_millions),
+    end_viewers = last(viewers_millions),
+    .groups = "drop"
+  )
+
+kable(round(season_stats, 2), caption = "Average viewership by season")
+```
+
+### Viewership over time
+
+```{r}
+ggplot(episodes_clean, aes(x = release_date, y = viewers_millions)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.6) +
+  labs(
+    title = "Viewership over time for *Suits*",
+    x = "Release date",
+    y = "U.S. viewers (millions)"
+  ) +
+  theme_minimal()
+```
+
+### Episode-to-episode changes
+
+```{r}
+episodes_change <- episodes_clean |>
+  arrange(release_date) |>
+  mutate(viewer_change = viewers_millions - lag(viewers_millions))
+
+ggplot(episodes_change, aes(x = release_date, y = viewer_change)) +
+  geom_hline(yintercept = 0, linewidth = 0.4) +
+  geom_col() +
+  labs(
+    title = "Episode-to-episode change in viewership",
+    x = "Release date",
+    y = "Change in viewers (millions)"
+  ) +
+  theme_minimal()
+```
+
+### Interpretation
+
+```{r}
+first_view <- summary_stats$first_episode_viewers
+last_view <- summary_stats$last_episode_viewers
+avg_view <- summary_stats$average_viewers
+max_view <- summary_stats$max_viewers
+min_view <- summary_stats$min_viewers
+
+season_1_avg <- season_stats |> filter(season == 1) |> pull(avg_viewers)
+season_5_avg <- season_stats |> filter(season == 5) |> pull(avg_viewers)
+season_9_avg <- season_stats |> filter(season == 9) |> pull(avg_viewers)
+
+drop_1_to_5 <- season_5_avg - season_1_avg
+drop_1_to_9 <- season_9_avg - season_1_avg
+```
+
+The pilot episode of Suits drew r round(first_view, 2) million viewers, while the final observed episode in the scraped data drew r round(last_view, 2) million. Average episode viewership across the series was r round(avg_view, 2) million viewers. The maximum observed audience was r round(max_view, 2) million, while the minimum was r round(min_view, 2) million.
+
+At the season level, average viewership fell from r round(season_1_avg, 2) million in season 1 to r round(season_5_avg, 2) million in season 5, a change of r round(drop_1_to_5, 2) million viewers. By season 9, the average had moved to r round(season_9_avg, 2) million, which is r round(drop_1_to_9, 2) million lower than season 1. Overall, the graphs suggest that the show started with stronger audiences and then generally trended downward over time, although there were still noticeable episode-level fluctuations.
+
+### Source
+
+The report uses the episode list and viewer counts reported on Wikipedia for Suits.

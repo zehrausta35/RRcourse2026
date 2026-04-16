@@ -8,7 +8,7 @@ format:
     toc-depth: 3
     toc-title: "Contents"
     number-sections: false
-    theme: darkly
+    theme: whitely
 execute:
   echo: fenced
 ---
@@ -16,8 +16,13 @@ execute:
 ```{r}
 #| label: setup
 #| include: false
+
+# Install if needed (but better to install manually beforehand)
+if (!require("rlang")) install.packages("rlang")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("chron")) install.packages("chron")
+
 library(chron)
-library(reticulate)
 library(ggplot2)
 ```
 
