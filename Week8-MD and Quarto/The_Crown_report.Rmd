@@ -1,0 +1,25 @@
+---
+title: "The_Crown_report"
+author: "Yuliya Martyniuk"
+date: "2026-04-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(knitr)
+```
+
+# The Crown
+
+## Description
+
+*The Crown* is a historical drama television series about the reign of Queen Elizabeth II, created and principally written by Peter Morgan and produced by Left Bank Pictures and Sony Pictures Television for Netflix. Morgan developed the series from his film The Queen (2006) and his stage play The Audience (2013), which also focused on Elizabeth.
+
+```{r, echo=FALSE, fig.align='center', out.width='30%'}
+knitr::include_graphics("crown_photo.jpg")
+```
+
+
+
