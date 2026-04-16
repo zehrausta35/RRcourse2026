@@ -1,0 +1,121 @@
+---
+title: "Game of Thrones: Viewership Report"
+author: "Meifang Wu 473459"
+date: today
+format:
+  html:
+    toc: true
+    number-sections: true
+    theme: cosmo
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(scales)
+
+got <- data.frame(
+  season = 1:8,
+  episodes = c(10, 10, 10, 10, 10, 10, 7, 6),
+  avg_viewers_m = c(2.52, 3.80, 4.97, 6.84, 6.88, 7.69, 10.26, 11.99)
+)
+
+got <- got %>%
+  mutate(
+    change_m = avg_viewers_m - lag(avg_viewers_m),
+    pct_change = 100 * change_m / lag(avg_viewers_m)
+  )
+
+summary_tbl <- data.frame(
+  Statistic = c(
+    "Network",
+    "Number of seasons",
+    "Number of episodes",
+    "First air date",
+    "Last air date"
+  ),
+  Value = c(
+    "HBO",
+    "8",
+    "73",
+    "2011-04-17",
+    "2019-05-19"
+  )
+)
+
+peak_season <- got %>% slice_max(avg_viewers_m, n = 1)
+largest_jump <- got %>% filter(!is.na(change_m)) %>% slice_max(change_m, n = 1)
+smallest_jump <- got %>% filter(!is.na(change_m)) %>% slice_min(change_m, n = 1)
+```
+
+# Introduction
+
+*Game of Thrones* is an American fantasy drama television series created for HBO. The show ran for eight seasons and became one of the most well-known television series of the 2010s. In this report, I examine how its average U.S. viewership changed across seasons.
+
+# Image
+
+![](images/Game_of_Thrones_title_card.jpg){fig-align="center" width="60%"}
+
+# Basic Statistics
+
+```{r}
+kable(summary_tbl, caption = "Basic information about Game of Thrones")
+```
+
+# Season-Level Viewership Data
+
+```{r}
+kable(
+  got,
+  digits = 2,
+  caption = "Average U.S. viewership by season (in millions)"
+)
+```
+
+# Viewership Over Time
+
+```{r}
+ggplot(got, aes(x = season, y = avg_viewers_m)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  scale_x_continuous(breaks = 1:8) +
+  labs(
+    title = "Average U.S. Viewership by Season",
+    x = "Season",
+    y = "Average viewers (millions)"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+# Season-to-Season Change
+
+```{r}
+ggplot(got %>% filter(!is.na(change_m)), aes(x = season, y = change_m)) +
+  geom_col() +
+  scale_x_continuous(breaks = 2:8) +
+  labs(
+    title = "Season-to-Season Change in Average Viewership",
+    x = "Season",
+    y = "Change in viewers (millions)"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+# Discussion
+
+The results show a clear upward trend in the average U.S. viewership of *Game of Thrones*. The average audience increased from `r got$avg_viewers_m[1]` million viewers in season 1 to `r got$avg_viewers_m[8]` million viewers in season 8.
+
+The highest average viewership was recorded in season `r peak_season$season`, with `r peak_season$avg_viewers_m` million viewers. The largest increase occurred between season `r largest_jump$season - 1` and season `r largest_jump$season`, when average viewership rose by `r round(largest_jump$change_m, 2)` million viewers.
+
+By contrast, the smallest increase happened between season `r smallest_jump$season - 1` and season `r smallest_jump$season`, when average viewership increased by only `r round(smallest_jump$change_m, 2)` million viewers. Overall, the show gained `r round(got$avg_viewers_m[8] - got$avg_viewers_m[1], 2)` million average viewers from the first season to the last season.
+
+These patterns suggest that the series became increasingly popular over time, especially in its later seasons. Although the growth was not equally strong every year, the general trend was clearly positive.
+
+# Conclusion
+
+This report analyzed the season-level viewership of *Game of Thrones*. Based on the available data, the show experienced substantial audience growth across its eight seasons. Both the line chart and the season-to-season change chart show that the series attracted a much larger average audience in the final seasons than at the beginning.
