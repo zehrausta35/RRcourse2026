@@ -107,3 +107,10 @@ ggplot(filter(m_jak_milosc_data, !is.na(Change_From_Previous)),
   ) +
   theme(legend.position = "top")
 ```
+
+
+---
+
+## 5. Analysis of Observed Changes
+
+The graphs clearly illustrate the life cycle of *M jak miłość*. After its initial premiere, the show experienced a massive surge in popularity. However, since its absolute peak of `r max_viewers` million viewers in Season `r peak_season`, the television landscape has drastically changed. The viewership decreased by a staggering `r total_drop_from_peak` million viewers between its peak and Season 24. Despite this steady decline—a trend visible across all linear television globally—it remains one of the most culturally significant shows in Poland.
