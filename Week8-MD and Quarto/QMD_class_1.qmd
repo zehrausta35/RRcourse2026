@@ -1,0 +1,556 @@
+---
+title: "Quarto — Class 1"
+author: "Wojciech Hardy"
+date: "04/09/2023"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    number-sections: false
+    theme: darkly
+execute:
+  echo: fenced
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(chron)
+library(reticulate)
+library(ggplot2)
+```
+
+---
+
+# Three key elements
+
+Every Quarto document is built from exactly three things. Understanding how they interact is the key to everything else in this lecture
+
+## The YAML header
+
+The YAML block sits at the very top of every `.qmd` file, enclosed in triple dashes (`---`). It stores document-level configuration: author information, output format, global execution options, styles, and more. Changes here affect the entire document.
+
+This document uses:
+
+```yaml
+---
+title: "Quarto"
+author: "Wojciech Hardy"
+date: "4/11/2023"
+format: html
+execute:
+  echo: fenced
+---
+```
+
+> **Note:** `execute: echo: fenced` is what makes code chunks display with their fence backticks visible in the output — useful for teaching. In a regular report you would typically set `echo: false` here.
+
+## Theme 
+
+Applies a Bootstrap CSS theme to the HTML output. flatly is a clean, modern light theme. Other built-in options include cosmo, lumen, journal, darkly (dark mode), slate (dark), and others. This one line completely changes the visual appearance of the rendered document without you writing any CSS.
+
+## Markdown
+
+The text layer of the document. Markdown is a lightweight markup language — plain text with simple syntax for formatting. It keeps your source clean and readable, and plays well with version control.
+
+## Code chunks
+
+Where the magic happens. Code whose output — numbers, tables, plots — becomes part of the document automatically. Every time you render, the output is freshly generated from the source.
+
+Let's start with Markdown!
+
+---
+
+# Switching from RMarkdown?
+
+If you've used RMarkdown before, Quarto will feel very familiar — it is essentially RMarkdown's successor. The syntax is mostly compatible, and most `.Rmd` files render in Quarto without changes. The main differences are in YAML structure and chunk option syntax (more on that later).
+
+[Might want to take a look at the official FAQ](https://quarto.org/docs/faq/rmarkdown.html)
+
+---
+
+> **💡 Tip:** In RStudio, try switching between **Source** and **Visual** mode (top-left of the editor). Visual mode gives you a WYSIWYG view — useful for tables and formatting. Also consider enabling **Render on Save** so the preview updates automatically as you type.
+
+---
+
+# Cheatsheets are handy as always
+
+You don't need to memorise Markdown syntax — keep a reference nearby. Note: the link syntax shown below is itself a Markdown example.
+
+`[A Markdown cheatsheet](https://www.markdownguide.org/cheat-sheet/)`
+
+`[A Quarto cheat sheet](https://res.cloudinary.com/dyd911kmh/image/upload/v1676540721/Marketing/Blog/Quarto_Cheat_Sheet.pdf)`
+
+[A Markdown cheatsheet](https://www.markdownguide.org/cheat-sheet/)
+
+[A Quarto cheat sheet](https://res.cloudinary.com/dyd911kmh/image/upload/v1676540721/Marketing/Blog/Quarto_Cheat_Sheet.pdf)
+
+---
+
+# Basic formatting
+
+The most common inline formatting uses asterisks or underscores. Either syntax works — just be consistent.
+
+Some basic text formatting includes `*Italics*` or `_Italics_` (*Italics*) and `**Bold**` or `__Bold__` (**Bold**) text. ***Bold***
+
+---
+
+**Line breaks in Markdown behave differently than you might expect.** The three examples below look similar in the source but render differently:
+
+Some text
+sdajiodf
+
+Some text  
+sdajiodf
+
+Some text
+
+sdajiodf
+
+> The first pair has no special treatment — they merge into one paragraph. The second pair has **two trailing spaces** after `Some text`, which forces a line break within the same paragraph. The third has a **blank line** between them, creating two separate paragraphs. This trips up almost everyone the first time.
+
+---
+
+Superscripts can be done like so: `R^2^` R^2^
+
+Subscripts can be done like so: `H~2~O` H~2~O
+
+---
+
+# Headers
+
+Headers are created with `#` symbols. The number of `#` symbols determines the level. They also automatically appear in the table of contents (when `toc: true` is set in the YAML).
+
+`# Header 1`
+
+# Header 1
+
+`## Header 2`
+
+## Header 2
+
+`### Header 3`
+
+### Header 3
+
+`#### Header 4`
+
+#### Header 4
+
+`##### Header 5`
+
+##### Header 5
+
+---
+
+# Lists
+
+## Ordered
+
+Markdown is forgiving with ordered list numbering — it corrects errors automatically. The source below intentionally uses `2.` twice, but the rendered output still numbers correctly.
+
+`1. Item 1`
+
+`2. Item 2`
+
+`2. Item 3 # Note the error in numbering`
+
+1.  Item 1
+
+2.  Item 2
+
+3.  Item 3 `# It's fine here though`
+
+## Unordered
+
+Use `*`, `-`, or `+` for unordered lists — they all work the same way.
+
+`* Item`
+
+`* Another item`
+
+-   Item
+
+-   Another item
+
+## Subitems
+
+Nesting is done with indentation (4 spaces or 1 tab). You can mix ordered and unordered levels freely.
+
+`1.  Item 1`
+
+`-   Item 2`
+
+`-   Item 3`
+
+1.  Item 1
+    -   Item 2
+    -   Item 3
+
+---
+
+# Tables
+
+Markdown tables are written with `|` pipe characters and `:` colons for column alignment. The colons in the separator row control alignment: `:-` left, `-:` right, `:-:` centre.
+
+| Day       | Hour  | Group |
+|:----------|:-----:|------:|
+| Wednesday | 9:45  |     1 |
+| Thursday  | 16:45 |     2 |
+| Thursday  | 18:30 |     3 |
+
+(this is a raw Markdown approach — later we'll see `knitr::kable()` for generating tables from data automatically)
+
+---
+
+# Quotes
+
+Blockquotes are created with `>`. Useful for callout text, definitions, or attribution.
+
+`> Hmmm`
+
+> Hmmm
+
+\- Geralt of Rivia
+
+---
+
+# Using HTML
+
+When rendering to HTML, you can embed raw HTML directly in your Markdown. This is an escape hatch for anything Markdown can't express natively — custom tables, styled elements, embedded media. Here's something copied and pasted directly from the YAML Wikipedia page source code:
+
+<table class="infobox"><caption class="infobox-title" style="padding-bottom:0.15em;">YAML</caption><tbody><tr><td colspan="2" class="infobox-image"><a href="/wiki/File:Official_YAML_Logo.svg" class="image"><img alt="Official YAML Logo.svg" src="//upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/64px-Official_YAML_Logo.svg.png" decoding="async" width="64" height="59" srcset="//upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/96px-Official_YAML_Logo.svg.png 1.5x, //upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/128px-Official_YAML_Logo.svg.png 2x" data-file-width="512" data-file-height="471"></a></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><a href="/wiki/Filename_extension" title="Filename extension">Filename extensions</a></th><td class="infobox-data" style="line-height:1.35em;"><code class="mw-highlight mw-highlight-lang-text mw-content-ltr" id="" style="" dir="ltr">.yaml</code>, <code class="mw-highlight mw-highlight-lang-text mw-content-ltr" id="" style="" dir="ltr">.yml</code></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><a href="/wiki/Media_type" title="Media type">Internet media&nbsp;type</a></th><td class="infobox-data" style="line-height:1.35em;"><i>Not registered</i></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;">Initial release</th><td class="infobox-data" style="line-height:1.35em;">11&nbsp;May 2001<span class="noprint">; 21 years ago</span><span style="display:none">&nbsp;(<span class="bday dtstart published updated">2001-05-11</span>)</span></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><a href="/wiki/Software_release_life_cycle" title="Software release life cycle">Latest release</a></th><td class="infobox-data" style="line-height:1.35em;"><div style="display: inline-block; line-height: 1.2em; padding: .1em 0;">1.2 (Revision 1.2.2)<br>1&nbsp;October 2021<span class="noprint">; 18 months ago</span><span style="display:none">&nbsp;(<span class="bday dtstart published updated">2021-10-01</span>)</span> </div></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;">Type of format</th><td class="infobox-data" style="line-height:1.35em;">Data interchange</td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><span class="nowrap"><a href="/wiki/Open_file_format" title="Open file format">Open format</a>?</span></th><td class="infobox-data" style="line-height:1.35em;">Yes</td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;">Website</th><td class="infobox-data" style="line-height:1.35em;"><span class="url"><a rel="nofollow" class="external text" href="https://yaml.org">yaml<wbr>.org</a></span></td></tr></tbody></table>
+
+---
+
+# Equations
+
+Quarto uses MathJax to render LaTeX-style equations. Inline equations use single `$`, and display (standalone) equations use double `$$`.
+
+You can insert equations with the same syntax as in LaTeX (MathJax). E.g. within a sentence `$ \sum (x + 1) $` $\sum (x + 1)$ or as standalone with double `$$` at start and finish:
+
+$$\int_{-\infty}^{\infty}1/(b-a) \, dx$$
+
+---
+
+# Using code chunks in Quarto
+
+This is the core feature of Quarto. Code chunks are fenced blocks that start with three backticks and a language name in `{}`. When you render, the code runs and the output is embedded directly in the document.
+
+Supported languages include R and Python (and others like Julia, Observable JS). Empty chunks are valid — useful as placeholders.
+
+```{r}
+
+```
+
+```{python}
+
+```
+
+A simple R example — the `cat()` output appears directly below the chunk:
+
+```{r}
+cat("This is a code chunk")
+```
+
+You can also run individual chunks within the RStudio editor (green play button, or `Ctrl+Shift+Enter`) without rendering the full document. This is useful during development.
+
+```{r}
+summary(cars)
+```
+
+```{r}
+plot(pressure)
+```
+
+---
+
+You can also [use Python in Quarto with Jupyter Notebook](https://quarto.org/docs/computations/python.html) or even use R and Python interchangeably in the same document via the `reticulate` package. A Python chunk creates an object, and an R chunk can access it using the `py$` prefix:
+
+```{python}
+#| eval: false
+import pandas
+flights = pandas.read_csv("../Data/flights.csv")
+flights = flights[flights['dest'] == "ORD"]
+flights = flights[['carrier', 'dep_delay', 'arr_delay']]
+flights = flights.dropna()
+```
+
+```{r}
+#| eval: false
+library(ggplot2)
+ggplot(py$flights, aes(carrier, arr_delay)) + geom_point() + geom_jitter()
+
+cat("Example from: https://rstudio.github.io/reticulate/articles/r_markdown.html")
+```
+
+> **Note:** The chunks above use `eval: false` because they depend on a local data file (`../Data/flights.csv`). The code is displayed for reference only.
+
+---
+
+For nicer tables from data frames, use `kable()` from the `knitr` package instead of printing raw output. Both calls below produce the same table — the `"html"` argument in the second version explicitly targets HTML output.
+
+```{r}
+knitr::kable(head(mtcars[, 1:4]), caption = "A kable table, ver 1")
+```
+
+```{r}
+knitr::kable(head(mtcars[, 1:4]), "html", caption = "A kable table, ver 2")
+```
+
+---
+
+# Code chunk customisation
+
+Chunk options are written as special comments at the top of a chunk, prefixed with `#|`. They give you fine-grained control over what appears in the output and how.
+
+([Partially taken from here](https://bookdown.org/yihui/rmarkdown-cookbook/hide-one.html))
+
+> **Old vs. new syntax:** You may encounter two styles of chunk options. The old RMarkdown style uses `=` and `TRUE/FALSE`. The new Quarto style uses `:` and `true/false`. Both work, but the new style is preferred going forward. This document mixes both intentionally so you recognise each.
+>
+> Old: `#| echo = FALSE`  
+> New: `#| echo: false`
+
+## Chunk naming (for reference and navigation)
+
+Giving chunks a label makes navigation easier (they appear in the document outline in RStudio) and is required for cross-referencing figures and tables. Labels must be unique across the document.
+
+```{r}
+#| label = "chunk_name"
+"You specify it as a label"
+```
+
+## Using variables as parameters
+
+You can use R variables as chunk option values — useful when you want consistent dimensions across many figures without hardcoding numbers everywhere.
+
+```{r}
+typical_width <- 4
+typical_height <- 4
+```
+
+```{r}
+#| fig.width = typical_width,
+#| fig.height = typical_height
+plot(cars)
+```
+
+## Using variables within the text
+
+Inline R expressions embed a computed value directly into prose. The syntax is a backtick-r-space-expression-backtick. The first line below shows the raw syntax; the second shows the rendered result.
+
+We have previously set a typical width to 'r typical_width' and the typical height to 'r typical_height'.
+
+We have previously set a typical width to `r typical_width` and the typical height to `r typical_height`.
+
+> **Why this matters:** If your data changes, every inline number in your text updates automatically on the next render. No more manually editing "the average was 4.2" after rerunning an analysis.
+
+## Other figure options
+
+Beyond dimensions, you can add captions, alt text for accessibility, and cross-reference labels. Note that figure labels **must start with `fig-`** for the `@fig-` cross-reference syntax to work.
+
+```{r}
+#| label: fig-cars
+#| fig-cap: "City and highway mileage for 38 popular models of cars."
+#| fig-alt: "Scatterplot of city vs. highway mileage for cars, where points are colored by the number of cylinders. The plot displays a positive, linear, and strong relationship between city and highway mileage, and mileage increases as the number of cylinders decreases."
+#| fig-width: 6
+#| fig-height: 3.5
+
+ggplot(mpg, aes(x=hwy, y=cty, color=cyl)) +
+  geom_point(alpha = 0.5, size = 2) +
+  scale_color_viridis_c() + 
+  theme_minimal()
+```
+
+And you can refer to @fig-cars (`@fig-cars`) in-text!
+
+You can also control the layout — here two plots are placed side by side using `layout-ncol: 2`. The `column: page` option lets the figure span beyond the text column width.
+
+```{r}
+#| label: fig-mpg
+#| fig-cap: "City and highway mileage for 38 popular models of cars."
+#| fig-subcap:
+#|   - "Color by number of cylinders"
+#|   - "Color by engine displacement, in liters"
+#| layout-ncol: 2
+#| column: page
+
+ggplot(mpg, aes(x = hwy, y = cty, color = cyl)) +
+  geom_point(alpha = 0.5, size = 2) +
+  scale_color_viridis_c() +
+  theme_minimal()
+
+ggplot(mpg, aes(x = hwy, y = cty, color = displ)) +
+  geom_point(alpha = 0.5, size = 2) +
+  scale_color_viridis_c(option = "E") +
+  theme_minimal()
+```
+
+## Conditional execution with `eval`
+
+The `eval` option accepts any R expression that returns `TRUE` or `FALSE` — not just a literal value. This means you can make chunk execution conditional on runtime state, such as what day it is.
+
+(`is.weekend` comes from the `chron` package)
+
+```{r}
+#| eval = is.weekend(Sys.Date())
+cat("It's the weekend! :)")
+```
+
+```{r}
+#| eval = !is.weekend(Sys.Date())
+cat("It's not the weekend! :(")
+```
+
+## Handling errors
+
+By default, Quarto stops rendering when it hits an error in a chunk. Setting `error: true` tells Quarto to display the error message in the output and continue rendering the rest of the document. Useful when you *want* to show that something fails.
+
+```{r}
+#| error = TRUE
+543 + "clearly a text and not a number"
+```
+
+By default Quarto stops after encountering an error. We can tell it to continue.
+
+## Caching results that take long to compute
+
+Caching saves the output of a chunk to disk so it doesn't re-run on every render. The chunk only re-executes if its contents change.
+
+```{r}
+x <- 15
+```
+
+```{r}
+#| label = "slow_chunk",
+#| cache = TRUE
+Sys.sleep(10)
+a <- 5 + x
+a
+```
+
+The chunk gets reevaluated if anything changes within the chunk. **Make sure you know what you're doing when caching**.
+
+By default, cache invalidation only detects changes *inside the chunk* — not in external files or other chunks it depends on. We can use `cache.extra =` to specify additional conditions for cache invalidation (i.e. to repeat the calculations), e.g.:
+
+-   `file.mtime('filename')` — modification time of the file changed
+-   `tools::md5sum('filename')` — content of the file changed
+-   `getRversion()` — R version changed
+
+Other caching options:
+
+-   `cache-comments` — if you don't want to recalculate after changing a comment
+-   `cache-lazy` — loading with `lazyload()` instead of `load()` (see [Lazy loading](https://en.wikipedia.org/wiki/Lazy_loading))
+-   `cache-vars` — cache only specified objects
+-   `dependson` — reevaluate conditional on a change in a different chunk (or chunks)
+-   `autodep` — will try to find the between-chunk dependencies on its own
+
+---
+
+## Keeping your report nice and clear
+
+The options below control what your reader sees. The general principle: **during development, show everything; in a final report, hide what isn't useful to the reader.**
+
+### Hide the source code with `echo: false`
+
+Use this when you want to show results but not the code that produced them. The default here is `echo: true` (code shows), overriding the global `echo: fenced` set in the YAML.
+
+```{r}
+#| echo = TRUE
+
+1+1
+
+```
+
+### Hide messages (e.g. when loading stuff) with `message: false`
+
+Package loading often prints informational messages that clutter the output. `message: false` silences them without affecting the output.
+
+```{r}
+#| message = FALSE
+
+message("You will not see the message.")
+
+```
+
+### Hide warnings with `warning: false`
+
+R sometimes produces warnings for valid operations (e.g. vector recycling). Use this to suppress them when you've already verified they're not a problem.
+
+```{r}
+#| warning = FALSE
+
+1:2 + 1:3
+
+```
+
+### Hide plots with `fig.show: 'hide'`
+
+The code runs and the plot is produced, but it won't appear in the output. Useful when you want to generate a plot object for later use without displaying it immediately.
+
+```{r}
+#| fig.show = "hide"
+
+plot(cars)
+
+```
+
+### Hide everything from the chunk with `include: false`
+
+The nuclear option — the chunk runs (so all variables and side effects are available), but nothing appears in the document at all. Standard practice for setup chunks that load libraries.
+
+```{r}
+#| include = FALSE
+
+cat("Some words")
+3 + 4
+# comment
+plot(cars)
+
+```
+
+### Hide the results with `results: 'hide'`
+
+The code is shown, it runs, but the printed output is suppressed. Unlike `include: false`, the code itself is still visible.
+
+```{r}
+#| results = "hide"
+
+a*typical_height*typical_width
+  
+```
+
+### Generate Markdown content with R code with `results: 'asis'`
+
+Normally Quarto treats chunk output as plain text. With `results: 'asis'`, the output is passed directly to Markdown and interpreted as markup. This lets you generate dynamic lists, headers, or tables entirely from code.
+
+```{r}
+#| results = "asis"
+
+for (i in 1:10) {
+  cat("- Item", i, "\n")
+}
+```
+
+(Note that it got interpreted as Markdown markup — each `cat()` line became a real list item!)
+
+---
+
+# Assignment
+
+Pick a TV show that had its premieres on TV and thus has some viewership numbers reported on Wikipedia. E.g. [Suits](https://en.wikipedia.org/wiki/List_of_Suits_episodes) (see the table just above the References section).
+
+Then create a short report — you can copy descriptive content from Wikipedia for this task. The report should contain:
+
+> **Tip:** Try to make more than one commit as you work — divide your work into logical steps (text first, then data, then plots). This is good practice and part of the grading criteria.
+
+1.  A brief description of the show (use *italics* for names).
+2.  A photo with the logo or a shot from the show itself.
+3.  A summary of some basic statistics (e.g. on viewership or ratings).
+4.  A graph of the viewership over time.
+5.  A graph of the episode-to-episode (or season-to-season) changes in viewership.
+6.  A short description of the observed changes that includes inline references to numbers (e.g. the viewership decreased by `insert_calculated_number` between seasons 3 and 5).
+7.  Make sure your report looks nice — this time we're mostly interested in the output and not necessarily the code used to achieve it. Use `echo: false` globally.
+8.  `render` your report and save it in the relevant folder of your repo.
+9.  Commit the changes and push them to GitHub.
