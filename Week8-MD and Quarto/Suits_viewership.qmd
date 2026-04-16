@@ -1,0 +1,70 @@
+---
+title: "Suits – Viewership Report"
+author: "Mirzakalonboy Khamidov"
+format: html
+---
+
+# *Suits* – TV Series Overview
+
+*Suits* is an American legal drama television series that follows a talented college dropout who begins working at a prestigious New York law firm. The show focuses on high‑stakes corporate cases, complex relationships inside the firm, and the tension created by the main character hiding the fact that he never attended law school.
+
+## Suits Logo
+
+![](images/MV5BN2EwMGExNDgtNTA5Yi00OGRjLWJlYzEtZmI3MDg0NzQxNTIwXkEyXkFqcGdeQXNhcmFocmVi._V1_.jpg){width="300px"}
+
+------------------------------------------------------------------------
+
+## Viewership Data
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+season1 \<- read_excel("C:/Users/khami/Desktop/University of Warsaw/4 semester/Reproducible research/RRcourse2026/Data/season_1.xlsx")
+
+head(season1)
+```
+
+
+```{r}
+summary(season1)
+
+```
+
+```{r}
+ggplot(season1, aes(x = episode, y = viewers)) +
+  geom_line(color = "steelblue", linewidth = 1.2) +
+  geom_point(size = 2) +
+  labs(
+    title = "Suits Season 1 Viewership Over Episodes",
+    x = "Episode",
+    y = "Viewers (millions)"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+season1_change <- season1 %>%
+  arrange(episode) %>%
+  mutate(change = viewers - lag(viewers))
+
+season1_change
+
+```
+
+```{r}
+ggplot(season1_change, aes(x = episode, y = change)) +
+  geom_col(fill = "darkred") +
+  labs(
+    title = "Episode-to-Episode Change in Viewership",
+    x = "Episode",
+    y = "Change (millions)"
+  ) +
+  theme_minimal()
+
+```
+
