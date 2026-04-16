@@ -1,26 +1,9 @@
 ---
 title: "Assignment"
-author: "Weronika Mądro"
+author: "Weronika Mądro 473193"
 format: html
 editor: visual
 ---
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
 
 # Pretty Little Liars
 
@@ -94,4 +77,97 @@ dvd_tbl |>
     stub.font.weight = "normal",
     table.font.size = px(18)
   )
+```
+
+*Pretty Little Liars* premiered on June 8, 2010, in the United States, becoming ABC Family's highest-rated series debut on record across the network's target demographics. It ranked number one in key 12–34 demos and teens, becoming the number-one scripted show in Women 18–34, and Women 18–49. The premiere was number two in the hour for total viewers, which generated 2.47 million unique viewers, and was ABC Family's best delivery in the time slot since the premiere of *The Secret Life of the American Teenager*.
+
+he second episode retained 100% of its premiere audience with 2.48 million viewers, despite the usual downward trend following a premiere of a show, and built on its premiere audience. It was the dominant number one of its time slot in Adults 18–49, and the number one show in female teens. Subsequent episodes fluctuated between 2.09 and 2.74 million viewers.The August 10, 2010, "Summer Finale" episode drew an impressive 3.07 million viewers.
+
+On June 28, 2010, ABC Family ordered 12 more episodes of the show, bringing its total first-season order to 22.\[97\] On January 10, 2011, ABC Family picked the show up for a second season that premiered on June 14, 2011. During the summer of 2011, *Pretty Little Liars* was basic cable's top scripted series in women aged 18–34 and viewers 12–34.The second half of season 2 aired on Mondays at 8/7c, beginning on January 2, 2012.
+
+On November 29, 2011, ABC Family renewed the show for a third season, which consisted of 24 episodes. On October 4, 2012, ABC Family announced that the show was renewed for a fourth season, again comprising 24 episodes. The second half of the third season began airing on January 8, 2013, and finished on March 19, 2013. *Pretty Little Liars* returned for Season 4 on June 11, 2013. On March 26, 2013, it was again announced that Pretty Little Liars had been renewed for a fifth season scheduled for a 2014 air date and a new spin off show entitled *Ravenswood* would begin airing after the season four annual Halloween special in October 2013. The second half of season four premiered on January 7, 2014. It was announced on June 10, 2014, that Pretty Little Liars was renewed for two seasons, making the show ABC Family's longest running original hit series.On August 29, 2016, I. Marlene King announced that *Pretty Little Liars* would be ending after the seventh season had aired. The second half of the seventh season began airing in April compared to January in the previous season.
+
+### Viewership over time
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+# install.packages(c("tidyverse", "lubridate"))
+
+library(tidyverse)
+library(lubridate)
+
+viewership <- tibble(
+  season = 1:7,
+  first_date = as.Date(c(
+    "2010-06-08", "2011-06-14", "2012-06-05",
+    "2013-06-11", "2014-06-10", "2015-06-02", "2016-06-21"
+  )),
+  first_viewers = c(2.47, 3.68, 2.93, 2.97, 2.72, 2.38, 1.43),
+  last_date = as.Date(c(
+    "2011-03-21", "2012-03-19", "2013-03-19",
+    "2014-03-18", "2015-03-24", "2016-03-15", "2017-06-27"
+  )),
+  last_viewers = c(3.64, 3.69, 2.87, 3.12, 2.65, 1.19, 1.41),
+  avg_viewers = c(2.87, 2.68, 2.59, 2.53, 2.01, 1.72, 1.11)
+)
+
+# Convert to long format for plotting
+plot_data <- bind_rows(
+  viewership %>%
+    transmute(season, date = first_date, viewers = first_viewers, type = "First aired"),
+  viewership %>%
+    transmute(season, date = last_date, viewers = last_viewers, type = "Last aired"),
+  viewership %>%
+    transmute(
+      season,
+      date = first_date + (last_date - first_date)/2,
+      viewers = avg_viewers,
+      type = "Average"
+    )
+)
+
+ggplot(plot_data, aes(x = date, y = viewers, color = type, group = type)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b %Y") +
+  labs(
+    title = "TV Viewership Over Time by Season",
+    x = "Date",
+    y = "Viewers (millions)",
+    color = ""
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+### Season-to-season change
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(tidyverse)
+
+viewership_change <- tibble(
+  season = 1:7,
+  avg_viewers = c(2.87, 2.68, 2.59, 2.53, 2.01, 1.72, 1.11)
+) %>%
+  mutate(change = avg_viewers - lag(avg_viewers)) %>%
+  filter(!is.na(change))
+
+ggplot(viewership_change, aes(x = season, y = change)) +
+  geom_col() +
+  geom_hline(yintercept = 0, linewidth = 0.8) +
+  scale_x_continuous(breaks = 2:7) +
+  labs(
+    title = "Season-to-Season Change in Viewership",
+    x = "Season",
+    y = "Change in viewers (millions)"
+  ) +
+  theme_minimal(base_size = 14)
 ```
