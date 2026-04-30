@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Project Guidelines — Reproducible Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f5f1e8;
+    --paper-dark: #ebe4d3;
+    --accent: #2d5a3f;
+    --accent-soft: #5a8a6e;
+    --rule: #2a2a2a;
+    --muted: #6a6358;
+    --code-bg: #1f2a24;
+    --code-text: #f5f1e8;
+    --highlight: #f4d35e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 18px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ========== HEADER ========== */
+  header {
+    padding: 5rem 0 3rem;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--rule);
+    display: inline-block;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-variation-settings: "opsz" 144;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .dek {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    line-height: 1.4;
+    color: var(--muted);
+    max-width: 620px;
+    margin-bottom: 2.5rem;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--rule);
+  }
+
+  .meta-item { font-family: 'Inter Tight', sans-serif; }
+
+  .meta-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .meta-value {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* ========== TOC ========== */
+  .toc {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+  }
+
+  .toc-title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc-counter;
+  }
+
+  .toc li {
+    counter-increment: toc-counter;
+    padding: 0.4rem 0;
+    border-bottom: 1px dotted rgba(0,0,0,0.15);
+    display: flex;
+    align-items: baseline;
+  }
+
+  .toc li:last-child { border-bottom: none; }
+
+  .toc li::before {
+    content: counter(toc-counter, decimal-leading-zero);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-right: 1rem;
+    font-weight: 700;
+  }
+
+  .toc a {
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    transition: color 0.2s;
+  }
+
+  .toc a:hover { color: var(--accent); }
+
+  /* ========== SECTIONS ========== */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    font-variation-settings: "opsz" 144;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin: 2rem 0 0.8rem;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1.5rem 0 0.6rem;
+  }
+
+  p {
+    margin-bottom: 1.2rem;
+    max-width: 68ch;
+  }
+
+  p.lead {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--muted);
+    border-left: 2px solid var(--accent);
+    padding-left: 1.2rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  ul, ol {
+    margin: 1rem 0 1.5rem 1.5rem;
+    max-width: 68ch;
+  }
+
+  li {
+    margin-bottom: 0.6rem;
+    padding-left: 0.3rem;
+  }
+
+  /* ========== CALLOUTS ========== */
+  .callout {
+    margin: 2rem 0;
+    padding: 1.5rem 1.8rem;
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+  }
+
+  .callout-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.warn {
+    border-left-color: var(--highlight);
+    background: #fdf6dc;
+  }
+
+  .callout.warn .callout-label { color: #8a6a00; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ========== CODE ========== */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--paper-dark);
+    padding: 0.1em 0.4em;
+    border-radius: 2px;
+    color: var(--ink);
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    border-left: 4px solid var(--accent);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  .comment { color: #7a8a7f; font-style: italic; }
+
+  /* ========== PROPOSAL TEMPLATE BOX ========== */
+  .template {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+
+  .template-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--rule);
+    margin-bottom: 1.5rem;
+  }
+
+  .template-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .template-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .template dl {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .template dt {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding-top: 0.2rem;
+  }
+
+  .template dd {
+    font-family: 'Fraunces', serif;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  @media (max-width: 700px) {
+    .template dl { grid-template-columns: 1fr; gap: 0.3rem 0; }
+    .template dt { margin-top: 1rem; }
+  }
+
+  /* ========== EXAMPLE TOPICS GRID ========== */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .topic-card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 1.3rem;
+    position: relative;
+  }
+
+  .topic-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+  }
+
+  .topic-card h4 {
+    margin: 0 0 0.5rem;
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-transform: none;
+    letter-spacing: -0.01em;
+  }
+
+  .topic-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 700px) {
+    .topics-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ========== STRUCTURE TREE ========== */
+  .tree {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.9;
+  }
+
+  .tree .folder { color: var(--accent); font-weight: 700; }
+  .tree .note { color: var(--muted); font-style: italic; font-family: 'Fraunces', serif; }
+
+  /* ========== STEPPED ========== */
+  .stepped {
+    counter-reset: step;
+    list-style: none;
+    margin-left: 0;
+  }
+
+  .stepped li {
+    counter-increment: step;
+    padding: 1rem 0 1rem 3.5rem;
+    border-bottom: 1px dashed rgba(0,0,0,0.15);
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  .stepped li:last-child { border-bottom: none; }
+
+  .stepped li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--paper-dark);
+    padding: 0.3rem 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  .stepped li strong {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ========== FOOTER ========== */
+  footer {
+    padding: 3rem 0 5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  footer::before {
+    content: '◆ ◆ ◆';
+    display: block;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.5em;
+  }
+
+  /* entrance anim */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  header > * { animation: fadeUp 0.7s ease both; }
+  header .eyebrow { animation-delay: 0.05s; }
+  header h1 { animation-delay: 0.15s; }
+  header .dek { animation-delay: 0.3s; }
+  header .meta-grid { animation-delay: 0.45s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="eyebrow">Reproducible Research · University of Warsaw</div>
+  <h1>Final Project<br><em>Guidelines</em></h1>
+  <p class="dek">A guide to scoping, building, and delivering your final project — from choosing a topic to the Git repository you present at the end of the semester.</p>
+
+  <div class="meta-grid">
+    <div class="meta-item">
+      <div class="meta-label">Group size</div>
+      <div class="meta-value">3–4 people</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Topic</div>
+      <div class="meta-value">You propose</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Deliverable</div>
+      <div class="meta-value">Git repository</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Final step</div>
+      <div class="meta-value">Live presentation</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TOC ============ -->
+<div class="toc">
+  <div class="toc-title">In this document</div>
+  <ol>
+    <li><a href="#what">What the project is for</a></li>
+    <li><a href="#topic">Choosing a good topic</a></li>
+    <li><a href="#scope">Scoping the work</a></li>
+    <li><a href="#repo">The repository — what to build</a></li>
+    <li><a href="#reproducibility">Reproducibility expectations</a></li>
+    <li><a href="#presentation">The final presentation</a></li>
+  </ol>
+</div>
+
+<!-- ============ 01 WHAT ============ -->
+<section id="what">
+  <span class="section-number">§ 01</span>
+  <h2>What the project is for</h2>
+  <p class="lead">The point is not to do the most complicated analysis you can imagine. The point is to produce a piece of research that someone else can actually run on their own computer, reach the same results, and understand what you did.</p>
+
+  <p>Everything in this course — version control, Quarto, coding principles, environments — is building toward one outcome: <strong>a research artefact that is genuinely reproducible</strong>. The final project is where you put it all together.</p>
+
+  <p>Your project should demonstrate:</p>
+
+  <ul>
+    <li><strong>A clear research question</strong> — something you set out to investigate, answer, model, or understand.</li>
+    <li><strong>Real data</strong> — a dataset relevant to your question, either public or scraped/collected by you.</li>
+    <li><strong>A documented analysis</strong> — code that produces results, with enough explanation that a classmate reading the repo understands what each part does.</li>
+    <li><strong>Reproducibility</strong> — someone cloning your repo should be able to run it and get the same results.</li>
+  </ul>
+
+  <p>Ambition matters less than execution. A small, clean, well-documented project is better than a sprawling, half-finished one.</p>
+</section>
+
+<!-- ============ PROPOSAL ============ -->
+<section id="proposal">
+  <span class="section-number">§ 02</span>
+  <h2>Document your project plan in the README</h2>
+  <p>Before you start coding, agree as a group on what your project is about and write it down — not in an email, not in a shared Google Doc, but directly in the <code>README.md</code> file at the root of your Git repository.</p>
+
+  <p>This is more than a formality. Writing your plan forces the group to align on what you're actually trying to do, and keeping it in the README means future-you (and anyone reading your repository) can see the intent behind the code.</p>
+
+  <h3>What your initial README should contain</h3>
+
+  <div class="template">
+    <div class="template-header">
+      <span class="template-title">Initial README Structure</span>
+      <span class="template-label">Before you start coding</span>
+    </div>
+    <dl>
+      <dt>Project title</dt>
+      <dd>A short, descriptive name for your project.</dd>
+
+      <dt>Group members</dt>
+      <dd>Full names of all 3–4 group members.</dd>
+
+      <dt>Research question</dt>
+      <dd>One or two sentences. What are you trying to find out, model, compare, or explain?</dd>
+
+      <dt>Data source</dt>
+      <dd>Where is the data coming from? A public dataset (link it), scraping (which site), an API (which one), an open repository (Kaggle, OECD, Eurostat, Zenodo)?</dd>
+
+      <dt>Planned approach</dt>
+      <dd>Roughly what methods or tools you plan to use. A few sentences. This is not a commitment — you can change course later.</dd>
+
+      <dt>Language / tools</dt>
+      <dd>R, Python, or both? Any specific packages or frameworks you already know you will need?</dd>
+
+      <dt>Motivation</dt>
+      <dd>One or two sentences on why your group finds this interesting.</dd>
+    </dl>
+  </div>
+
+  <p>As the project develops, your README will grow. What starts as a project plan becomes setup instructions, run instructions, and documentation of what the project produces. See <a href="#repo">section 5</a> for what the full README should contain by the end.</p>
+</section>
+
+<!-- ============ 03 TOPIC ============ -->
+<section id="topic">
+  <span class="section-number">§ 03</span>
+  <h2>Choosing a good topic</h2>
+  <p>Because you choose your own topic, the temptation is to either pick something you already know backwards (too easy, nothing learned) or something wildly ambitious (too hard, nothing finished). Aim for the middle.</p>
+
+  <h3>A good topic usually...</h3>
+  <ul>
+    <li>Has a <strong>specific, answerable question</strong> — not "let's look at climate data" but "how do European heating patterns shift after a heatwave?"</li>
+    <li>Uses <strong>real, accessible data</strong> — something you can actually get, not something hypothetical.</li>
+    <li>Fits in the <strong>time available</strong> — a few weeks of work for 3–4 people, not a master's thesis.</li>
+    <li>Has <strong>a clear output</strong> — a visualisation, a model comparison, a set of statistics, a tool. Something you can point to at the end.</li>
+    <li>Is <strong>interesting to your group</strong> — weeks of work on a boring question is miserable.</li>
+  </ul>
+
+  <h3>Example topic directions</h3>
+  <p>Not a prescriptive list — just to give you a sense of scope. Your actual topic can come from anywhere.</p>
+
+  <div class="topics-grid">
+    <div class="topic-card">
+      <h4>Data analysis on a public dataset</h4>
+      <p>Explore a question using OECD, Eurostat, World Bank, or a Kaggle dataset. Produce clear visualisations and descriptive findings.</p>
+    </div>
+    <div class="topic-card">
+      <h4>Web scraping + exploratory analysis</h4>
+      <p>Scrape data from a public website, clean it, analyse it. Great for topics where no pre-made dataset exists.</p>
+    </div>
+    <div class="topic-card">
+      <h4>Reproducing a published paper</h4>
+      <p>Pick a paper with public data, try to reproduce its main result, document where you succeeded or struggled.</p>
+    </div>
+    <div class="topic-card">
+      <h4>Comparison across countries / time / groups</h4>
+      <p>Compare something measurable across a dimension — countries, years, demographics — using open data.</p>
+    </div>
+    <div class="topic-card">
+      <h4>Model comparison</h4>
+      <p>Pick a dataset and compare several modelling approaches on it. Focus on the methodology, not on winning a benchmark.</p>
+    </div>
+    <div class="topic-card">
+      <h4>A small tool or dashboard</h4>
+      <p>Build a Shiny app, Streamlit dashboard, or Quarto document that lets someone explore a dataset interactively.</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============ 04 SCOPE ============ -->
+<section id="scope">
+  <span class="section-number">§ 04</span>
+  <h2>Scoping the work</h2>
+  <p>The single most common failure mode in student projects is overscoping — committing to something you cannot possibly finish, then panicking at the end. A few heuristics to help you calibrate.</p>
+
+  <h3>Signs of good scope</h3>
+  <ul>
+    <li>You could describe the <strong>minimum viable version</strong> of your project in one sentence, and it still feels meaningful.</li>
+    <li>You have clear stages: data collection, cleaning, analysis, visualisation — and rough time estimates for each.</li>
+    <li>You know what you'd cut first if you ran out of time.</li>
+  </ul>
+
+  <h3>Signs of bad scope</h3>
+  <ul>
+    <li>You plan to "try different approaches and see which works" without knowing what "work" means.</li>
+    <li>Your data source requires access you don't yet have.</li>
+    <li>Your method depends on techniques no one in the group has used before and nobody has allocated time to learn.</li>
+    <li>Your plan would require a full-time researcher months of work.</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-label">The honest test</div>
+    <p>If you can imagine a weekend where the whole group sits down and produces <em>a working first version</em> — even a rough one — your scope is probably right. If even a rough first version seems implausible, cut the scope.</p>
+  </div>
+</section>
+
+<!-- ============ 05 REPO ============ -->
+<section id="repo">
+  <span class="section-number">§ 05</span>
+  <h2>The repository — what to build</h2>
+  <p>Your one deliverable is a public Git repository. Everything you produce — code, documentation, rendered outputs — lives here.</p>
+
+  <h3>Minimum structure</h3>
+  <p>This is a suggested layout. Adapt as needed, but include something functionally equivalent.</p>
+
+  <div class="tree">
+    <span class="folder">your-project/</span><br>
+    ├── README.md <span class="note">— project description, setup, how to run</span><br>
+    ├── data/ <span class="note">— raw data, or a script that fetches it</span><br>
+    ├── R/ <span class="note">or</span> src/ <span class="note">— your code, organised by purpose</span><br>
+    ├── output/ <span class="note">— rendered plots, tables, reports</span><br>
+    ├── renv.lock <span class="note">or</span> requirements.txt <span class="note">— pinned dependencies</span><br>
+    ├── .gitignore <span class="note">— ignore caches, credentials, rendered binaries</span><br>
+    └── analysis.qmd <span class="note">or</span> main.py <span class="note">— the main entry point</span>
+  </div>
+
+  <h3>README.md — the single most important file</h3>
+  <p>A classmate or instructor should be able to open your README and immediately understand: what this project is, how to set it up, how to run it, and what it produces. Aim for something structured like:</p>
+
+<pre><code><span class="comment"># Project title</span>
+
+<span class="comment">## Authors</span>
+Names, course year, group number.
+
+<span class="comment">## What this project does</span>
+Two or three sentences. Plain language.
+
+<span class="comment">## Requirements</span>
+- R &gt;= 4.3, or Python &gt;= 3.10
+- Any system-level dependencies
+
+<span class="comment">## Setup</span>
+Exact commands to install dependencies and prepare the environment.
+
+<span class="comment">## How to run</span>
+Exact commands to reproduce the analysis from start to finish.
+
+<span class="comment">## Expected output</span>
+What gets produced, where, and roughly how long it takes.
+
+<span class="comment">## Data</span>
+Where the data comes from, whether it's in the repo or fetched at runtime.
+
+<span class="comment">## Repository structure</span>
+Brief description of each main folder.
+</code></pre>
+
+  <h3>Good practices expected throughout</h3>
+  <ol>
+    <li><strong>Commits are meaningful</strong> — "fix bug" is bad; "fix off-by-one error in regression output" is good. We will look at commit history.</li>
+    <li><strong>Code is documented</strong> — comments explain <em>why</em>, not just <em>what</em>. Functions have brief docstrings.</li>
+    <li><strong>No absolute paths</strong> — nothing like <code>/Users/your-name/...</code>. Use relative paths or the <code>here</code> package / <code>pathlib</code>.</li>
+    <li><strong>No secrets committed</strong> — no API keys, passwords, or personal tokens in the repo. Use environment variables or <code>.env</code> files that are gitignored.</li>
+    <li><strong>Multiple contributors</strong> — Git should show commits from all group members, not just one.</li>
+  </ol>
+</section>
+
+<!-- ============ 06 REPRODUCIBILITY ============ -->
+<section id="reproducibility">
+  <span class="section-number">§ 06</span>
+  <h2>Reproducibility expectations</h2>
+  <p class="lead">This is a reproducible research course. Reproducibility is not a bonus; it is the substance of what we are grading.</p>
+
+  <h3>What "reproducible" means here</h3>
+  <p>Someone with a fresh machine, no prior contact with your group, and only your README in front of them should be able to:</p>
+
+  <ol class="stepped">
+    <li>
+      <strong>Clone the repository</strong>
+      <code>git clone ...</code> — no access requests, no special permissions needed.
+    </li>
+    <li>
+      <strong>Set up the environment</strong>
+      Following your README. Tools like <code>renv::restore()</code> or <code>pip install -r requirements.txt</code> should just work.
+    </li>
+    <li>
+      <strong>Run the analysis end-to-end</strong>
+      One command, or a short sequence of commands. Not "first open this script, comment out line 47, then..."
+    </li>
+    <li>
+      <strong>Get the same output</strong>
+      The figures, tables, and results in <code>output/</code> should match what your analysis regenerates.
+    </li>
+  </ol>
+
+  <h3>Tools we expect you to use</h3>
+  <ul>
+    <li><strong>Git</strong> for version control — covered in class.</li>
+    <li><strong>renv</strong> (R) or <strong>venv</strong> / <strong>conda</strong> (Python) for environment management — covered in class.</li>
+    <li><strong>Quarto or R Markdown</strong> if you produce a rendered report.</li>
+    <li><strong>Docker</strong> is optional — a nice-to-have, not required.</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-label">Grading philosophy</div>
+    <p>We grade reproducibility on <strong>best-effort and documentation quality</strong>, not tooling purity. You do not need Docker. You do not need perfect setup on every possible operating system. What you do need: a README someone can follow, pinned dependencies, working code, and no hidden assumptions about your own machine.</p>
+  </div>
+</section>
+
+<!-- ============ 07 PRESENTATION ============ -->
+<section id="presentation">
+  <span class="section-number">§ 07</span>
+  <h2>The final presentation</h2>
+  <p>At the end of the semester, each group presents their project live. Two groups present per 90-minute lecture. Your slot is 40 minutes and includes a short talk, a live clone-and-run demo, and Q&amp;A.</p>
+
+  <p>The distinctive part: during your slot, you will clone your own repository fresh on the spot and run it in front of the class. This tests what we have been teaching all semester — that a well-built project runs from scratch on any machine.</p>
+
+  <p>All logistics, timings, role assignments, and what to do when the demo breaks are covered in the separate presentation guidelines document:</p>
+
+  <p><strong><a href="presentation_guidelines.html">→ Read the Presentation Guidelines</a></strong></p>
+
+  <p>Start reading it at least two weeks before your slot, so your repository is ready for the live demo.</p>
+</section>
+
+<footer>
+  Reproducible Research &nbsp;·&nbsp; University of Warsaw &nbsp;·&nbsp; 2025/26
+</footer>
+
+</div>
+</body>
+</html>
