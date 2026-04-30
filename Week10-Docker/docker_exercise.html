@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Exercise — Your First Reproducible Container</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdfcf8;
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --rule: #d9d5c8;
+    --accent: #b8451f;
+    --code-bg: #f4f1e8;
+    --highlight: #fff3d6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+  }
+
+  header.doc-header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+  }
+  .course-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 18px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 0;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 12px;
+    border-top: 1px solid var(--rule);
+    padding-top: 32px;
+    margin-top: 48px;
+  }
+  h2 .step {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    margin-right: 12px;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 24px 0 8px;
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0;
+  }
+  p { margin: 0 0 14px; }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    padding: 14px 18px;
+    margin: 16px 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    border-radius: 2px;
+  }
+  code:not(pre code) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  /* Callout box (the 💡 / ⚠️ / 🪟 boxes) */
+  .callout {
+    background: var(--highlight);
+    border-left: 3px solid var(--accent);
+    padding: 14px 20px;
+    margin: 20px 0;
+    font-size: 16px;
+    border-radius: 2px;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout strong { color: var(--ink); }
+
+  ul, ol { padding-left: 24px; margin: 0 0 16px; }
+  li { margin-bottom: 6px; }
+
+  /* Recap / takeaway box */
+  .recap {
+    background: #fef3eb;
+    border: 1px solid #f0c8a8;
+    padding: 20px 24px;
+    margin: 32px 0;
+    border-radius: 2px;
+  }
+  .recap h3 {
+    margin-top: 0;
+    color: var(--accent);
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Notice — the strong "notice" lines after results */
+  .notice {
+    border-left: 3px solid var(--ink-soft);
+    padding: 4px 20px;
+    margin: 20px 0;
+    background: #faf8f1;
+    font-size: 16px;
+  }
+  .notice p:last-child { margin-bottom: 12px; }
+  .notice p:first-child { margin-top: 12px; }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 2px solid var(--ink);
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 40px 24px 60px; }
+    h1 { font-size: 26px; }
+    h2 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<header class="doc-header">
+  <div class="course-line">REPRODUCIBLE RESEARCH · UNIVERSITY OF WARSAW</div>
+  <h1>Docker Exercise: Your First Reproducible Container</h1>
+  <p class="subtitle">Understand the three core Docker concepts — <strong>image</strong>, <strong>container</strong>, <strong>Dockerfile</strong> — by building and running a tiny Python script in an isolated environment.</p>
+</header>
+
+<div class="callout">
+  <p>💡 <strong>The whole exercise stays in the terminal.</strong> No text editor needed. This is itself good practice for reproducibility: every step is a command you can copy, paste, and re-run.</p>
+</div>
+
+<h2>Why this exercise?</h2>
+
+<p>Reproducibility means: <em>anyone, anywhere, on any machine, gets the same result.</em> The classic problem — "it works on my machine" — happens because Python versions, package versions, and operating systems differ. Docker solves this by packaging your code together with its environment.</p>
+
+<p>In this exercise, you will package a one-line Python script into a Docker image and run it. That's it. No web servers, no databases, no <code>docker-compose</code>. Just the absolute minimum.</p>
+
+<h2>Prerequisites</h2>
+
+<p>Install <strong>Docker Desktop</strong> from <a href="https://www.docker.com/products/docker-desktop/">docker.com/products/docker-desktop</a> and make sure it is running. Verify:</p>
+
+<pre>docker --version</pre>
+
+<p>You should see something like <code>Docker version 27.x.x</code>. If not, ask for help before continuing.</p>
+
+<div class="callout">
+  <p>🪟 <strong>Windows users:</strong> the commands below use <strong>PowerShell</strong> syntax (which is what Windows Terminal opens by default). If you prefer Git Bash or WSL, use the macOS/Linux blocks instead.</p>
+</div>
+
+<h2><span class="step">Step 1.</span>Create a working folder</h2>
+
+<pre>mkdir hello-docker
+cd hello-docker</pre>
+
+<h2><span class="step">Step 2.</span>Create a tiny Python script</h2>
+
+<p>We will use a <strong>heredoc</strong> (<code>cat &gt; file &lt;&lt; 'EOF' ... EOF</code>) to write the file directly from the terminal. Everything between <code>&lt;&lt; 'EOF'</code> and the closing <code>EOF</code> becomes the file content.</p>
+
+<h3>macOS / Linux / Git Bash / WSL</h3>
+
+<pre>cat &gt; hello.py &lt;&lt; 'EOF'
+import sys
+print(f"Hello from Python {sys.version_info.major}.{sys.version_info.minor} inside a container!")
+EOF</pre>
+
+<h3>Windows PowerShell</h3>
+
+<pre>@'
+import sys
+print(f"Hello from Python {sys.version_info.major}.{sys.version_info.minor} inside a container!")
+'@ | Out-File -FilePath hello.py -Encoding utf8</pre>
+
+<p>Verify the file was created correctly:</p>
+
+<pre>cat hello.py        # macOS / Linux
+type hello.py       # Windows PowerShell</pre>
+
+<p>Now try running the script on your own machine:</p>
+
+<pre>python hello.py</pre>
+
+<p>Note which Python version it prints. <strong>This is the version your computer happens to have.</strong> Different students will see different numbers — that is exactly the reproducibility problem we want to solve.</p>
+
+<h2><span class="step">Step 3.</span>Create the Dockerfile</h2>
+
+<p>Same idea, but now we write a <code>Dockerfile</code> (no extension, capital D).</p>
+
+<h3>macOS / Linux / Git Bash / WSL</h3>
+
+<pre>cat &gt; Dockerfile &lt;&lt; 'EOF'
+FROM python:3.11-slim
+WORKDIR /app
+COPY hello.py .
+CMD ["python", "hello.py"]
+EOF</pre>
+
+<h3>Windows PowerShell</h3>
+
+<pre>@'
+FROM python:3.11-slim
+WORKDIR /app
+COPY hello.py .
+CMD ["python", "hello.py"]
+'@ | Out-File -FilePath Dockerfile -Encoding utf8</pre>
+
+<p>Four lines, four ideas:</p>
+
+<ul>
+  <li><code>FROM</code> — the base image we build on top of (a minimal Linux with Python 3.11 already installed).</li>
+  <li><code>WORKDIR</code> — where inside the container we will work.</li>
+  <li><code>COPY</code> — bring the file from your computer into the image.</li>
+  <li><code>CMD</code> — the default command to run when the container starts.</li>
+</ul>
+
+<div class="callout">
+  <p>⚠️ <strong>Why a heredoc and not chained <code>echo</code> commands?</strong> A Dockerfile has multiple lines and special characters (<code>[</code>, <code>]</code>, <code>"</code>). Writing it line-by-line with <code>echo "..." &gt;&gt; Dockerfile</code> is fragile: shells may interpret the quotes or special characters. Heredocs treat the whole block as plain text — exactly what we want.</p>
+</div>
+
+<h2><span class="step">Step 4.</span>Build the image</h2>
+
+<pre>docker build -t hello-docker .</pre>
+
+<p>The <code>-t hello-docker</code> gives the image a name. The <code>.</code> at the end tells Docker to look for the <code>Dockerfile</code> in the current folder.</p>
+
+<p>Watch the output. Docker downloads the Python base image (only the first time), then runs each instruction in your <code>Dockerfile</code>.</p>
+
+<h2><span class="step">Step 5.</span>Run the container</h2>
+
+<pre>docker run --rm hello-docker</pre>
+
+<p>You should see:</p>
+
+<pre>Hello from Python 3.11 inside a container!</pre>
+
+<div class="notice">
+  <p><strong>Notice:</strong> Even if your computer has Python 3.9, 3.10, or 3.13, the container always reports 3.11. That is reproducibility — the environment is fixed by the <code>Dockerfile</code>, not by your laptop.</p>
+</div>
+
+<p>The <code>--rm</code> flag tells Docker to delete the container after it finishes (otherwise stopped containers pile up).</p>
+
+<h2>Quick checks for understanding</h2>
+
+<p>Answer these in your own words. There is no need to submit anything — they are for you.</p>
+
+<ol>
+  <li>What is the difference between an <strong>image</strong> and a <strong>container</strong>?</li>
+  <li>Why did we pin the base image to <code>python:3.11-slim</code> instead of just <code>python</code>?</li>
+  <li>If your collaborator clones your repository (with <code>hello.py</code> and <code>Dockerfile</code>), what commands do they need to run to reproduce your result exactly?</li>
+</ol>
+
+<h2>Bonus (optional, +5 minutes)</h2>
+
+<p>Modify <code>hello.py</code> so it also imports <code>numpy</code>. Overwrite the file with a new heredoc:</p>
+
+<h3>macOS / Linux</h3>
+
+<pre>cat &gt; hello.py &lt;&lt; 'EOF'
+import sys, numpy
+print(f"Python {sys.version_info.major}.{sys.version_info.minor}, NumPy {numpy.__version__}")
+EOF</pre>
+
+<h3>Windows PowerShell</h3>
+
+<pre>@'
+import sys, numpy
+print(f"Python {sys.version_info.major}.{sys.version_info.minor}, NumPy {numpy.__version__}")
+'@ | Out-File -FilePath hello.py -Encoding utf8</pre>
+
+<p>Rebuild and run with <code>docker build -t hello-docker .</code> and then <code>docker run --rm hello-docker</code>. <strong>It will fail</strong> — numpy is not installed in the image.</p>
+
+<p>Fix it by rewriting the <code>Dockerfile</code> to install numpy <em>before</em> copying the script:</p>
+
+<h3>macOS / Linux</h3>
+
+<pre>cat &gt; Dockerfile &lt;&lt; 'EOF'
+FROM python:3.11-slim
+WORKDIR /app
+RUN pip install numpy==1.26.4
+COPY hello.py .
+CMD ["python", "hello.py"]
+EOF</pre>
+
+<h3>Windows PowerShell</h3>
+
+<pre>@'
+FROM python:3.11-slim
+WORKDIR /app
+RUN pip install numpy==1.26.4
+COPY hello.py .
+CMD ["python", "hello.py"]
+'@ | Out-File -FilePath Dockerfile -Encoding utf8</pre>
+
+<p>Rebuild and run:</p>
+
+<pre>docker build -t hello-docker .
+docker run --rm hello-docker</pre>
+
+<p>Now the container has numpy pinned to a specific version — anyone who builds this image gets the exact same numpy, on the exact same Python, on the exact same Linux. <strong>That is full reproducibility in two files plus a few commands.</strong></p>
+
+<div class="recap">
+  <h3>What to take away</h3>
+  <p>A <code>Dockerfile</code> is a <strong>recipe</strong> written in plain text. Anyone with Docker can read it, build the same image, and run the same code in the same environment — regardless of their operating system or what's installed on their laptop. That is the core of reproducible computational research.</p>
+  <p style="margin-bottom: 0;">And because the entire workflow above lives in the terminal — no GUI, no text editor — you can paste it into a script, share it as a <code>README</code>, or include it verbatim in a paper's supplementary material. The instructions <em>are</em> the experiment.</p>
+</div>
+
+<footer>
+  <p>End of exercise · Reproducible Research course · University of Warsaw</p>
+</footer>
+
+</div>
+
+</body>
+</html>
