@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Assignment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdfcf8;
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --rule: #d9d5c8;
+    --accent: #b8451f;
+    --code-bg: #f4f1e8;
+    --highlight: #fff3d6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+  }
+
+  header.doc-header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+  }
+  .course-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .meta strong { color: var(--ink); font-weight: 600; }
+
+  h2 {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 12px;
+    border-top: 1px solid var(--rule);
+    padding-top: 32px;
+    margin-top: 48px;
+  }
+  h2 .part {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    margin-right: 12px;
+  }
+  h3 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 32px 0 8px;
+    color: var(--ink);
+  }
+  p { margin: 0 0 14px; }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    padding: 14px 18px;
+    margin: 16px 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    border-radius: 2px;
+  }
+  code:not(pre code) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  /* Reminder callout */
+  .callout {
+    background: var(--highlight);
+    border-left: 3px solid var(--accent);
+    padding: 14px 20px;
+    margin: 20px 0;
+    font-size: 16px;
+    border-radius: 2px;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout strong { color: var(--ink); }
+
+  /* Submit-instructions block */
+  .submit-block {
+    border-left: 3px solid var(--ink-soft);
+    padding: 4px 20px;
+    margin: 16px 0 20px;
+    background: #faf8f1;
+  }
+  .submit-block .label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 12px 0 8px;
+    font-weight: 600;
+  }
+  .submit-block ul { margin-bottom: 12px; }
+  .submit-block p:last-child { margin-bottom: 12px; }
+
+  /* Meta-note */
+  .meta-note {
+    font-size: 15px;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--rule);
+    border-bottom: 1px dashed var(--rule);
+    padding: 14px 0;
+    margin: 24px 0;
+    font-style: italic;
+  }
+  .meta-note strong { color: var(--ink); font-style: normal; }
+
+  /* Example submission block */
+  .example {
+    background: #fef3eb;
+    border: 1px solid #f0c8a8;
+    padding: 20px 24px;
+    margin: 32px 0;
+    border-radius: 2px;
+  }
+  .example h3 {
+    margin-top: 0;
+    color: var(--accent);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .example pre { background: var(--bg); }
+
+  ul, ol { padding-left: 24px; margin: 0 0 16px; }
+  li { margin-bottom: 6px; }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 2px solid var(--ink);
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 40px 24px 60px; }
+    h1 { font-size: 26px; }
+    h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<header class="doc-header">
+  <div class="course-line">REPRODUCIBLE RESEARCH · UNIVERSITY OF WARSAW</div>
+  <h1>Docker Assignment</h1>
+  <div class="meta">
+    <div><strong>Based on:</strong> the in-class <code>hello-docker</code> exercise</div>
+    <div><strong>Submit:</strong> push a single <code>.md</code> or <code>.txt</code> file to your forked course repository, in the same folder as the Docker materials</div>
+  </div>
+</header>
+
+<h2><span class="part">Part 1.</span>Mechanics</h2>
+
+<p>Work in your <code>hello-docker</code> folder from class.</p>
+
+<p>For each task, <strong>copy and paste from your terminal</strong> the commands you ran <em>and</em> their output. Wrap them in code blocks (triple backticks) so they stay readable.</p>
+
+<div class="callout">
+  <p>💡 <strong>Reminder:</strong> every time you change the <code>Dockerfile</code>, you must rebuild the image with <code>docker build -t hello-docker .</code> before running it again. Editing the recipe does not change the cake until you bake again.</p>
+</div>
+
+<h3>Task 1.1 — Change the Python version</h3>
+
+<p>Edit your <code>Dockerfile</code> so it uses <strong>Python 3.9</strong> instead of 3.11. Rebuild and run.</p>
+
+<div class="submit-block">
+  <span class="label">Submit</span>
+  <ul>
+    <li>The full terminal session (commands + output) showing <code>docker build</code> and <code>docker run</code>. The output should now say "Python 3.9 inside a container".</li>
+  </ul>
+</div>
+
+<h3>Task 1.2 — Break and fix the Dockerfile</h3>
+
+<p>Replace your <code>hello.py</code> with:</p>
+
+<pre>import sys, pandas
+print(f"Python {sys.version_info.major}.{sys.version_info.minor}, pandas {pandas.__version__}")</pre>
+
+<p>Rebuild and run. <strong>It will fail.</strong> Read the error, then add one line to your <code>Dockerfile</code> to fix it. The fix must <strong>pin a specific version</strong> of pandas.</p>
+
+<div class="submit-block">
+  <span class="label">Submit</span>
+  <ul>
+    <li>The terminal session showing the failed run and its error message.</li>
+    <li>The terminal session showing the successful run after your fix.</li>
+    <li>Your final <code>Dockerfile</code> pasted as text.</li>
+  </ul>
+</div>
+
+<h2><span class="part">Part 2.</span>Reproducibility judgment</h2>
+
+<p>Answer in <strong>3–5 sentences each.</strong></p>
+
+<h3>Question 2.1 — Why pin?</h3>
+
+<p>In Task 1.2 you pinned a specific version of pandas. Suppose you had instead written <code>RUN pip install pandas</code> (no version). Your Dockerfile would still build and run <em>today</em>. Why is this a reproducibility problem? What concretely could go wrong, and when?</p>
+
+<h3>Question 2.2 — Recipe or cake?</h3>
+
+<p>If you want a colleague to reproduce your work, you can either send them the built image (e.g. via Docker Hub) or send them only the <code>Dockerfile</code> and <code>hello.py</code>. Which is better for <strong>reproducible research</strong>, and why? Give one concrete reason beyond "easier" or "faster."</p>
+
+<h2>Submission</h2>
+
+<p>Push a single <code>.md</code> or <code>.txt</code> file to your <strong>forked course repository</strong>, in the <strong>same folder as the Docker materials</strong>.</p>
+
+<p>The file should contain:</p>
+
+<ul>
+  <li>Your terminal sessions for Task 1.1 and Task 1.2 (commands + output, in code blocks).</li>
+  <li>Your final <code>Dockerfile</code> as text.</li>
+  <li>Your two written answers.</li>
+</ul>
+
+<p><strong>Filename:</strong> <code>docker_assignment_&lt;yourlastname&gt;.md</code></p>
+
+<div class="meta-note">
+  <strong>A small meta-note:</strong> pasting plain text — not screenshots — is itself good practice for reproducible research. Text is searchable, diff-able, and copy-pasteable. Screenshots are not.
+</div>
+
+<div class="example">
+  <h3>Example submission format</h3>
+  <p>A correct submission for Task 1.1 should look like this:</p>
+<pre>## Task 1.1
+
+```
+$ docker build -t hello-docker .
+[+] Building 2.3s (8/8) FINISHED
+ =&gt; [internal] load build definition from Dockerfile
+ ...
+ =&gt; =&gt; naming to docker.io/library/hello-docker
+
+$ docker run --rm hello-docker
+Hello from Python 3.9 inside a container!
+```</pre>
+</div>
+
+<footer>
+  <p>End of assignment · Reproducible Research course · University of Warsaw</p>
+</footer>
+
+</div>
+
+</body>
+</html>
