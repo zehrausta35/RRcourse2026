@@ -1,0 +1,19 @@
+---
+title: "Viewership Report: Suits"
+author: "Twoje Imię i Nazwisko"
+date: today
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Brief Description of the Show
+
+*Suits* is an American legal drama television series. The show is set at a fictional New York City law firm and follows the story of *Harvey Specter*, a highly successful corporate lawyer, and his associate *Mike Ross*, who has a photographic memory but never attended law school. The series premiered in 2011 and quickly gained a massive fan base.
+
+![Suits Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Suits_Logo.png/800px-Suits_Logo.png)
+---
+
+## 

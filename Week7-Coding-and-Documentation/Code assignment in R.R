@@ -1,6 +1,82 @@
+# ==============================================================================
+# --- CLEANED & AUTOMATED VERSION FILIP ŻEBROWSKi ---
+# ==============================================================================
+# Sets the path to the parent directory of RR classes
+setwd("/Users/filipzebro/Documents/Studia/RR/repositories/RRcourse2026/Week7-Coding-and-Documentation")
+
+library(tidyverse)
+library(readxl)
+library(Hmisc)
+library(stringr)
+
+# 1. Load and aggregate task data (O*NET)
+task_data <- read.csv("Data/onet_tasks.csv") %>%
+  mutate(isco08_1dig = as.numeric(str_sub(isco08, 1, 1)))
+
+aggdata <- task_data %>%
+  group_by(isco08_1dig) %>%
+  summarise(across(starts_with("t_"), ~mean(.x, na.rm = TRUE)))
+
+# 2. Automatically load all Eurostat sheets at once
+file_path <- "Data/Eurostat_employment_isco.xlsx"
+sheets <- excel_sheets(file_path)
+
+# The map_dfr function iterates through sheets (ISCO1...ISCO9), loads them, and binds them into one table
+all_data_clean <- sheets %>%
+  map_dfr(~read_excel(file_path, sheet = .x) %>% 
+            mutate(ISCO = as.numeric(str_extract(.x, "\\d+"))))
+
+# 3. Data transformation: from wide format (country columns) to long format (single "Country" column)
+# You can easily add more countries here!
+countries <- c("Belgium", "Spain", "Poland")
+
+long_data <- all_data_clean %>%
+  select(TIME, ISCO, all_of(countries)) %>%
+  pivot_longer(cols = all_of(countries), names_to = "Country", values_to = "Employment")
+
+# 4. Calculate totals and shares grouped by Country and Time
+long_data <- long_data %>%
+  group_by(Country, TIME) %>%
+  mutate(Total_Employment = sum(Employment, na.rm = TRUE),
+         Share = Employment / Total_Employment) %>%
+  ungroup()
+
+# 5. Merge with O*NET data
+combined_clean <- long_data %>%
+  left_join(aggdata, by = c("ISCO" = "isco08_1dig"))
+
+# 6. Standardize tasks (NRCA) using weights (Share) grouped by Country
+nrca_tasks <- c("t_4A2a4", "t_4A2b2", "t_4A4a1")
+
+combined_clean <- combined_clean %>%
+  group_by(Country) %>%
+  # Automatic standardization for all selected tasks
+  mutate(across(all_of(nrca_tasks),
+                ~ (.x - wtd.mean(.x, Share)) / sqrt(wtd.var(.x, Share)),
+                .names = "std_{.col}")) %>%
+  # Sum and standardize the final NRCA index
+  mutate(NRCA = std_t_4A2a4 + std_t_4A2b2 + std_t_4A4a1) %>%
+  mutate(std_NRCA = (NRCA - wtd.mean(NRCA, Share)) / sqrt(wtd.var(NRCA, Share))) %>%
+  ungroup()
+
+# 7. Calculate final trends over time
+country_trends <- combined_clean %>%
+  mutate(multip_NRCA = std_NRCA * Share) %>%
+  group_by(Country, TIME) %>%
+  summarise(Country_NRCA = sum(multip_NRCA, na.rm = TRUE), .groups = "drop")
+
+# 8. Plot (ggplot2 looks much more professional than the standard plot())
+ggplot(country_trends, aes(x = TIME, y = Country_NRCA, color = Country, group = Country)) +
+  geom_line(linewidth = 1) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) +
+  labs(title = "Non-routine cognitive analytical tasks intensity over time",
+       y = "Standardized NRCA Intensity", x = "Quarter")
+
+
 
 # Sets the path to the parent directory of RR classes
-setwd("Z:\\File folders\\Teaching\\Reproducible Research\\2023\\Repository\\RRcourse2023\\6. Coding and documentation")
+setwd("/Users/filipzebro/Documents/Studia/RR/repositories/RRcourse2026/Week7-Coding-and-Documentation")
 
 #   Import data from the O*NET database, at ISCO-08 occupation level.
 # The original data uses a version of SOC classification, but the data we load here
@@ -9,7 +85,7 @@ setwd("Z:\\File folders\\Teaching\\Reproducible Research\\2023\\Repository\\RRco
 # The O*NET database contains information for occupations in the USA, including
 # the tasks and activities typically associated with a specific occupation.
 
-task_data = read.csv("Data\\onet_tasks.csv")
+task_data = read.csv("Data/onet_tasks.csv")
 # isco08 variable is for occupation codes
 # the t_* variables are specific tasks conducted on the job
 
@@ -18,15 +94,15 @@ task_data = read.csv("Data\\onet_tasks.csv")
 # 1-digit ISCO occupation categories. (Check here for details: https://www.ilo.org/public/english/bureau/stat/isco/isco08/)
 library(readxl)                     
 
-isco1 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO1")
-isco2 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO2")
-isco3 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO3")
-isco4 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO4")
-isco5 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO5")
-isco6 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO6")
-isco7 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO7")
-isco8 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO8")
-isco9 <- read_excel("Data\\Eurostat_employment_isco.xlsx", sheet="ISCO9")
+isco1 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO1")
+isco2 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO2")
+isco3 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO3")
+isco4 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO4")
+isco5 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO5")
+isco6 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO6")
+isco7 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO7")
+isco8 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO8")
+isco9 <- read_excel("Data//Eurostat_employment_isco.xlsx", sheet="ISCO9")
 
 # We will focus on three countries, but perhaps we could clean this code to allow it
 # to easily run for all the countries in the sample?
