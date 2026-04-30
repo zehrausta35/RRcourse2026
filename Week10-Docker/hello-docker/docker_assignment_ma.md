@@ -126,7 +126,7 @@ CMD ["python", "hello.py"]
 
 ## Question 2.1
 
-Pinning a package version means that everyone builds the image with the same version of that package. If I wrote only "RUN pip install pandas"", Docker would install whatever the latest pandas version is at the time of building. That might work today, but a future pandas release could change behavior, remove features, or introduce incompatibilities with my code. Therefore, the same Dockerfile could produce different results depending on when it is built which is a reproducibility problem.
+Pinning a package version means that everyone builds the image with the same version of that package. If I wrote only "RUN pip install pandas", Docker would install whatever the latest pandas version is at the time of building. That might work today but a future pandas release could change behavior, remove features, or introduce incompatibilities with my code. Therefore, the same Dockerfile could produce different results depending on when it is built which is a reproducibility problem.
 
 ## Question 2.2
 
