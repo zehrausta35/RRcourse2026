@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding Docker — Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f5f1e8;
+    --paper-dark: #ebe4d3;
+    --accent: #1e5f74;
+    --accent-soft: #4a8ba3;
+    --rule: #2a2a2a;
+    --muted: #6a6358;
+    --code-bg: #1a2430;
+    --code-text: #e8eef5;
+    --highlight: #f4d35e;
+    --ocean: #0d3b4f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ========== SLIDE SYSTEM ========== */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4vh 6vw;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.45s ease, transform 0.45s ease, visibility 0s linear 0.45s;
+    overflow-y: auto;
+    z-index: 2;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.45s ease, transform 0.45s ease, visibility 0s;
+  }
+
+  .slide-inner {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ========== TYPOGRAPHY ========== */
+  .eyebrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: clamp(0.7rem, 1vw, 0.85rem);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--rule);
+    display: inline-block;
+  }
+
+  h1.deck-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-variation-settings: "opsz" 144;
+    margin-bottom: 1.5rem;
+  }
+
+  h1.deck-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  h2.slide-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+    font-variation-settings: "opsz" 144;
+  }
+
+  h2.slide-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  p.lead-big {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    line-height: 1.35;
+    color: var(--muted);
+    max-width: 50ch;
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--accent);
+    padding-left: 1.5rem;
+  }
+
+  p.subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+    color: var(--muted);
+    max-width: 55ch;
+    margin-bottom: 2.5rem;
+    line-height: 1.4;
+  }
+
+  /* ========== BULLETS ========== */
+  ul.points {
+    list-style: none;
+    max-width: 65ch;
+    margin: 1rem 0 0;
+  }
+
+  ul.points li {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    line-height: 1.5;
+    padding: 0.5rem 0 0.5rem 2rem;
+    position: relative;
+  }
+
+  ul.points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05rem;
+    width: 0.9rem;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  ul.points li strong {
+    font-weight: 600;
+  }
+
+  ul.points.compact li {
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    padding: 0.3rem 0 0.3rem 1.8rem;
+  }
+
+  ul.points.compact li::before {
+    top: 0.85rem;
+  }
+
+  /* ========== TWO-COLUMN LAYOUTS ========== */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .split.bullets-right {
+    grid-template-columns: 1.2fr 1fr;
+  }
+
+  @media (max-width: 900px) {
+    .split { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  /* ========== CALLOUTS ========== */
+  .callout {
+    margin: 1.5rem 0 0;
+    padding: 1.2rem 1.5rem;
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+    max-width: 60ch;
+  }
+
+  .callout-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .callout p {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    line-height: 1.5;
+  }
+
+  .callout.dark {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-left-color: var(--highlight);
+  }
+  .callout.dark .callout-label { color: var(--highlight); }
+  .callout.dark p { color: var(--code-text); }
+  .callout.dark strong { color: var(--highlight); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--paper-dark);
+    padding: 0.1em 0.4em;
+    border-radius: 2px;
+  }
+
+  .callout.dark code {
+    background: rgba(255,255,255,0.1);
+    color: var(--code-text);
+  }
+
+  /* ========== VISUAL CONTAINER ========== */
+  .visual-slide {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .visual-slide svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* ========== NAVIGATION ========== */
+  .nav {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav button {
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .nav button:hover:not(:disabled) {
+    background: var(--accent);
+    color: white;
+  }
+
+  .nav button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .counter {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    z-index: 100;
+    padding: 0.5rem 0.8rem;
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+  }
+
+  .counter strong {
+    color: var(--accent);
+  }
+
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 100;
+    transition: width 0.45s ease;
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    z-index: 100;
+    padding: 0.5rem 0.8rem;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  .hint kbd {
+    background: var(--paper-dark);
+    border: 1px solid var(--rule);
+    padding: 0.1rem 0.4rem;
+    font-family: inherit;
+    font-size: 0.7rem;
+  }
+
+  /* ========== TITLE SLIDE SPECIFIC ========== */
+  .title-slide {
+    text-align: left;
+  }
+
+  .title-slide .meta-row {
+    display: flex;
+    gap: 3rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--rule);
+    max-width: 700px;
+  }
+
+  .title-slide .meta-item {
+    font-family: 'Inter Tight', sans-serif;
+  }
+
+  .title-slide .meta-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .title-slide .meta-value {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  /* ========== FINAL SLIDE ========== */
+  .final-center {
+    text-align: center;
+  }
+
+  .final-center .eyebrow {
+    justify-content: center;
+  }
+
+  .final-center .eyebrow::before {
+    display: none;
+  }
+
+  .check-points {
+    display: inline-block;
+    text-align: left;
+    margin-top: 2rem;
+  }
+
+  @media print {
+    .nav, .counter, .hint, .progress { display: none; }
+    .slide {
+      position: relative;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: none !important;
+      page-break-after: always;
+      height: 100vh;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" style="width: 0%;"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ============ SLIDE 1 — TITLE ============ -->
+  <section class="slide active title-slide" data-slide="1">
+    <div class="slide-inner">
+      <div class="eyebrow">Reproducible Research · Lecture</div>
+      <h1 class="deck-title">Understanding<br><em>Docker</em></h1>
+      <p class="subtitle">From <code>renv</code> and <code>venv</code> to containers — the last rung of the reproducibility ladder.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <div class="meta-label">Today</div>
+          <div class="meta-value">Concepts & visuals</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Next class</div>
+          <div class="meta-value">Live demo</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Required for project</div>
+          <div class="meta-value">No — optional</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2 — WHY ============ -->
+  <section class="slide" data-slide="2">
+    <div class="slide-inner">
+      <h2 class="slide-title">Why we need <em>more</em> than <code>renv</code></h2>
+      <p class="lead-big">You pin every package, push to GitHub, and your collaborator still cannot run your code. Why?</p>
+
+      <ul class="points">
+        <li>Different <strong>R or Python version</strong> — packages no longer compile</li>
+        <li>Missing <strong>system libraries</strong> like <code>libxml2</code> or <code>pandoc</code></li>
+        <li>Different <strong>operating system</strong> — subtle changes in results</li>
+        <li><code>renv.lock</code> cannot fix any of these</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3 — LAYERS VISUAL ============ -->
+  <section class="slide" data-slide="3">
+    <div class="slide-inner">
+      <h2 class="slide-title">The reproducibility <em>stack</em></h2>
+
+      <div class="split bullets-right">
+        <div class="visual-slide">
+          <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Project layers: code, packages, runtime, system libraries, operating system. Git covers code. renv covers packages. Docker covers everything from packages down to the OS.">
+            <defs>
+              <style>
+                .lbl-l { font-family: 'Inter Tight', sans-serif; font-size: 13px; font-weight: 600; fill: #1a1a1a; letter-spacing: 0.05em; }
+                .lbl-lw { font-family: 'Inter Tight', sans-serif; font-size: 13px; font-weight: 600; fill: #f5f1e8; letter-spacing: 0.05em; }
+                .cap-l { font-family: 'Inter Tight', sans-serif; font-size: 11px; fill: #6a6358; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+                .tool-l { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: #1e5f74; }
+                .desc-l { font-family: 'Fraunces', serif; font-size: 12px; font-style: italic; fill: #1a1a1a; }
+              </style>
+            </defs>
+            <text x="160" y="24" class="cap-l" text-anchor="middle">Your project</text>
+            <text x="500" y="24" class="cap-l" text-anchor="middle">What locks it</text>
+
+            <rect x="40" y="40" width="240" height="44" fill="#f4d35e" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="160" y="67" class="lbl-l" text-anchor="middle">Your code</text>
+
+            <rect x="40" y="84" width="240" height="44" fill="#d9714a" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="160" y="111" class="lbl-lw" text-anchor="middle">R / Python packages</text>
+
+            <rect x="40" y="128" width="240" height="44" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="160" y="155" class="lbl-lw" text-anchor="middle">R or Python itself</text>
+
+            <rect x="40" y="172" width="240" height="44" fill="#1e5f74" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="160" y="199" class="lbl-lw" text-anchor="middle">System libraries</text>
+
+            <rect x="40" y="216" width="240" height="44" fill="#0d3b4f" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="160" y="243" class="lbl-lw" text-anchor="middle">Operating system</text>
+
+            <rect x="40" y="260" width="240" height="36" fill="#ebe4d3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="160" y="283" class="lbl-l" text-anchor="middle">Computer</text>
+
+            <path d="M 300 42 L 315 42 L 315 82 L 300 82" fill="none" stroke="#6a6358" stroke-width="1.5"/>
+            <text x="325" y="66" class="tool-l">Git</text>
+            <text x="355" y="66" class="desc-l">— versions your code</text>
+
+            <path d="M 300 86 L 315 86 L 315 126 L 300 126" fill="none" stroke="#6a6358" stroke-width="1.5"/>
+            <text x="325" y="110" class="tool-l">renv / venv</text>
+            <text x="415" y="110" class="desc-l">— locks packages</text>
+
+            <path d="M 300 88 L 288 88 L 288 258 L 300 258" fill="none" stroke="#1e5f74" stroke-width="2.5"/>
+            <text x="325" y="175" class="tool-l" style="font-size: 14px;">Docker</text>
+            <text x="385" y="175" class="desc-l">— locks everything,</text>
+            <text x="385" y="193" class="desc-l" style="font-size: 11px; fill: #6a6358;">from packages down to OS</text>
+          </svg>
+        </div>
+
+        <ul class="points">
+          <li>Every project sits on <strong>layers</strong></li>
+          <li>Git versions only the <strong>top</strong> layer</li>
+          <li><code>renv</code> locks only the <strong>package</strong> layer</li>
+          <li>Docker locks <strong>everything below</strong> too</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4 — WHAT IS DOCKER ============ -->
+  <section class="slide" data-slide="4">
+    <div class="slide-inner">
+      <h2 class="slide-title">So what <em>is</em> Docker?</h2>
+      <p class="lead-big">Docker wraps your entire working environment — OS, runtime, libraries, code — into one sealed package that runs identically anywhere.</p>
+
+      <ul class="points">
+        <li>Solves the "works on my machine" problem</li>
+        <li>Lighter than a virtual machine</li>
+        <li>Standard in modern research and industry</li>
+      </ul>
+
+      <div class="callout dark">
+        <div class="callout-label">One-line summary</div>
+        <p>Docker is <strong>renv for the whole operating system</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5 — THREE WORDS ============ -->
+  <section class="slide" data-slide="5">
+    <div class="slide-inner">
+      <h2 class="slide-title">Three words to <em>remember</em></h2>
+
+      <div class="visual-slide">
+        <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dockerfile recipe flows into an image, which runs as a container.">
+          <defs>
+            <style>
+              .title-s { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; fill: #1a1a1a; }
+              .cap-s { font-family: 'Inter Tight', sans-serif; font-size: 10px; fill: #6a6358; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; }
+              .sub-s { font-family: 'Fraunces', serif; font-style: italic; font-size: 12px; fill: #6a6358; }
+              .arr-s { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #1e5f74; font-weight: 700; }
+              .line-s { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: #6a6358; }
+            </style>
+            <marker id="arr1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#1e5f74"/>
+            </marker>
+          </defs>
+          <g transform="translate(20, 50)">
+            <rect x="0" y="0" width="150" height="170" fill="#f5f1e8" stroke="#2a2a2a" stroke-width="2"/>
+            <text x="12" y="24" class="line-s">FROM python:3.11</text>
+            <text x="12" y="44" class="line-s">WORKDIR /project</text>
+            <text x="12" y="64" class="line-s">COPY . .</text>
+            <text x="12" y="84" class="line-s">RUN pip install</text>
+            <text x="12" y="104" class="line-s">    -r requirements</text>
+            <text x="12" y="124" class="line-s">CMD ["python",</text>
+            <text x="12" y="144" class="line-s">     "analysis.py"]</text>
+            <path d="M 135 0 L 150 15 L 135 15 Z" fill="#ebe4d3" stroke="#2a2a2a" stroke-width="1.5"/>
+          </g>
+          <text x="95" y="30" class="cap-s" text-anchor="middle">01 · The recipe</text>
+          <text x="95" y="240" class="title-s" text-anchor="middle">Dockerfile</text>
+          <text x="95" y="260" class="sub-s" text-anchor="middle">text file you write</text>
+
+          <line x1="185" y1="135" x2="260" y2="135" stroke="#1e5f74" stroke-width="2" marker-end="url(#arr1)"/>
+          <text x="222" y="125" class="arr-s" text-anchor="middle">docker build</text>
+
+          <g transform="translate(275, 60)">
+            <rect x="0" y="20" width="150" height="140" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="2"/>
+            <polygon points="0,20 150,20 135,5 15,5" fill="#1e5f74" stroke="#2a2a2a" stroke-width="2"/>
+            <rect x="70" y="5" width="10" height="155" fill="#0d3b4f" stroke="#2a2a2a" stroke-width="1.5"/>
+            <rect x="20" y="60" width="110" height="40" fill="#f5f1e8" stroke="#2a2a2a" stroke-width="1"/>
+            <text x="75" y="78" class="line-s" text-anchor="middle" style="font-size: 10px;">my-project</text>
+            <text x="75" y="92" class="line-s" text-anchor="middle" style="font-size: 9px;">v1.0 · 450MB</text>
+          </g>
+          <text x="350" y="30" class="cap-s" text-anchor="middle">02 · The snapshot</text>
+          <text x="350" y="240" class="title-s" text-anchor="middle">Image</text>
+          <text x="350" y="260" class="sub-s" text-anchor="middle">frozen, shareable</text>
+
+          <line x1="440" y1="135" x2="515" y2="135" stroke="#1e5f74" stroke-width="2" marker-end="url(#arr1)"/>
+          <text x="477" y="125" class="arr-s" text-anchor="middle">docker run</text>
+
+          <g transform="translate(530, 60)">
+            <rect x="0" y="0" width="150" height="160" fill="#f4d35e" stroke="#2a2a2a" stroke-width="2"/>
+            <circle cx="20" cy="18" r="5" fill="#2d5a3f"/>
+            <text x="32" y="22" class="line-s" style="font-size: 10px; fill: #1a1a1a;">RUNNING</text>
+            <rect x="12" y="35" width="126" height="110" fill="#1a2430" stroke="none"/>
+            <text x="20" y="52" class="line-s" style="fill: #9ed1e8;">$ python analysis.py</text>
+            <text x="20" y="68" class="line-s" style="fill: #e8eef5;">Loading data...</text>
+            <text x="20" y="84" class="line-s" style="fill: #e8eef5;">Computing model...</text>
+            <text x="20" y="100" class="line-s" style="fill: #e8c87a;">Results saved.</text>
+            <text x="20" y="122" class="line-s" style="fill: #4a8ba3;">_</text>
+          </g>
+          <text x="605" y="30" class="cap-s" text-anchor="middle">03 · The instance</text>
+          <text x="605" y="240" class="title-s" text-anchor="middle">Container</text>
+          <text x="605" y="260" class="sub-s" text-anchor="middle">running copy</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6 — KITCHEN ANALOGY ============ -->
+  <section class="slide" data-slide="6">
+    <div class="slide-inner">
+      <h2 class="slide-title">The kitchen <em>analogy</em></h2>
+
+      <ul class="points">
+        <li><strong>Dockerfile</strong> = the recipe (a text file)</li>
+        <li><strong>Image</strong> = the meal, cooked and vacuum-sealed</li>
+        <li><strong>Container</strong> = the meal being eaten</li>
+      </ul>
+
+      <div class="callout" style="margin-top: 2.5rem;">
+        <div class="callout-label">Why the separation matters</div>
+        <p>The recipe is written once. The meal is cooked once. But the meal can be reheated and served many times — each serving is independent.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 7 — ONE IMAGE MANY CONTAINERS ============ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-inner">
+      <h2 class="slide-title">One image, <em>many</em> containers</h2>
+
+      <div class="split bullets-right">
+        <div class="visual-slide">
+          <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One image produces four identical running containers with dots indicating more possible.">
+            <defs>
+              <style>
+                .lbl-m { font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 600; fill: #1a1a1a; }
+                .sub-m { font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; fill: #6a6358; }
+                .line-m { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: #e8eef5; }
+              </style>
+              <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#1e5f74"/>
+              </marker>
+            </defs>
+            <g transform="translate(20, 60)">
+              <rect x="0" y="20" width="130" height="100" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="2"/>
+              <polygon points="0,20 130,20 115,5 15,5" fill="#1e5f74" stroke="#2a2a2a" stroke-width="2"/>
+              <rect x="20" y="50" width="90" height="30" fill="#f5f1e8" stroke="#2a2a2a" stroke-width="1"/>
+              <text x="65" y="70" class="lbl-m" text-anchor="middle" style="font-size: 11px;">IMAGE</text>
+            </g>
+            <text x="85" y="175" class="sub-m" text-anchor="middle">one image</text>
+
+            <line x1="160" y1="100" x2="220" y2="50" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr2)"/>
+            <line x1="160" y1="110" x2="220" y2="110" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr2)"/>
+            <line x1="160" y1="120" x2="220" y2="170" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr2)"/>
+
+            <g transform="translate(230, 20)">
+              <rect x="0" y="0" width="110" height="60" fill="#f4d35e" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="3" fill="#2d5a3f"/>
+              <rect x="8" y="22" width="94" height="30" fill="#1a2430"/>
+              <text x="14" y="36" class="line-m">$ analysis.py</text>
+              <text x="14" y="48" class="line-m" style="fill: #e8c87a;">running...</text>
+            </g>
+            <text x="285" y="95" class="sub-m" text-anchor="middle">container 1</text>
+
+            <g transform="translate(230, 105)">
+              <rect x="0" y="0" width="110" height="60" fill="#f4d35e" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="3" fill="#2d5a3f"/>
+              <rect x="8" y="22" width="94" height="30" fill="#1a2430"/>
+              <text x="14" y="36" class="line-m">$ analysis.py</text>
+              <text x="14" y="48" class="line-m" style="fill: #e8c87a;">running...</text>
+            </g>
+            <text x="285" y="180" class="sub-m" text-anchor="middle">container 2</text>
+
+            <g transform="translate(370, 20)">
+              <rect x="0" y="0" width="110" height="60" fill="#f4d35e" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="3" fill="#2d5a3f"/>
+              <rect x="8" y="22" width="94" height="30" fill="#1a2430"/>
+              <text x="14" y="36" class="line-m">$ analysis.py</text>
+              <text x="14" y="48" class="line-m" style="fill: #e8c87a;">running...</text>
+            </g>
+            <text x="425" y="95" class="sub-m" text-anchor="middle">container 3</text>
+
+            <g transform="translate(370, 105)">
+              <rect x="0" y="0" width="110" height="60" fill="#f4d35e" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="3" fill="#2d5a3f"/>
+              <rect x="8" y="22" width="94" height="30" fill="#1a2430"/>
+              <text x="14" y="36" class="line-m">$ analysis.py</text>
+              <text x="14" y="48" class="line-m" style="fill: #e8c87a;">running...</text>
+            </g>
+            <text x="425" y="180" class="sub-m" text-anchor="middle">container 4</text>
+
+            <text x="520" y="105" class="lbl-m" style="font-size: 20px; fill: #6a6358;">. . .</text>
+            <text x="605" y="100" class="lbl-m" text-anchor="middle">many</text>
+            <text x="605" y="118" class="sub-m" text-anchor="middle">all identical</text>
+          </svg>
+        </div>
+
+        <ul class="points">
+          <li>Image = cookie cutter</li>
+          <li>Container = one cookie</li>
+          <li>Each container is <strong>isolated</strong></li>
+          <li>Create, destroy, repeat — <strong>cheaply</strong></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8 — WORKFLOW INTRO ============ -->
+  <section class="slide" data-slide="8">
+    <div class="slide-inner">
+      <h2 class="slide-title">What happens when you <em>run</em> Docker</h2>
+      <p class="lead-big">A typical Docker workflow has four moments. Here is what actually happens at each one.</p>
+
+      <ul class="points">
+        <li><strong>Write</strong> the Dockerfile</li>
+        <li><strong>Build</strong> it into an image</li>
+        <li><strong>Run</strong> the image as a container</li>
+        <li><strong>Exit</strong> — container disappears, image stays</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 9 — TIMELINE VISUAL ============ -->
+  <section class="slide" data-slide="9">
+    <div class="slide-inner">
+      <h2 class="slide-title">The four-step <em>timeline</em></h2>
+
+      <div class="visual-slide">
+        <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Timeline with four steps: Write Dockerfile, Build, Run, Exit, each explained.">
+          <defs>
+            <style>
+              .num-t { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; fill: #f5f1e8; }
+              .step-t { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; fill: #1a1a1a; }
+              .stepsub-t { font-family: 'Fraunces', serif; font-size: 12px; fill: #6a6358; font-style: italic; }
+              .stepcmd-t { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #1e5f74; font-weight: 600; }
+              .stepeff-t { font-family: 'Inter Tight', sans-serif; font-size: 11px; fill: #1a1a1a; }
+              .mt { font-family: 'Inter Tight', sans-serif; font-size: 10px; fill: #6a6358; }
+              .gt { font-family: 'Inter Tight', sans-serif; font-size: 10px; fill: #2d5a3f; font-weight: 600; }
+              .tm { font-family: 'Inter Tight', sans-serif; font-size: 10px; fill: #6a6358; font-style: italic; }
+            </style>
+          </defs>
+          <line x1="60" y1="80" x2="680" y2="80" stroke="#2a2a2a" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+          <circle cx="90" cy="80" r="22" fill="#1e5f74"/>
+          <text x="90" y="86" class="num-t" text-anchor="middle">01</text>
+          <text x="90" y="120" class="step-t" text-anchor="middle">Write</text>
+          <text x="90" y="138" class="stepsub-t" text-anchor="middle">Dockerfile</text>
+          <rect x="28" y="165" width="125" height="115" fill="white" stroke="#2a2a2a" stroke-width="1"/>
+          <text x="35" y="185" class="stepeff-t" style="font-weight: 600;">Nothing runs yet.</text>
+          <text x="35" y="205" class="mt">Just a text file in</text>
+          <text x="35" y="219" class="mt">your project folder.</text>
+          <text x="35" y="245" class="mt">A recipe waiting</text>
+          <text x="35" y="259" class="mt">to be cooked.</text>
+
+          <circle cx="260" cy="80" r="22" fill="#1e5f74"/>
+          <text x="260" y="86" class="num-t" text-anchor="middle">02</text>
+          <text x="260" y="120" class="step-t" text-anchor="middle">Build</text>
+          <text x="260" y="138" class="stepcmd-t" text-anchor="middle">docker build</text>
+          <rect x="200" y="165" width="125" height="115" fill="white" stroke="#2a2a2a" stroke-width="1"/>
+          <text x="207" y="185" class="stepeff-t" style="font-weight: 600;">Docker cooks.</text>
+          <text x="207" y="205" class="mt">Downloads base OS,</text>
+          <text x="207" y="219" class="mt">installs packages,</text>
+          <text x="207" y="233" class="mt">copies your code.</text>
+          <text x="207" y="259" class="gt">Result: an image</text>
+          <text x="207" y="273" class="gt">on your disk.</text>
+
+          <circle cx="430" cy="80" r="22" fill="#1e5f74"/>
+          <text x="430" y="86" class="num-t" text-anchor="middle">03</text>
+          <text x="430" y="120" class="step-t" text-anchor="middle">Run</text>
+          <text x="430" y="138" class="stepcmd-t" text-anchor="middle">docker run</text>
+          <rect x="370" y="165" width="125" height="115" fill="white" stroke="#2a2a2a" stroke-width="1"/>
+          <text x="377" y="185" class="stepeff-t" style="font-weight: 600;">Container starts.</text>
+          <text x="377" y="205" class="mt">Docker creates a</text>
+          <text x="377" y="219" class="mt">running instance</text>
+          <text x="377" y="233" class="mt">from the image.</text>
+          <text x="377" y="259" class="gt">Your code runs</text>
+          <text x="377" y="273" class="gt">inside it.</text>
+
+          <circle cx="600" cy="80" r="22" fill="#1e5f74"/>
+          <text x="600" y="86" class="num-t" text-anchor="middle">04</text>
+          <text x="600" y="120" class="step-t" text-anchor="middle">Exit</text>
+          <text x="600" y="138" class="stepsub-t" text-anchor="middle">--rm flag</text>
+          <rect x="540" y="165" width="125" height="115" fill="white" stroke="#2a2a2a" stroke-width="1"/>
+          <text x="547" y="185" class="stepeff-t" style="font-weight: 600;">Container dies.</text>
+          <text x="547" y="205" class="mt">Script finishes,</text>
+          <text x="547" y="219" class="mt">container deleted.</text>
+          <text x="547" y="245" class="gt">Image stays.</text>
+          <text x="547" y="259" class="mt">Ready to run again</text>
+          <text x="547" y="273" class="mt">anytime.</text>
+
+          <text x="90" y="320" class="tm" text-anchor="middle">text file</text>
+          <text x="260" y="320" class="tm" text-anchor="middle">slow, once</text>
+          <text x="430" y="320" class="tm" text-anchor="middle">fast, many times</text>
+          <text x="600" y="320" class="tm" text-anchor="middle">instant</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 10 — KEY INSIGHT ============ -->
+  <section class="slide" data-slide="10">
+    <div class="slide-inner">
+      <h2 class="slide-title">Your computer stays <em>clean</em></h2>
+
+      <ul class="points">
+        <li>Nothing is installed on your Mac directly</li>
+        <li>Python, Linux, packages — all live <strong>inside the image</strong></li>
+        <li>Delete the image → your computer is back to normal</li>
+        <li>No version conflicts with other projects</li>
+      </ul>
+
+      <div class="callout dark">
+        <div class="callout-label">Why this matters</div>
+        <p>You can have <strong>five different Python versions</strong> running on the same laptop, each in its own image. None of them touch your system Python.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 11 — SHARING INTRO ============ -->
+  <section class="slide" data-slide="11">
+    <div class="slide-inner">
+      <h2 class="slide-title">How someone else uses your <em>work</em></h2>
+      <p class="lead-big">Docker images live on whichever computer built them. For someone else to use one, something has to travel.</p>
+
+      <ul class="points">
+        <li>Two ways this can happen</li>
+        <li>Both are common in practice</li>
+        <li>Your choice depends on <strong>who</strong> you are sharing with</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 12 — SHARING VISUAL ============ -->
+  <section class="slide" data-slide="12">
+    <div class="slide-inner">
+      <h2 class="slide-title">Two ways to <em>share</em></h2>
+
+      <div class="visual-slide">
+        <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Way 1: Dockerfile travels via GitHub. Way 2: built image travels via Docker Hub.">
+          <defs>
+            <style>
+              .lbl-sh { font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 600; fill: #1a1a1a; }
+              .sub-sh { font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; fill: #6a6358; }
+              .tag-sh { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #1e5f74; font-weight: 700; }
+              .way-sh { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 600; fill: #1e5f74; }
+              .sm-sh { font-family: 'Inter Tight', sans-serif; font-size: 10px; fill: #6a6358; }
+            </style>
+            <marker id="arr3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#1e5f74"/>
+            </marker>
+          </defs>
+
+          <text x="10" y="25" class="way-sh">Way 1 — Share the recipe</text>
+          <text x="10" y="42" class="sm-sh">You send the Dockerfile through Git. Your colleague builds their own image.</text>
+
+          <g transform="translate(10, 55)">
+            <rect x="0" y="0" width="100" height="75" fill="#ebe4d3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="50" y="20" class="sm-sh" style="font-weight: 600;" text-anchor="middle">YOUR MAC</text>
+            <rect x="15" y="30" width="70" height="35" fill="#f5f1e8" stroke="#2a2a2a" stroke-width="1"/>
+            <text x="50" y="52" class="tag-sh" text-anchor="middle" style="font-size: 9px;">Dockerfile</text>
+          </g>
+
+          <g transform="translate(280, 70)">
+            <ellipse cx="40" cy="22" rx="50" ry="22" fill="#f5f1e8" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="40" y="20" class="lbl-sh" text-anchor="middle" style="font-size: 11px;">GitHub</text>
+            <text x="40" y="33" class="sm-sh" text-anchor="middle" style="font-size: 9px;">Dockerfile travels</text>
+          </g>
+
+          <g transform="translate(560, 55)">
+            <rect x="0" y="0" width="100" height="75" fill="#ebe4d3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="50" y="20" class="sm-sh" style="font-weight: 600;" text-anchor="middle">COLLEAGUE</text>
+            <rect x="15" y="30" width="70" height="35" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="1"/>
+            <text x="50" y="52" class="tag-sh" text-anchor="middle" style="font-size: 9px; fill: #f5f1e8;">their image</text>
+          </g>
+
+          <line x1="115" y1="92" x2="275" y2="92" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr3)"/>
+          <text x="195" y="85" class="tag-sh" text-anchor="middle" style="font-size: 9px;">git push</text>
+
+          <line x1="365" y1="92" x2="555" y2="92" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr3)"/>
+          <text x="460" y="85" class="tag-sh" text-anchor="middle" style="font-size: 9px;">clone + docker build</text>
+
+          <line x1="10" y1="165" x2="670" y2="165" stroke="#6a6358" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+          <text x="10" y="190" class="way-sh">Way 2 — Share the finished image</text>
+          <text x="10" y="207" class="sm-sh">You push the built image to Docker Hub. Your colleague downloads it.</text>
+
+          <g transform="translate(10, 220)">
+            <rect x="0" y="0" width="100" height="75" fill="#ebe4d3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="50" y="20" class="sm-sh" style="font-weight: 600;" text-anchor="middle">YOUR MAC</text>
+            <rect x="15" y="30" width="70" height="35" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="1"/>
+            <text x="50" y="52" class="tag-sh" text-anchor="middle" style="font-size: 9px; fill: #f5f1e8;">your image</text>
+          </g>
+
+          <g transform="translate(280, 235)">
+            <ellipse cx="40" cy="22" rx="55" ry="25" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="40" y="20" class="lbl-sh" text-anchor="middle" style="font-size: 11px; fill: #f5f1e8;">Docker Hub</text>
+            <text x="40" y="33" class="sm-sh" text-anchor="middle" style="font-size: 9px; fill: #f5f1e8;">image travels</text>
+          </g>
+
+          <g transform="translate(560, 220)">
+            <rect x="0" y="0" width="100" height="75" fill="#ebe4d3" stroke="#2a2a2a" stroke-width="1.5"/>
+            <text x="50" y="20" class="sm-sh" style="font-weight: 600;" text-anchor="middle">COLLEAGUE</text>
+            <rect x="15" y="30" width="70" height="35" fill="#4a8ba3" stroke="#2a2a2a" stroke-width="1"/>
+            <text x="50" y="52" class="tag-sh" text-anchor="middle" style="font-size: 9px; fill: #f5f1e8;">same image</text>
+          </g>
+
+          <line x1="115" y1="257" x2="275" y2="257" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr3)"/>
+          <text x="195" y="250" class="tag-sh" text-anchor="middle" style="font-size: 9px;">docker push</text>
+
+          <line x1="365" y1="257" x2="555" y2="257" stroke="#1e5f74" stroke-width="1.5" marker-end="url(#arr3)"/>
+          <text x="460" y="250" class="tag-sh" text-anchor="middle" style="font-size: 9px;">docker pull</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 13 — WHICH TO USE ============ -->
+  <section class="slide" data-slide="13">
+    <div class="slide-inner">
+      <h2 class="slide-title">Which way should <em>you</em> use?</h2>
+
+      <ul class="points">
+        <li><strong>Way 1 (Dockerfile via Git)</strong> — standard for research</li>
+        <li>Small, human-readable, lives with your code</li>
+        <li>Works for 90% of academic projects</li>
+      </ul>
+
+      <ul class="points" style="margin-top: 2rem;">
+        <li><strong>Way 2 (Docker Hub)</strong> — for fast distribution</li>
+        <li>Published papers, teaching materials, production apps</li>
+        <li>Skip the build time for anyone who clones</li>
+      </ul>
+
+      <div class="callout dark">
+        <div class="callout-label">Rule of thumb</div>
+        <p>For your research: <strong>ship the Dockerfile</strong>. That's it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 14 — RECAP ============ -->
+  <section class="slide" data-slide="14">
+    <div class="slide-inner">
+      <h2 class="slide-title">What we <em>covered</em></h2>
+
+      <ul class="points">
+        <li><strong>The problem</strong> — reproducibility goes deeper than packages</li>
+        <li><strong>The concept</strong> — Docker locks the whole stack</li>
+        <li><strong>The three words</strong> — Dockerfile, image, container</li>
+        <li><strong>The workflow</strong> — write, build, run, exit</li>
+        <li><strong>Sharing</strong> — Dockerfile via Git, or image via Docker Hub</li>
+      </ul>
+
+      <div class="callout" style="margin-top: 2.5rem;">
+        <div class="callout-label">Still optional for your final project</div>
+        <p><code>renv</code> or <code>venv</code> plus a clear README is enough. Docker is a tool you reach for when you need it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 15 — BEFORE NEXT CLASS ============ -->
+  <section class="slide final-center" data-slide="15">
+    <div class="slide-inner">
+      <div class="eyebrow">Before next class</div>
+      <h2 class="slide-title" style="margin-bottom: 1rem;">Can you answer <em>these</em>?</h2>
+
+      <div class="check-points">
+        <ul class="points">
+          <li>What is a <strong>Dockerfile</strong>, in one sentence?</li>
+          <li>What is an <strong>image</strong>, in one sentence?</li>
+          <li>What is a <strong>container</strong>, in one sentence?</li>
+          <li>Why does Docker solve what <code>renv</code> alone cannot?</li>
+        </ul>
+      </div>
+
+      <p class="subtitle" style="margin: 2.5rem auto 0; max-width: 40ch;">Next class: live demo. Install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a> if you want to follow along.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="counter" id="counter"><strong>01</strong> / 15</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous slide">◀ PREV</button>
+  <button id="next" aria-label="Next slide">NEXT ▶</button>
+</div>
+
+<div class="hint">Use <kbd>←</kbd> <kbd>→</kbd> or click</div>
+
+<script>
+  (function() {
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const prev = document.getElementById('prev');
+    const next = document.getElementById('next');
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    let current = 0;
+
+    function pad(n) { return n.toString().padStart(2, '0'); }
+
+    function show(index) {
+      if (index < 0) index = 0;
+      if (index >= total) index = total - 1;
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      current = index;
+      counter.innerHTML = '<strong>' + pad(index + 1) + '</strong> / ' + pad(total);
+      progress.style.width = ((index + 1) / total * 100) + '%';
+      prev.disabled = index === 0;
+      next.disabled = index === total - 1;
+    }
+
+    prev.addEventListener('click', () => show(current - 1));
+    next.addEventListener('click', () => show(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') { show(current - 1); e.preventDefault(); }
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { show(current + 1); e.preventDefault(); }
+      if (e.key === 'Home') { show(0); e.preventDefault(); }
+      if (e.key === 'End') { show(total - 1); e.preventDefault(); }
+    });
+
+    // click on empty area to advance (but not on buttons/links)
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('button, a, .nav, kbd')) return;
+      show(current + 1);
+    });
+
+    show(0);
+  })();
+</script>
+
+</body>
+</html>
