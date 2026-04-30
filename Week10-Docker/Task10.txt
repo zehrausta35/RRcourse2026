@@ -1,0 +1,86 @@
+PS C:\Users\wojci\Desktop\hello-docker> @'
+>> import sys
+>> print(f"Hello from Python {sys.version_info.major}.{sys.version_info.minor} inside a container!")
+>> '@ | Out-File -FilePath hello.py -Encoding utf8
+PS C:\Users\wojci\Desktop\hello-docker> python hello.py
+Hello from Python 3.13 inside a container!
+PS C:\Users\wojci\Desktop\hello-docker> @'
+>> FROM python:3.11-slim
+>> WORKDIR /app
+>> COPY hello.py .
+>> CMD ["python", "hello.py"]
+>> '@ | Out-File -FilePath Dockerfile -Encoding utf8
+
+
+
+docker build -t hello-docker .
+[+] Building 15.2s (8/8) FINISHED
+ => [internal] load build definition from Dockerfile
+ => => transferring dockerfile: 142B
+ => [internal] load metadata for docker.io/library/python:3.9
+ => [internal] load .dockerignore
+ => => transferring context: 2B
+ => [1/3] FROM docker.io/library/python:3.9@sha256:...
+ => [internal] load build context
+ => => transferring context: 95B
+ => [2/3] WORKDIR /app
+ => [3/3] COPY hello.py .
+ => exporting to image
+ => => exporting layers
+ => => writing image sha256:...
+ => => naming to docker.io/library/hello-docker
+
+docker run --rm hello-docker
+Hello from Python 3.9 inside a container!
+
+
+docker build -t hello-docker .
+[+] Building 2.1s (8/8) FINISHED
+...
+
+docker run --rm hello-docker
+Traceback (most recent call last):
+  File "/app/hello.py", line 1, in <module>
+    import sys, pandas
+ModuleNotFoundError: No module named 'pandas'
+
+
+
+docker build -t hello-docker .
+[+] Building 8.4s (9/9) FINISHED
+ => [internal] load build definition from Dockerfile
+ => => transferring dockerfile: 184B
+ => [internal] load metadata for docker.io/library/python:3.9
+ => [internal] load .dockerignore
+ => => transferring context: 2B
+ => [1/4] FROM docker.io/library/python:3.9
+ => [internal] load build context
+ => => transferring context: 110B
+ => [2/4] WORKDIR /app
+ => [3/4] COPY hello.py .
+ => [4/4] RUN pip install pandas==2.2.0
+ => exporting to image
+ => => exporting layers
+ => => writing image sha256:...
+ => => naming to docker.io/library/hello-docker
+
+docker run --rm hello-docker
+Python 3.9, pandas 2.2.0
+
+
+FROM python:3.9
+
+WORKDIR /app
+
+COPY hello.py .
+RUN pip install pandas==2.2.0
+
+CMD ["python", "hello.py"]
+
+
+
+Question 2.1
+If we just use RUN pip install pandas without a version, Docker will grab whatever the newest version is at the exact moment the image is built. So, if a colleague tries to build my Dockerfile in a year, they might get a newer version of pandas where some functions have been changed or removed. This is a big problem for reproducibility because the code might suddenly crash or give totally different results for them, even though they used my exact same Dockerfile.
+
+Question 2.2
+It's better to share the Dockerfile (the recipe) because it lets other people see exactly how the environment was built step-by-step. If you just send the built image (the cake), it might run perfectly, but it's basically a black box—they won't know what specific commands or background libraries were used to make it. Sharing the Dockerfile makes the research transparent, letting others check the exact dependencies and easily modify the setup if they need to for their own work.
