@@ -1,0 +1,178 @@
+---
+title: "Viewership Analysis: Prison Break"
+author: "Umair Aziz"
+date: "2026-04-16"
+format: html
+execute:
+  echo: false
+---
+
+## About *Prison Break*
+
+*Prison Break* is an American crime drama television series created by Paul Scheuring for Fox. The series revolves around two brothers: Lincoln Burrows (Dominic Purcell) and Michael Scofield (Wentworth Miller); Lincoln has been sentenced to death for a crime he did not commit, while Michael devises an elaborate plan to help his brother escape prison and clear his name. The series was originally turned down by Fox in 2003, which was concerned about the long-term prospects of such a series. Following the popularity of serialized prime time television series *24* and *Lost*, Fox decided to back production in 2004.
+
+The first season received mostly positive reviews from critics and performed exceptionally in the ratings. It was originally planned for a 13-episode run, but was extended to include an extra nine episodes due to its popularity. *Prison Break* was nominated for several industry awards, including the 2005 Golden Globe Award for Best Television Series Drama and the 2006 People's Choice Award for Favorite New TV Drama, which it won.
+
+![Prison Break Logo](../images/Prison-break-s1-intro.jpg)
+
+The series originally aired from August 29, 2005, to May 15, 2009, spanning four seasons on Fox. After an eight-year hiatus, a nine-episode fifth season premiered on April 4, 2017, and concluded on May 30, 2017, serving as a revival of the series.
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(knitr)
+
+# Create the data directly in the code
+viewership <- tibble(
+  season = c(1, 2, 3, 4, 5),
+  premiere_date = c("August 29, 2005", "August 21, 2006", "September 17, 2007", 
+                    "September 1, 2008", "April 4, 2017"),
+  premiere_viewers = c(10.51, 9.37, 7.51, 6.53, 3.83),
+  finale_date = c("May 15, 2006", "April 2, 2007", "February 18, 2008", 
+                  "May 15, 2009", "May 30, 2017"),
+  finale_viewers = c(10.24, 8.12, 7.40, 3.32, 2.30),
+  avg_viewers = c(9.2, 9.3, 8.2, 6.1, 4.0),
+  rank = c(55, 51, 73, 68, 115)
+)
+```
+
+## Viewership Statistics
+
+```{r}
+#| label: summary-stats
+# Calculate summary statistics
+avg_viewers <- mean(viewership$avg_viewers, na.rm = TRUE)
+max_premiere <- max(viewership$premiere_viewers, na.rm = TRUE)
+min_finale <- min(viewership$finale_viewers, na.rm = TRUE)
+total_decline <- viewership$avg_viewers[1] - viewership$avg_viewers[5]
+```
+
+*Prison Break* demonstrated strong viewership throughout its initial four-season run (2005-2009), with an overall average of `r round(avg_viewers, 2)` million viewers across all seasons. The series premiere achieved the highest viewership with `r round(max_premiere, 2)` million viewers, while the lowest finale viewership was recorded at `r round(min_finale, 2)` million viewers during the fifth season revival in 2017.
+
+The show debuted on August 29, 2005, to an estimated audience of 10.5 million viewers. Fox had not had such success for mid-year Monday numbers since *Melrose Place* and *Ally McBeal* aired in September 1998. The premiere was ranked first in both the 18–49 and 18–34 demographics.
+
+## Viewership Over Time
+
+```{r}
+#| label: fig-viewership-over-time
+#| fig-cap: "Average viewership by season showing the trend from 2005 to 2017"
+#| fig-width: 10
+#| fig-height: 6
+#| warning: false
+
+# Create a data frame for plotting with proper season labels
+viewership_plot <- viewership %>%
+  mutate(season_label = paste("Season", season),
+         year = c("2005-06", "2006-07", "2007-08", "2008-09", "2017"))
+
+ggplot(viewership_plot, aes(x = factor(season), y = avg_viewers, group = 1)) +
+  geom_line(color = "#2c5aa0", linewidth = 1.2) +
+  geom_point(color = "#2c5aa0", size = 4) +
+  geom_text(aes(label = paste0(avg_viewers, "M")), 
+            vjust = -1, size = 3.5, fontface = "bold") +
+  labs(
+    x = "Season",
+    y = "Average Viewers (Millions)",
+    title = "Prison Break Viewership Trends Across All Seasons",
+    subtitle = "Seasons 1-4 (2005-2009) and Season 5 Revival (2017)"
+  ) +
+  scale_y_continuous(limits = c(0, 12), breaks = seq(0, 12, 2)) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11),
+    axis.title = element_text(size = 11, face = "bold"),
+    axis.text = element_text(size = 10),
+    panel.grid.minor = element_blank()
+  )
+```
+
+The visualization clearly shows a downward trend in average viewership from the series premiere through its original run. After an eight-year gap, Season 5 returned with significantly lower viewership numbers compared to the original series.
+
+## Season-to-Season Changes in Viewership
+
+```{r}
+#| label: fig-viewership-changes
+#| fig-cap: "Change in average viewership between consecutive seasons"
+#| fig-width: 10
+#| fig-height: 6
+#| warning: false
+
+# Calculate season-to-season changes
+viewership_changes <- viewership %>%
+  mutate(
+    change = avg_viewers - lag(avg_viewers),
+    change_label = case_when(
+      is.na(change) ~ "Premiere",
+      change > 0 ~ paste0("+", round(change, 1), "M"),
+      TRUE ~ paste0(round(change, 1), "M")
+    )
+  )
+
+# For the gap between season 4 and 5, we need special handling
+viewership_changes$change_label[5] <- paste0(round(viewership_changes$change[5], 1), "M\n(8-year gap)")
+
+ggplot(viewership_changes %>% filter(!is.na(change)), 
+       aes(x = factor(season), y = change, fill = change > 0)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = change_label), 
+            vjust = ifelse(viewership_changes %>% 
+                          filter(!is.na(change)) %>% 
+                          pull(change) > 0, -0.5, 1.5), 
+            size = 3.5, fontface = "bold") +
+  labs(
+    x = "Season",
+    y = "Change in Average Viewers (Millions)",
+    title = "Season-to-Season Viewership Changes",
+    subtitle = "Positive values indicate growth, negative values indicate decline"
+  ) +
+  scale_fill_manual(values = c("TRUE" = "#2ecc71", "FALSE" = "#e74c3c"), guide = "none") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11),
+    axis.title = element_text(size = 11, face = "bold"),
+    axis.text = element_text(size = 10),
+    panel.grid.minor = element_blank()
+  )
+```
+
+This chart illustrates the magnitude of viewership changes between consecutive seasons, highlighting both gains and losses in the audience.
+
+## Analysis of Observed Trends
+
+```{r}
+#| label: calculate-detailed-changes
+# Calculate specific changes mentioned in the analysis
+change_s1_s2 <- viewership$avg_viewers[2] - viewership$avg_viewers[1]
+change_s2_s3 <- viewership$avg_viewers[3] - viewership$avg_viewers[2]
+change_s3_s4 <- viewership$avg_viewers[4] - viewership$avg_viewers[3]
+change_s3_s5 <- viewership$avg_viewers[5] - viewership$avg_viewers[3]
+percent_decline_s1_s4 <- ((viewership$avg_viewers[1] - viewership$avg_viewers[4]) / viewership$avg_viewers[1]) * 100
+percent_decline_s4_s5 <- ((viewership$avg_viewers[4] - viewership$avg_viewers[5]) / viewership$avg_viewers[4]) * 100
+```
+
+The viewership data reveals several significant patterns throughout *Prison Break*'s run:
+
+**Seasons 1-2: Stable Performance**
+
+The series maintained remarkably stable viewership between its first and second seasons, with only a marginal increase of `r round(change_s1_s2, 1)` million viewers. Season 1 averaged 9.2 million viewers, while Season 2 averaged 9.3 million viewers. This consistency demonstrated the show's ability to retain its audience during the critical transition from the prison escape premise to the fugitive storyline.
+
+**Season 3: First Major Decline**
+
+Season 3 marked the first significant drop in viewership, decreasing by `r round(abs(change_s2_s3), 1)` million viewers to an average of 8.2 million. This decline coincided with the show's relocation to the Panamanian prison Sona and represented a notable shift in audience engagement. Some critics suggested this was when the show began to diverge too far from its original premise.
+
+**Season 4: Continued Erosion**
+
+The trend continued into Season 4, which saw another decline of `r round(abs(change_s3_s4), 1)` million viewers, bringing the average down to 6.1 million. This represented a `r round(percent_decline_s1_s4, 1)`% decrease from the first season's viewership. The fourth season's shift toward a government conspiracy storyline further distanced the series from its prison-break origins, which may have contributed to the declining audience.
+
+**Season 5: The Revival Effect**
+
+After an eight-year hiatus, Season 5 premiered in 2017 with substantially lower viewership of 4.0 million average viewers. Compared to Season 3, this represented a decline of `r round(abs(change_s3_s5), 1)` million viewers. The `r round(abs(change_s3_s5), 1)` million viewer decrease from Season 4 to Season 5 (`r round(percent_decline_s4_s5, 1)`% decline) reflects both the challenges of reviving a series after a long gap and changes in television viewing habits, including the rise of streaming platforms.
+
+**Overall Trajectory**
+
+From premiere to finale, *Prison Break* experienced a total decline of `r round(total_decline, 1)` million viewers in average season viewership. However, the series maintained a dedicated fanbase throughout its run and later gained renewed popularity on streaming platforms. According to Nielsen Media Research, in August 2024, *Prison Break* became the most-streamed program on Netflix, garnering 1.6 billion minutes of viewership, demonstrating the show's enduring appeal beyond traditional broadcast television.
+
+The viewership patterns align with broader industry trends during the late 2000s and the fundamental challenge of sustaining a premise-driven series beyond its original concept. Despite the numerical decline, *Prison Break* remained culturally significant and successful enough to warrant its 2017 revival.
