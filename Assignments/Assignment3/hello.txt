@@ -1,1 +1,11 @@
-<write something here>
+In mathematics, Wiener process is a stochastic process sharing the same behaviour as Brownian
+motion, which is a physical phenomenon of random movement of particles suspended in a
+fluid. Generally, the terms “Brownian motion” and “Wiener process” are the same, although the
+former emphasises the physical aspects whilst the latter emphasises the mathematical aspects.
+In quantitative analysis, by drawing on the mathematical properties of Wiener processes to
+explain economic phenomena, financial information such as stock prices, commodity prices,
+interest rates, foreign exchange rates, etc. are treated as random quantities and then mathematical
+models are constructed to capture the randomness. Given these financial models are
+stochastic and continuous in nature, the Wiener process is usually employed to express the
+random component of the model. Before we discuss the models in depth, in this chapter we
+first look at the definition and basic properties of a Wiener process.
