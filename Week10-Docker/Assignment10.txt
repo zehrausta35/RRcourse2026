@@ -1,0 +1,110 @@
+1.1
+```
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> @'
+>> FROM python:3.9
+>> WORKDIR /app
+>> COPY hello.py .
+>> CMD ["python", "hello.py"]
+>> '@ | Out-File -FilePath Dockerfile -Encoding utf8
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> docker build -t hello-docker .
+[+] Building 8.4s (8/8) FINISHED                                                                   docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                               0.1s
+ => => transferring dockerfile: 113B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/python:3.9                                                      7.5s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [1/3] FROM docker.io/library/python:3.9@sha256:da5aee29682d12a6649f51c8d6f15b87deb3e6c524b923c41d0cb3304d07c9  0.0s
+ => => resolve docker.io/library/python:3.9@sha256:da5aee29682d12a6649f51c8d6f15b87deb3e6c524b923c41d0cb3304d07c9  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 148B                                                                                  0.0s
+ => CACHED [2/3] WORKDIR /app                                                                                      0.0s
+ => [3/3] COPY hello.py .                                                                                          0.0s
+ => exporting to image                                                                                             0.5s
+ => => exporting layers                                                                                            0.1s
+ => => exporting manifest sha256:be4bf77ed7dd6f507784a276db28716f966a2c828e1e72cad896e6dc7f2eb4e3                  0.0s
+ => => exporting config sha256:ce9e6cda73e461bc6d8e5bf2412c5f9bc82d03d2b4736fbc6f8d22bb34fb1a3c                    0.0s
+ => => exporting attestation manifest sha256:df03851b57a2138d1ef7ad85d62f728a9674397749b82516b0618cb05aeab0a7      0.1s
+ => => exporting manifest list sha256:5d7ebe03c340b757cf8aabf006a4a99a633696b52006d2783a7bef7d5690caf5             0.0s
+ => => naming to docker.io/library/hello-docker:latest                                                             0.0s
+ => => unpacking to docker.io/library/hello-docker:latest                                                          0.1s
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> docker run --rm hello-docker
+Hello from Python 3.9 inside a container!
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker>
+```
+
+1.2
+```
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> @'
+>> FROM python:3.9
+>> WORKDIR /app
+>> RUN pip install pandas==2.0.3 numpy==1.26.4
+>> COPY hello.py .
+>> CMD ["python", "hello.py"]
+>> '@ | Out-File -FilePath Dockerfile -Encoding utf8
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> docker build -t hello-docker .
+[+] Building 21.4s (9/9) FINISHED                                                                  docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                               0.0s
+ => => transferring dockerfile: 157B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/python:3.9                                                      0.7s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [1/4] FROM docker.io/library/python:3.9@sha256:da5aee29682d12a6649f51c8d6f15b87deb3e6c524b923c41d0cb3304d07c9  0.0s
+ => => resolve docker.io/library/python:3.9@sha256:da5aee29682d12a6649f51c8d6f15b87deb3e6c524b923c41d0cb3304d07c9  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 29B                                                                                   0.0s
+ => CACHED [2/4] WORKDIR /app                                                                                      0.0s
+ => [3/4] RUN pip install pandas==2.0.3 numpy==1.26.4                                                             12.4s
+ => [4/4] COPY hello.py .                                                                                          0.1s
+ => exporting to image                                                                                             8.0s
+ => => exporting layers                                                                                            6.2s
+ => => exporting manifest sha256:d038b5f5438d935713b891ccd303c8a2b684851eef3cef8510c3608c8b4d04df                  0.0s
+ => => exporting config sha256:afdee0c68187813cb1b5d3e28de814b631f90cd06032bdcde3bf71223cf38796                    0.0s
+ => => exporting attestation manifest sha256:68667a397ee6cab37ecd21ed97426be334e27174bd612ed99d5f7de144627ed5      0.0s
+ => => exporting manifest list sha256:b53c98eda07a6bd508bc6e33bf863e6955db2ce59e5449d2d125ec96dd3e7d8e             0.0s
+ => => naming to docker.io/library/hello-docker:latest                                                             0.0s
+ => => unpacking to docker.io/library/hello-docker:latest                                                          1.6s
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> docker run --rm hello-docker
+Python 3.9, pandas 2.0.3
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> @'
+>> import sys, pandas
+>> print(f"Python {sys.version_info.major}.{sys.version_info.minor}, pandas {pandas.__version__}")
+>> '@ | Out-File -FilePath hello.py -Encoding utf8
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> docker build -t hello-docker .
+[+] Building 1.1s (9/9) FINISHED                                                                   docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                               0.0s
+ => => transferring dockerfile: 157B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/python:3.9                                                      0.7s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 2B                                                                                    0.0s
+ => [1/4] FROM docker.io/library/python:3.9@sha256:da5aee29682d12a6649f51c8d6f15b87deb3e6c524b923c41d0cb3304d07c9  0.0s
+ => => resolve docker.io/library/python:3.9@sha256:da5aee29682d12a6649f51c8d6f15b87deb3e6c524b923c41d0cb3304d07c9  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 154B                                                                                  0.0s
+ => CACHED [2/4] WORKDIR /app                                                                                      0.0s
+ => CACHED [3/4] RUN pip install pandas==2.0.3 numpy==1.26.4                                                       0.0s
+ => CACHED [4/4] COPY hello.py .                                                                                   0.0s
+ => exporting to image                                                                                             0.1s
+ => => exporting layers                                                                                            0.0s
+ => => exporting manifest sha256:d038b5f5438d935713b891ccd303c8a2b684851eef3cef8510c3608c8b4d04df                  0.0s
+ => => exporting config sha256:afdee0c68187813cb1b5d3e28de814b631f90cd06032bdcde3bf71223cf38796                    0.0s
+ => => exporting attestation manifest sha256:e0fd27a486c6a737e9e1d2a02a2258164d8cabdc4a774b21b2c9a7a540c31eaa      0.0s
+ => => exporting manifest list sha256:e74906e65381058d6409c03e92f93834fa9177609da497bda852fddb1e4d4aca             0.0s
+ => => naming to docker.io/library/hello-docker:latest                                                             0.0s
+ => => unpacking to docker.io/library/hello-docker:latest                                                          0.0s
+PS C:\Users\adala\data_science_masters\YEAR2\reproducible_research\repositories\RRcourse2026\Week10-Docker\hello-docker> docker run --rm hello-docker
+Python 3.9, pandas 2.0.3
+```
+
+Dockerfile
+FROM python:3.9
+WORKDIR /app
+RUN pip install pandas==2.0.3 numpy==1.26.4
+COPY hello.py .
+CMD ["python", "hello.py"]
+
+2.1
+The reproducibility problem is that without giving a specific version of pandas, when installing the library the system chooses the latest avalaible version, which can be different few months ago compared to now. This way different users will have different versions, depending on the time of installing the library.
+
+2.2
+
+The Dokerfile includes all the neccesary information and contstruct of the project which will make the reproducibility easier and complete, including all the neccessary libraries and creating proper environment.
