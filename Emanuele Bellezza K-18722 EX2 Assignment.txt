@@ -1,0 +1,35 @@
+emanu@PcEmanuele MINGW64 ~/Desktop/RR_gitl/EX2 (master)
+$ git status
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .gitignore
+        datadata1.csv
+        gitignore
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+emanu@PcEmanuele MINGW64 ~/Desktop/RR_gitl/EX2 (master)
+$ git log
+commit 784268de8ef2fb6dcfa1fa54f310a05e682aaf35 (HEAD -> master)
+Author: Emanuele Bellezza <emanubellez@gmail.com>
+Date:   Thu Feb 26 19:27:01 2026 +0100
+
+    added nwe readme.txt and new line to README.md
+
+commit 1e6b1600fa4e35516c4490d560819a2da641ec4e
+Author: Emanuele Bellezza <emanubellez@gmail.com>
+Date:   Thu Feb 26 19:22:20 2026 +0100
+
+    Addes README.md with
+
+emanu@PcEmanuele MINGW64 ~/Desktop/RR_gitl/EX2 (master)
+$ git ls-files
+README.md
+readme.txt
+
+emanu@PcEmanuele MINGW64 ~/Desktop/RR_gitl/EX2 (master)
+$ git ls-files -o
+.gitignore
+datadata1.csv
+gitignore

@@ -21,7 +21,7 @@ library(reticulate)
 library(ggplot2)
 ```
 
----
+------------------------------------------------------------------------
 
 # Three key elements
 
@@ -33,7 +33,7 @@ The YAML block sits at the very top of every `.qmd` file, enclosed in triple das
 
 This document uses:
 
-```yaml
+``` yaml
 ---
 title: "Quarto"
 author: "Wojciech Hardy"
@@ -46,7 +46,7 @@ execute:
 
 > **Note:** `execute: echo: fenced` is what makes code chunks display with their fence backticks visible in the output — useful for teaching. In a regular report you would typically set `echo: false` here.
 
-## Theme 
+## Theme
 
 Applies a Bootstrap CSS theme to the HTML output. flatly is a clean, modern light theme. Other built-in options include cosmo, lumen, journal, darkly (dark mode), slate (dark), and others. This one line completely changes the visual appearance of the rendered document without you writing any CSS.
 
@@ -60,7 +60,7 @@ Where the magic happens. Code whose output — numbers, tables, plots — become
 
 Let's start with Markdown!
 
----
+------------------------------------------------------------------------
 
 # Switching from RMarkdown?
 
@@ -68,11 +68,11 @@ If you've used RMarkdown before, Quarto will feel very familiar — it is essent
 
 [Might want to take a look at the official FAQ](https://quarto.org/docs/faq/rmarkdown.html)
 
----
+------------------------------------------------------------------------
 
 > **💡 Tip:** In RStudio, try switching between **Source** and **Visual** mode (top-left of the editor). Visual mode gives you a WYSIWYG view — useful for tables and formatting. Also consider enabling **Render on Save** so the preview updates automatically as you type.
 
----
+------------------------------------------------------------------------
 
 # Cheatsheets are handy as always
 
@@ -86,7 +86,7 @@ You don't need to memorise Markdown syntax — keep a reference nearby. Note: th
 
 [A Quarto cheat sheet](https://res.cloudinary.com/dyd911kmh/image/upload/v1676540721/Marketing/Blog/Quarto_Cheat_Sheet.pdf)
 
----
+------------------------------------------------------------------------
 
 # Basic formatting
 
@@ -94,14 +94,13 @@ The most common inline formatting uses asterisks or underscores. Either syntax w
 
 Some basic text formatting includes `*Italics*` or `_Italics_` (*Italics*) and `**Bold**` or `__Bold__` (**Bold**) text. ***Bold***
 
----
+------------------------------------------------------------------------
 
 **Line breaks in Markdown behave differently than you might expect.** The three examples below look similar in the source but render differently:
 
-Some text
-sdajiodf
+Some text sdajiodf
 
-Some text  
+Some text\
 sdajiodf
 
 Some text
@@ -110,13 +109,13 @@ sdajiodf
 
 > The first pair has no special treatment — they merge into one paragraph. The second pair has **two trailing spaces** after `Some text`, which forces a line break within the same paragraph. The third has a **blank line** between them, creating two separate paragraphs. This trips up almost everyone the first time.
 
----
+------------------------------------------------------------------------
 
 Superscripts can be done like so: `R^2^` R^2^
 
 Subscripts can be done like so: `H~2~O` H~2~O
 
----
+------------------------------------------------------------------------
 
 # Headers
 
@@ -142,7 +141,7 @@ Headers are created with `#` symbols. The number of `#` symbols determines the l
 
 ##### Header 5
 
----
+------------------------------------------------------------------------
 
 # Lists
 
@@ -188,7 +187,7 @@ Nesting is done with indentation (4 spaces or 1 tab). You can mix ordered and un
     -   Item 2
     -   Item 3
 
----
+------------------------------------------------------------------------
 
 # Tables
 
@@ -202,7 +201,7 @@ Markdown tables are written with `|` pipe characters and `:` colons for column a
 
 (this is a raw Markdown approach — later we'll see `knitr::kable()` for generating tables from data automatically)
 
----
+------------------------------------------------------------------------
 
 # Quotes
 
@@ -214,15 +213,26 @@ Blockquotes are created with `>`. Useful for callout text, definitions, or attri
 
 \- Geralt of Rivia
 
----
+------------------------------------------------------------------------
 
 # Using HTML
 
 When rendering to HTML, you can embed raw HTML directly in your Markdown. This is an escape hatch for anything Markdown can't express natively — custom tables, styled elements, embedded media. Here's something copied and pasted directly from the YAML Wikipedia page source code:
 
-<table class="infobox"><caption class="infobox-title" style="padding-bottom:0.15em;">YAML</caption><tbody><tr><td colspan="2" class="infobox-image"><a href="/wiki/File:Official_YAML_Logo.svg" class="image"><img alt="Official YAML Logo.svg" src="//upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/64px-Official_YAML_Logo.svg.png" decoding="async" width="64" height="59" srcset="//upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/96px-Official_YAML_Logo.svg.png 1.5x, //upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/128px-Official_YAML_Logo.svg.png 2x" data-file-width="512" data-file-height="471"></a></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><a href="/wiki/Filename_extension" title="Filename extension">Filename extensions</a></th><td class="infobox-data" style="line-height:1.35em;"><code class="mw-highlight mw-highlight-lang-text mw-content-ltr" id="" style="" dir="ltr">.yaml</code>, <code class="mw-highlight mw-highlight-lang-text mw-content-ltr" id="" style="" dir="ltr">.yml</code></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><a href="/wiki/Media_type" title="Media type">Internet media&nbsp;type</a></th><td class="infobox-data" style="line-height:1.35em;"><i>Not registered</i></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;">Initial release</th><td class="infobox-data" style="line-height:1.35em;">11&nbsp;May 2001<span class="noprint">; 21 years ago</span><span style="display:none">&nbsp;(<span class="bday dtstart published updated">2001-05-11</span>)</span></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><a href="/wiki/Software_release_life_cycle" title="Software release life cycle">Latest release</a></th><td class="infobox-data" style="line-height:1.35em;"><div style="display: inline-block; line-height: 1.2em; padding: .1em 0;">1.2 (Revision 1.2.2)<br>1&nbsp;October 2021<span class="noprint">; 18 months ago</span><span style="display:none">&nbsp;(<span class="bday dtstart published updated">2021-10-01</span>)</span> </div></td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;">Type of format</th><td class="infobox-data" style="line-height:1.35em;">Data interchange</td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;"><span class="nowrap"><a href="/wiki/Open_file_format" title="Open file format">Open format</a>?</span></th><td class="infobox-data" style="line-height:1.35em;">Yes</td></tr><tr><th scope="row" class="infobox-label" style="line-height:1.2em; padding-right:0.65em;">Website</th><td class="infobox-data" style="line-height:1.35em;"><span class="url"><a rel="nofollow" class="external text" href="https://yaml.org">yaml<wbr>.org</a></span></td></tr></tbody></table>
+|  |
+|------------------------------------------------------------------------|
+| [![Official YAML Logo.svg](//upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Official_YAML_Logo.svg/64px-Official_YAML_Logo.svg.png){alt="Official YAML Logo.svg"}](/wiki/File:Official_YAML_Logo.svg) |
+| [Filename extensions](/wiki/Filename_extension "Filename extension") |
+| [Internet media type](/wiki/Media_type "Media type") |
+| Initial release |
+| [Latest release](/wiki/Software_release_life_cycle "Software release life cycle") |
+| Type of format |
+| [Open format](/wiki/Open_file_format "Open file format")? |
+| Website |
 
----
+: YAML
+
+------------------------------------------------------------------------
 
 # Equations
 
@@ -232,7 +242,7 @@ You can insert equations with the same syntax as in LaTeX (MathJax). E.g. within
 
 $$\int_{-\infty}^{\infty}1/(b-a) \, dx$$
 
----
+------------------------------------------------------------------------
 
 # Using code chunks in Quarto
 
@@ -264,7 +274,7 @@ summary(cars)
 plot(pressure)
 ```
 
----
+------------------------------------------------------------------------
 
 You can also [use Python in Quarto with Jupyter Notebook](https://quarto.org/docs/computations/python.html) or even use R and Python interchangeably in the same document via the `reticulate` package. A Python chunk creates an object, and an R chunk can access it using the `py$` prefix:
 
@@ -287,7 +297,7 @@ cat("Example from: https://rstudio.github.io/reticulate/articles/r_markdown.html
 
 > **Note:** The chunks above use `eval: false` because they depend on a local data file (`../Data/flights.csv`). The code is displayed for reference only.
 
----
+------------------------------------------------------------------------
 
 For nicer tables from data frames, use `kable()` from the `knitr` package instead of printing raw output. Both calls below produce the same table — the `"html"` argument in the second version explicitly targets HTML output.
 
@@ -299,7 +309,7 @@ knitr::kable(head(mtcars[, 1:4]), caption = "A kable table, ver 1")
 knitr::kable(head(mtcars[, 1:4]), "html", caption = "A kable table, ver 2")
 ```
 
----
+------------------------------------------------------------------------
 
 # Code chunk customisation
 
@@ -309,7 +319,7 @@ Chunk options are written as special comments at the top of a chunk, prefixed wi
 
 > **Old vs. new syntax:** You may encounter two styles of chunk options. The old RMarkdown style uses `=` and `TRUE/FALSE`. The new Quarto style uses `:` and `true/false`. Both work, but the new style is preferred going forward. This document mixes both intentionally so you recognise each.
 >
-> Old: `#| echo = FALSE`  
+> Old: `#| echo = FALSE`\
 > New: `#| echo: false`
 
 ## Chunk naming (for reference and navigation)
@@ -446,7 +456,7 @@ Other caching options:
 -   `dependson` — reevaluate conditional on a change in a different chunk (or chunks)
 -   `autodep` — will try to find the between-chunk dependencies on its own
 
----
+------------------------------------------------------------------------
 
 ## Keeping your report nice and clear
 
@@ -535,7 +545,7 @@ for (i in 1:10) {
 
 (Note that it got interpreted as Markdown markup — each `cat()` line became a real list item!)
 
----
+------------------------------------------------------------------------
 
 # Assignment
 

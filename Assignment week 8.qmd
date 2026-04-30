@@ -1,0 +1,81 @@
+---
+title: "Audience analisis: How i met your mother"
+author: "Emanuele Bellezza"
+date: "16/04/2026"
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+# Audience analsys: How i met your mother
+
+![Ufficial logo of how i met your mother](https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/HowIMetYourMother.svg/960px-HowIMetYourMother.svg.png){width="50%"}
+
+## Brief description of the show
+
+The series follows the adventures of ***Ted Mosby*** and his love life as a single man. His stories are narrated by **Ted Mosby** 25 years later, as he tells them to his adolescent children, **Luke** and **Penny**. The narrative leads to a flashback, and the story proper starts in 2005 with 27-year-old Ted Mosby living in ***New York City*** and working as an architect. The story deals primarily with his best friends. These include the long-standing couple ***Marshall Eriksen***, a law student, and ***Lily Aldrin***, a kindergarten teacher, who have been dating for almost nine years when Marshall proposes; and the playboy ***Barney Stinson*** and the Canadian news reporter ***Robin Scherbatsky***. All of the characters' lives are intertwined. The series explores many story lines, including "will they or won't they" relationships between Robin and each of the two single male friends, Marshall and Lily's relationship, and the ups and downs of the characters' careers.
+
+The show's frame story depicts Ted telling the story to his son Luke and daughter Penny as they sit on the couch in the year 2030. This frame is the show's putative narrative present, and **How I Met Your Mother** exploits this narrative structure in numerous ways: to depict and re-depict events from multiple points of view; to set up jokes using quick and sometimes multiple flashbacks nested within the oral retelling; to substitute visual, verbal, or aural euphemisms for activities Ted does not want to talk about with his children.
+
+Although the traditional love story structure begins when the lead characters first meet, How I Met Your Mother does not introduce ***Ted's wife*** until the eighth-season finale and only announces her full name, ***Tracy McConnell***, during the series finale. Her first name, **Tracy**, is mentioned in the first season at the end of episode nine.
+
+```{r}
+#| label: setup-data 
+#| include: false
+
+library(ggplot2)
+library(dplyr)
+
+# Ufficial data from wikipedia
+data <- data.frame(
+  season = 1:9, 
+  viewership = c(9.46, 9.12, 8.21, 9.43, 8.73, 8.80, 9.67, 9.02, 10.51)
+)
+
+data <- data %>%
+  mutate(variation = viewership - lag(viewership))
+
+# Compute some statistics
+total_mean <-  round(mean(data$viewership), 2)
+max <- max(data$viewership)
+changes_3_4 <- round(data$viewership[4] - data$viewership[3], 2)
+
+```
+
+## Statistics of the viewership in all time
+
+How **I met your mother** it maintained high visibility in all time, with a mean equal to `r total_mean` millions of viewers. The highest number of viewers was recorded in the *ninth season* `r max` as we can see in the next plot
+
+## Time trend graph
+
+```{r}
+#| label: plot-trend
+#| fig-cap: "Time trend graph for all the seasons"
+
+ggplot(data, aes(x = season, y = viewership)) +
+  geom_line(color = "#F2A900", linewidth = 1.2) + 
+  geom_point(color = "#00529B", size = 3) +       
+  theme_minimal() +
+  scale_x_continuous(breaks = 1:9) +
+  labs(x = "Season", y = "millions of viewers")
+```
+
+### Seasonal variations
+
+```{r}
+#| label: Plot-variations
+#| fig-cap: "difference in viewership between the third and fourth seasons"
+
+ggplot(data[!is.na(data$variation), ], aes(x = factor(season), y = variation)) +
+  geom_col(fill = "steelblue") +
+  theme_minimal() +
+  labs(x = "Season", y = "variations")
+```
+
+### Conclusion 
+
+In short, data analysis demonstrates how *How I Met Your Mother* has managed to maintain a loyal and even growing audience over the years, defying the natural decline in interest that often affects long-running sitcoms.
+
+The all-time record number of viewers achieved during the ninth and final season (with an average of over 10 million) testifies to the enormous curiosity of the audience, who remained glued to the screen for nine years just to finally discover the identity of the mysterious "Mother." A truly... *legendary* success!
