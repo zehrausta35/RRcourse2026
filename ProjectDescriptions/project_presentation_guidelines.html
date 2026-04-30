@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Project Presentations — Reproducible Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f5f1e8;
+    --paper-dark: #ebe4d3;
+    --accent: #b8321a;
+    --accent-soft: #d9714a;
+    --rule: #2a2a2a;
+    --muted: #6a6358;
+    --code-bg: #2a2620;
+    --code-text: #f5f1e8;
+    --highlight: #f4d35e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 18px;
+    overflow-x: hidden;
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ========== HEADER ========== */
+  header {
+    padding: 5rem 0 3rem;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--rule);
+    display: inline-block;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-variation-settings: "opsz" 144;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .dek {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    line-height: 1.4;
+    color: var(--muted);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--rule);
+  }
+
+  .meta-item {
+    font-family: 'Inter Tight', sans-serif;
+  }
+
+  .meta-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .meta-value {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* ========== TOC ========== */
+  .toc {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+  }
+
+  .toc-title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc-counter;
+  }
+
+  .toc li {
+    counter-increment: toc-counter;
+    padding: 0.4rem 0;
+    border-bottom: 1px dotted rgba(0,0,0,0.15);
+    display: flex;
+    align-items: baseline;
+  }
+
+  .toc li:last-child { border-bottom: none; }
+
+  .toc li::before {
+    content: counter(toc-counter, decimal-leading-zero);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-right: 1rem;
+    font-weight: 700;
+  }
+
+  .toc a {
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    transition: color 0.2s;
+  }
+
+  .toc a:hover {
+    color: var(--accent);
+  }
+
+  /* ========== SECTIONS ========== */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .optional-tag {
+    display: inline-block;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--paper-dark);
+    padding: 0.3em 0.8em;
+    margin-left: 0.8rem;
+    vertical-align: middle;
+    border: 1px solid var(--muted);
+    position: relative;
+    top: -0.3em;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin: 2rem 0 0.8rem;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1.5rem 0 0.6rem;
+  }
+
+  p {
+    margin-bottom: 1.2rem;
+    max-width: 68ch;
+  }
+
+  p.lead {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--muted);
+    border-left: 2px solid var(--accent);
+    padding-left: 1.2rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  ul, ol {
+    margin: 1rem 0 1.5rem 1.5rem;
+    max-width: 68ch;
+  }
+
+  li {
+    margin-bottom: 0.6rem;
+    padding-left: 0.3rem;
+  }
+
+  /* ========== CALLOUTS ========== */
+  .callout {
+    margin: 2rem 0;
+    padding: 1.5rem 1.8rem;
+    background: var(--paper-dark);
+    border-left: 4px solid var(--accent);
+    position: relative;
+  }
+
+  .callout-label {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.warn {
+    border-left-color: var(--highlight);
+    background: #fdf6dc;
+  }
+
+  .callout.warn .callout-label {
+    color: #8a6a00;
+  }
+
+  /* ========== TIMELINE ========== */
+  .timeline {
+    margin: 2rem 0;
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--rule);
+    background: white;
+  }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    border-bottom: 1px solid var(--rule);
+    min-height: 80px;
+  }
+
+  .timeline-row:last-child { border-bottom: none; }
+
+  .timeline-time {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1.2rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .timeline-time .dur {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    margin-top: 0.3rem;
+  }
+
+  .timeline-content {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .timeline-content h4 {
+    margin: 0 0 0.3rem;
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    text-transform: none;
+  }
+
+  .timeline-content p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  /* ========== CHECKLIST ========== */
+  .checklist {
+    list-style: none;
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .checklist li {
+    padding: 0.7rem 0 0.7rem 2.2rem;
+    border-bottom: 1px dashed rgba(0,0,0,0.15);
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .checklist li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    border: 2px solid var(--rule);
+    background: white;
+  }
+
+  .checklist li strong {
+    display: block;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .checklist li span {
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+
+  /* ========== CODE ========== */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--paper-dark);
+    padding: 0.1em 0.4em;
+    border-radius: 2px;
+    color: var(--ink);
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    border-left: 4px solid var(--accent);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+  }
+
+  /* Syntax highlighting accents */
+  .comment { color: #8a837a; font-style: italic; }
+  .cmd { color: var(--accent-soft); }
+
+  /* ========== GRADE TABLE ========== */
+  .grade-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-family: 'Inter Tight', sans-serif;
+    background: white;
+  }
+
+  .grade-table th,
+  .grade-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .grade-table th {
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .grade-table td:first-child {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .grade-table td:last-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    text-align: right;
+    color: var(--accent);
+  }
+
+  .grade-table tr:last-child td {
+    border-bottom: none;
+    background: var(--paper-dark);
+    font-weight: 700;
+  }
+
+  /* ========== ROLES ========== */
+  .role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .role-card {
+    padding: 1.8rem;
+    background: white;
+    border: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .role-card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 6px;
+    background: var(--accent);
+  }
+
+  .role-card.auditor::before {
+    background: var(--ink);
+  }
+
+  .role-card h3 {
+    margin-top: 0.5rem;
+    font-size: 1.3rem;
+  }
+
+  .role-card .role-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .role-card ul {
+    margin: 1rem 0 0 1.2rem;
+    font-size: 0.95rem;
+  }
+
+  .role-card li {
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 700px) {
+    .role-grid { grid-template-columns: 1fr; }
+    .timeline-row { grid-template-columns: 90px 1fr; }
+    body { font-size: 17px; }
+  }
+
+  /* ========== FOOTER ========== */
+  footer {
+    padding: 3rem 0 5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  footer::before {
+    content: '◆ ◆ ◆';
+    display: block;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.5em;
+  }
+
+  /* ========== MARGIN NOTES ========== */
+  .margin-note {
+    display: inline-block;
+    background: var(--highlight);
+    color: var(--ink);
+    padding: 0.1em 0.4em;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    vertical-align: baseline;
+  }
+
+  /* Entrance animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  header > * { animation: fadeUp 0.7s ease both; }
+  header .eyebrow { animation-delay: 0.05s; }
+  header h1 { animation-delay: 0.15s; }
+  header .dek { animation-delay: 0.3s; }
+  header .meta-grid { animation-delay: 0.45s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="eyebrow">Reproducible Research · University of Warsaw</div>
+  <h1>Final Project<br><em>Presentations</em> &amp; Live Demo</h1>
+  <p class="dek">A working session where your project meets the audience, the clock, and — most importantly — a clean machine that has never seen your code before.</p>
+
+  <div class="meta-grid">
+    <div class="meta-item">
+      <div class="meta-label">Format</div>
+      <div class="meta-value">Talk + Live Demo</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Duration</div>
+      <div class="meta-value">40 minutes</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Languages</div>
+      <div class="meta-value">R &amp; Python</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Deliverable</div>
+      <div class="meta-value">Public Git Repo</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TOC ============ -->
+<div class="toc">
+  <div class="toc-title">In this document</div>
+  <ol>
+    <li><a href="#overview">Overview &amp; what we're testing</a></li>
+    <li><a href="#schedule">The 40-minute schedule</a></li>
+    <li><a href="#before">Before the presentation — what to ship</a></li>
+    <li><a href="#during">During the presentation — the live demo</a></li>
+    <li><a href="#roles">Roles within your group</a></li>
+    <li><a href="#when-things-break">When things break on stage</a></li>
+    <li><a href="#grading">How this is graded</a></li>
+  </ol>
+</div>
+
+<!-- ============ 01 OVERVIEW ============ -->
+<section id="overview">
+  <span class="section-number">§ 01</span>
+  <h2>Overview</h2>
+  <p>Each group presents their final project in a <strong>40-minute slot</strong>. The slot has four parts: a short talk, a live demo, Q&amp;A from classmates and the instructor, and a short buffer for the next group to set up.</p>
+
+  <p>The distinctive part of this course's presentation format is the <strong>live clone-and-run demo</strong>. At some point during your slot, you will clone your own repository onto a fresh environment, project your screen, and run the whole project in front of the class.</p>
+</section>
+
+<!-- ============ 02 SCHEDULE ============ -->
+<section id="schedule">
+  <span class="section-number">§ 02</span>
+  <h2>The 40-minute schedule</h2>
+  <p>Two groups present per 90-minute lecture. Your slot is tight but workable. The timings below are hard caps — we will hold you to them, because the next group also needs their 40 minutes.</p>
+
+  <div class="timeline">
+    <div class="timeline-row">
+      <div class="timeline-time">0:00–0:15<div class="dur">15 min</div></div>
+      <div class="timeline-content">
+        <h4>Presentation</h4>
+        <p>Motivation, research question, data, methods, key results. Slides or a rendered Quarto/R Markdown document. Every group member speaks.</p>
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-time">0:15–0:25<div class="dur">10 min</div></div>
+      <div class="timeline-content">
+        <h4>Live demo — fresh clone</h4>
+        <p>You clone your own repo into an empty folder, set up the environment, and run the project end-to-end. Screen projected. Talk through what you're doing.</p>
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-time">0:25–0:35<div class="dur">10 min</div></div>
+      <div class="timeline-content">
+        <h4>Q&amp;A</h4>
+        <p>Questions from classmates and the instructor. At least one question must come from a non-presenting group.</p>
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-time">0:35–0:40<div class="dur">5 min</div></div>
+      <div class="timeline-content">
+        <h4>Transition</h4>
+        <p>Next group plugs in, opens their files, sanity-checks the projector.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 BEFORE ============ -->
+<section id="before">
+  <span class="section-number">§ 03</span>
+  <h2>Before the presentation — what to ship</h2>
+  <p>Push your final repo to a public GitHub repository <strong>at least 24 hours before your slot</strong>. This gives classmates time to look at it beforehand and prepare questions.</p>
+
+  <h3>What the repo must contain</h3>
+  <ul class="checklist">
+    <li>
+      <strong>A README.md at the root</strong>
+      <span>Project description, team members, how to set up the environment, how to run the project from start to finish, expected outputs, and how long it takes. Assume the reader has never seen your code.</span>
+    </li>
+    <li>
+      <strong>All code</strong>
+      <span>Scripts, notebooks, Quarto/R Markdown files — everything needed to go from raw data to final output. No "email me for this part" gaps.</span>
+    </li>
+    <li>
+      <strong>Data — or a script that fetches it</strong>
+      <span>Small datasets committed directly. Large ones fetched by a script (with a stable source), or clearly documented if they require access credentials.</span>
+    </li>
+    <li>
+      <strong>A dependency manifest</strong>
+      <span>For R: <code>renv.lock</code>, or at minimum a <code>sessionInfo()</code> file listing package versions. For Python: <code>requirements.txt</code>, <code>environment.yml</code>, or <code>pyproject.toml</code>. Pinned versions preferred.</span>
+    </li>
+    <li>
+      <strong>No absolute paths</strong>
+      <span>Nothing that looks like <code>/Users/your-name/Documents/...</code> or <code>C:\Users\...</code>. Use relative paths or the <code>here</code> package (R) / <code>pathlib</code> (Python).</span>
+    </li>
+    <li>
+      <strong>A <code>.gitignore</code></strong>
+      <span>So you're not committing <code>.DS_Store</code>, <code>__pycache__</code>, <code>.Rhistory</code>, rendered HTML outputs, virtual environments, or credentials.</span>
+    </li>
+    <li>
+      <strong>Final rendered output committed</strong>
+      <span>So anyone can see what the project is supposed to produce, even if they don't run it.</span>
+    </li>
+  </ul>
+
+  <h3>README.md — minimum viable structure</h3>
+  <p>Your README is the single most important file in the repository. A classmate should be able to open it and know exactly what to do next. Aim for something like:</p>
+
+<pre><code><span class="comment"># Project title</span>
+
+<span class="comment">## Authors</span>
+Names, course group, year.
+
+<span class="comment">## What this project does</span>
+Two or three sentences. No jargon.
+
+<span class="comment">## Requirements</span>
+- R &gt;= 4.3, or Python &gt;= 3.10
+- List of system-level dependencies if any
+
+<span class="comment">## Setup</span>
+<span class="cmd">git clone &lt;repo-url&gt;
+cd &lt;repo-name&gt;
+
+# R projects
+Rscript -e 'renv::restore()'
+
+# Python projects
+python -m venv .venv
+source .venv/bin/activate      # or .venv\Scripts\activate on Windows
+pip install -r requirements.txt</span>
+
+<span class="comment">## How to run</span>
+<span class="cmd">quarto render report.qmd
+# or
+python main.py</span>
+
+<span class="comment">## Expected output</span>
+Describe what gets produced and roughly how long it takes.
+
+<span class="comment">## Repository structure</span>
+Short tree of the main folders.
+</code></pre>
+
+  <div class="callout">
+    <div class="callout-label">On "best effort"</div>
+    <p style="margin:0;">This course grades reproducibility <strong>on documentation quality, not purity of tooling</strong>. You are not required to use Docker. What we grade is: could a reasonable person, reading your README, run this project on their laptop without messaging you? If yes — you are in good shape.</p>
+  </div>
+</section>
+
+<!-- ============ 04 DURING ============ -->
+<section id="during">
+  <span class="section-number">§ 04</span>
+  <h2>During the presentation — the live demo</h2>
+  <p>The live demo is the 10 minutes after your talk. Here is exactly how it goes.</p>
+
+  <h3>Setup — before you take the stage</h3>
+  <ol>
+    <li><strong>Empty folder ready.</strong> On your laptop, have an empty directory open in a terminal. Name it something like <code>~/demo/</code>. Delete any previous clones.</li>
+    <li><strong>A fresh terminal session.</strong> No history, no leftover variables, no cached packages visible on screen.</li>
+    <li><strong>Font size cranked up.</strong> Terminal, editor, browser. The back row should be able to read it.</li>
+    <li><strong>WiFi confirmed working.</strong> You will be cloning and pulling packages.</li>
+  </ol>
+
+  <h3>On stage — the demo script</h3>
+  <p>Narrate what you are doing. Not "now I'm typing git clone," but "the first thing any new user does is clone the repo — here it goes." Treat the audience like they are the new user.</p>
+
+<pre><code><span class="comment"># Step 1 — clone from scratch</span>
+<span class="cmd">git clone https://github.com/your-group/your-project.git
+cd your-project</span>
+
+<span class="comment"># Step 2 — show the structure</span>
+<span class="cmd">ls
+cat README.md     # or open it in your editor</span>
+
+<span class="comment"># Step 3 — restore the environment</span>
+<span class="comment"># R example:</span>
+<span class="cmd">Rscript -e 'renv::restore()'</span>
+
+<span class="comment"># Python example:</span>
+<span class="cmd">python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt</span>
+
+<span class="comment"># Step 4 — run the project</span>
+<span class="cmd">quarto render report.qmd
+# or whatever your main entry point is</span>
+
+<span class="comment"># Step 5 — open the output</span>
+<span class="cmd">open report.html</span>
+</code></pre>
+
+  <h3>What you should be talking about while it runs</h3>
+  <p>Package installs take minutes. Do not stand in silence. Use that time to:</p>
+  <ul>
+    <li>Walk through your folder structure</li>
+    <li>Point out the key scripts and what each one does</li>
+    <li>Show the <code>renv.lock</code> / <code>requirements.txt</code> and explain why versions are pinned</li>
+    <li>Highlight any particularly tricky reproducibility decisions you made</li>
+  </ul>
+
+  <div class="callout warn">
+    <div class="callout-label">Common pitfalls to pre-empt</div>
+    <p style="margin:0;">Hardcoded paths. Uncommitted data files. Untracked <code>.env</code> files with credentials. Platform-specific dependencies (something that only installs on macOS). System libraries you installed once and forgot (e.g. <code>libxml2</code>, <code>pandoc</code>). Git LFS files you never pushed. Check all of these before your slot.</p>
+  </div>
+</section>
+
+<!-- ============ 05 ROLES ============ -->
+<section id="roles">
+  <span class="section-number">§ 05</span>
+  <h2>Roles within your group<span class="optional-tag">Optional</span></h2>
+  <p>You have 3–4 people. Assign clear roles <em>before</em> the day of presentation, not during. Here is a minimal division of labour that works well for 40-minute slots.</p>
+
+  <div class="role-grid">
+    <div class="role-card">
+      <div class="role-tag">Role 01</div>
+      <h3>The Presenter</h3>
+      <ul>
+        <li>Introduces the project and the team</li>
+        <li>Handles the motivation and research question</li>
+        <li>Owns the first half of the talk</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-tag">Role 02</div>
+      <h3>The Methodologist</h3>
+      <ul>
+        <li>Explains the methods and key results</li>
+        <li>Owns the second half of the talk</li>
+        <li>Handles methods questions in Q&amp;A</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-tag">Role 03</div>
+      <h3>The Demo Driver</h3>
+      <ul>
+        <li>Runs the live clone-and-run</li>
+        <li>Has the fresh terminal and projector set up</li>
+        <li>Handles infrastructure questions in Q&amp;A</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-tag">Role 04</div>
+      <h3>The Timekeeper &amp; Backup</h3>
+      <ul>
+        <li>Watches the clock, signals the team at checkpoints</li>
+        <li>Backup driver if the demo machine dies</li>
+        <li>Fields Q&amp;A questions and distributes them to the right teammate</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>If you have three people instead of four, roles 3 and 4 can be merged — but the timekeeping function still needs to exist, even if just as a watch alarm.</p>
+</section>
+
+<!-- ============ 06 WHEN THINGS BREAK ============ -->
+<section id="when-things-break">
+  <span class="section-number">§ 06</span>
+  <h2>When things break on stage</h2>
+  <p class="lead">It will happen to at least a few groups this semester. The question is not whether it happens, but how you respond.</p>
+
+  <h3>The good response</h3>
+  <ol>
+    <li><strong>Name what you see.</strong> "Okay, the install is failing — let me read the error." Out loud. The audience is with you.</li>
+    <li><strong>Fix or describe.</strong> If you can fix it in 60 seconds, fix it. If not, describe what should happen: "this is where the regression output would normally appear — you can see the expected version in <code>report.html</code> which is committed in the repo."</li>
+  </ol>
+
+  <div class="callout">
+    <div class="callout-label">A failure you can diagnose is fine</div>
+    <p style="margin:0;">If the demo breaks and you can say <em>"this is because we forgot to pin the <code>dplyr</code> version and 1.1.4 changed the behaviour of <code>summarise</code>"</em> — that is a strong answer. It shows you understand your project. A working demo with no insight is actually worse.</p>
+  </div>
+</section>
+
+<!-- ============ 07 GRADING ============ -->
+<section id="grading">
+  <span class="section-number">§ 07</span>
+  <h2>How this is graded</h2>
+  <p>The presentation grade is a single number out of 100, composed of the following weights. Reproducibility is the largest single component — this is a reproducible research course.</p>
+
+  <table class="grade-table">
+    <thead>
+      <tr><th>Component</th><th>What we look for</th><th>Weight</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Talk quality</td>
+        <td>Clear motivation, methods, results. Every member speaks.</td>
+        <td>20%</td>
+      </tr>
+      <tr>
+        <td>Repository &amp; documentation</td>
+        <td>README clarity, folder structure, pinned deps, no hardcoded paths.</td>
+        <td>30%</td>
+      </tr>
+      <tr>
+        <td>Live demo</td>
+        <td>Successful clone-and-run, or honest diagnosis when things break.</td>
+        <td>25%</td>
+      </tr>
+      <tr>
+        <td>Methods &amp; analysis</td>
+        <td>Is the research question answered? Are the methods appropriate?</td>
+        <td>15%</td>
+      </tr>
+      <tr>
+        <td>Q&amp;A handling</td>
+        <td>Answering questions honestly, distributing them among teammates.</td>
+        <td>10%</td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td></td>
+        <td>100%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Note that <strong>a broken demo you can explain</strong> scores higher than a perfect demo with no reflection. The goal of this course is not that you never make mistakes, but that you can see them, name them, and teach the next person to avoid them.</p>
+</section>
+
+<!-- ============ FOOTER ============ -->
+  Reproducible Research &nbsp;·&nbsp; University of Warsaw &nbsp;·&nbsp; 2025/26
+</footer>
+
+</div>
+</body>
+</html>
