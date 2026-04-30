@@ -5,3 +5,14 @@ RUN pip install pandas==2.2.3
 COPY hello.py .
 CMD ["python", "hello.py"]
 '@ | Out-File -FilePath Dockerfile -Encoding utf8
+
+# my 2 answers
+Question 2.1 — Why pin?
+In Task 1.2 you pinned a specific version of pandas. Suppose you had instead written RUN pip install pandas (no version). Your Dockerfile would still build and run today. Why is this a reproducibility problem? What concretely could go wrong, and when?
+If you don't pin the version, Docker will always grab the newest version of pandas available at that moment. This is a problem because future updates might include breaking changes that make your code stop working. Concretely, a function you use today could be renamed or 
+removed in a future version, causing your research to fail when someone tries to run it next year.
+
+Question 2.2 — Recipe or cake?
+If you want a colleague to reproduce your work, you can either send them the built image (e.g. via Docker Hub) or send them only the Dockerfile and hello.py. Which is better for reproducible research, and why? Give one concrete reason beyond "easier" or "faster."
+It avoids upstream changes. Even if you pin your Python version, the underlying operating system (like the "slim" Debian base) might be updated by its maintainers. Sending the built image ensures your colleague uses the exact same bits you did, 
+whereas the Dockerfile might build a slightly different environment over time.
