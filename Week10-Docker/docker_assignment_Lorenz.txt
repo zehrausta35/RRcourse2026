@@ -40,7 +40,6 @@ anutek@MacBook-Air-Anna hello-docker % docker build -t hello-docker .
 anutek@MacBook-Air-Anna hello-docker % docker run --rm hello-docker
 Hello from Python 3.9 inside a container!
 
-
 ```
 ## Task 1.2
 
@@ -197,7 +196,6 @@ anutek@MacBook-Air-Anna hello-docker % docker run --rm hello-docker
 Python 3.9, pandas 2.2.2
 anutek@MacBook-Air-Anna hello-docker % 
 
-
 ```
 ## Final Dockerfile
 ```
@@ -212,9 +210,11 @@ CMD ["python", "hello.py"]
 ```
 ## Question 2.1
 ```
+
 Pip install always downloads the newest version, so in the next month it may install a different version than it does now. This can cause problems with programs, because they might work correctly with the previous version but break after update.
 
 ```
 ## Question 2.2
 ```
+
 Sending only the Dockerfile and hello.py is better because it allows someone to rebuild the environment exactly from scratch and see all dependencies. A prebuilt image may hide changes in versions or system setup, which can make results hard to verify or reproduce later. On the other hand sending a prebuilt image can be faster, because it can be run immediately without rebuilding the environment or installing dependencies.
